@@ -59,7 +59,7 @@ class PrimaryFlightDisplay(QWidget):
             self.view.fitInView(self.scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
 
     def updateFromData(self):
-        self.artificialHorizon.updatePositions(110, 90)
+        self.artificialHorizon.updatePositions(0, 0)
 
     def setupMockPFD(self, size): #Provisoire
         pixmap = QPixmap("assets/maquette.png")

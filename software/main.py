@@ -5,7 +5,7 @@ from PyQt6.QtGui import QIcon, QAction
 from PyQt6.QtCore import Qt
 
 from ui.pfd import PrimaryFlightDisplay
-from ui.settings import SettingsPage
+from ui.settings.settingsPage import SettingsPage
 from ui.ai import AIWidget
 
 try:
@@ -85,8 +85,9 @@ class MainWindow(QMainWindow):
         dialog.setMinimumWidth(400)
         
         layout = QVBoxLayout(dialog)
-        layout.setContentsMargins(10, 10, 10, 10)
-        layout.addWidget(SettingsPage())
+
+        settings_page = SettingsPage(self.pfdPage.artificialHorizon)
+        layout.addWidget(settings_page)
         
         dialog.exec()
 
