@@ -36,6 +36,7 @@ class PrimaryFlightDisplay(QWidget):
         self.scene.addItem(self.artificialHorizon)
         
         self.artificialHorizon.setPos(271, 277)
+        self.updateFromData()
 
     def showEvent(self, event):
         super().showEvent(event)
@@ -56,6 +57,9 @@ class PrimaryFlightDisplay(QWidget):
 
             self.view.setGeometry(x, y, side, side)
             self.view.fitInView(self.scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
+
+    def updateFromData(self):
+        self.artificialHorizon.updatePositions(10, 45)
 
     def setupMockPFD(self, size): #Provisoire
         pixmap = QPixmap("assets/maquette.png")

@@ -57,3 +57,6 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
         dot.setBrush(QBrush(QColor(color)))
         dot.setPen(QPen(Qt.PenStyle.NoPen))
         self.maquette.addToGroup(dot)
+    
+    def updatePositions(self, pitch, roll):
+        self.artificialHorizon.updatePositions(pitch, roll)
