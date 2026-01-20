@@ -1,39 +1,67 @@
-from PyQt6.QtWidgets import QWidget, QGraphicsView, QGraphicsScene, QVBoxLayout
-from PyQt6.QtCore import QSize, Qt
-from PyQt6.QtGui import QPixmap, QBrush
+from PyQt6.QtWidgets import QWidget, QGraphicsView, QGraphicsScene, QSizePolicy
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QPixmap, QBrush, QPainter
 
 class PrimaryFlightDisplay(QWidget):
     def __init__(self, size=600):
         super().__init__()
+        
+        self.setMinimumSize(100, 100)
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 
-        self.view = QGraphicsView()
-        self.scene = QGraphicsScene(self)
-        self.scene.setSceneRect(0, 0, size, size)
+        self.view = QGraphicsView(self)
+        self.scene = QGraphicsScene(0, 0, size, size)
         self.view.setScene(self.scene)
         
+        self.view.setFrameShape(QGraphicsView.Shape.NoFrame)
         self.view.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.view.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        
+        self.view.setRenderHints(
+            QPainter.RenderHint.Antialiasing | 
+            QPainter.RenderHint.SmoothPixmapTransform | 
+            QPainter.RenderHint.TextAntialiasing
+        )
+        self.view.setViewportUpdateMode(QGraphicsView.ViewportUpdateMode.SmartViewportUpdate)
+        self.view.setCacheMode(QGraphicsView.CacheModeFlag.CacheBackground)
+        self.view.setOptimizationFlag(QGraphicsView.OptimizationFlag.DontSavePainterState)
 
         self.setupMockPFD(size)
+        self.setupInstruments(size)
 
-        layout = QVBoxLayout(self)
-        layout.setAlignment(Qt.AlignmentFlag.AlignCenter) 
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(self.view)
+    def setupMockPFD(self, size): #Provisoire
+        pixmap = QPixmap("assets/maquette.png")
+        if not pixmap.isNull():
+            scaled_pixmap = pixmap.scaled(
+                size, size,
+                Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation
+            )
+            self.scene.setBackgroundBrush(QBrush(scaled_pixmap))
 
-    def setupMockPFD(self, size):
-        pixmap = QPixmap("assets/maquette.png").scaled(
-            size, size,
-            Qt.AspectRatioMode.KeepAspectRatio,
-            Qt.TransformationMode.SmoothTransformation
+    def setupInstruments(self, size):
+        from ui.artificialHorizon.instrument import ArtificialHorizonInstrument
+        
+        self.artificialHorizon = ArtificialHorizonInstrument(size)
+        self.scene.addItem(self.artificialHorizon)
+        
+        rect = self.scene.sceneRect()
+        self.artificialHorizon.setPos(
+            rect.center().x(), 
+            rect.center().y()
         )
-        self.scene.setBackgroundBrush(QBrush(pixmap))
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
+        
+        target_w = self.width()
+        target_h = self.height()
+        side = min(target_w, target_h)
+        
+        if side > 0:
+            x = (target_w - side) // 2
+            y = (target_h - side) // 2
 
-        newSize = min(self.width(), self.height())
-
-        if newSize > 0:
-            self.view.setFixedSize(newSize, newSize)
+            self.view.setGeometry(x, y, side, side)
+            
             self.view.fitInView(self.scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)

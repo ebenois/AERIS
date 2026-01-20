@@ -10,52 +10,90 @@ from ui.ai import AIWidget
 
 try:
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("AERIS")
-except AttributeError:
+except (AttributeError, OSError):
     pass
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        
         self.setWindowTitle("AERIS")
         self.setWindowIcon(QIcon("software/assets/logo.png"))
+        self.resize(1000, 700)
+
+        self.setStyleSheet("""
+            QMainWindow { background-color: #000000; }
+            QToolBar { 
+                background-color: #121212; 
+                border-bottom: 1px solid #333333; 
+                spacing: 10px; 
+                padding: 5px;
+            }
+            QToolBar QWidget { color: white; }
+            QStatusBar { 
+                background-color: #121212; 
+                border-top: 1px solid #333333; 
+                color: #888888; 
+            }
+            QDockWidget {
+                color: white;
+                titlebar-close-icon: url(software/assets/close.png);
+            }
+        """)
 
         self.pfdPage = PrimaryFlightDisplay()
         self.setCentralWidget(self.pfdPage)
 
-        toolbar = QToolBar("Navigation")
-        self.addToolBar(toolbar)
+        self.setupAIDock()
 
-        self.aiPage = QDockWidget("AI", self)
+        self.setupToolbar()
+
+    def setupAIDock(self):
+        self.aiPage = QDockWidget("Assistant IA", self)
+        self.aiPage.setAllowedAreas(Qt.DockWidgetArea.RightDockWidgetArea | Qt.DockWidgetArea.LeftDockWidgetArea)
+        
         self.aiWidget = AIWidget()
+        self.aiWidget.setStyleSheet("background-color: #1E1E1E; color: white; border-left: 1px solid #333333;")
+        
         self.aiPage.setWidget(self.aiWidget)
-        self.aiPage.setFloating(False)
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.aiPage)
         self.aiPage.hide()
 
-        self.aiButton = QAction("AI", self)
-        self.aiButton.triggered.connect(self.toggleAi)
-        toolbar.addAction(self.aiButton)
+    def setupToolbar(self):
+        toolbar = self.addToolBar("Navigation")
+        toolbar.setMovable(False)
 
-        self.settingsButton = QAction("Settings", self)
-        self.settingsButton.triggered.connect(self.showSettings)
-        toolbar.addAction(self.settingsButton)
+        self.aiAction = QAction("Assistant IA", self)
+        self.aiAction.setCheckable(True)
+        self.aiAction.triggered.connect(self.toggle_ai)
+        toolbar.addAction(self.aiAction)
 
-    def toggleAi(self):
-        if self.aiPage.isVisible():
-            self.aiPage.hide()
-        else:
-            self.aiPage.show()
+        toolbar.addSeparator()
 
-    def showSettings(self):
+        settingsAction = QAction("Paramètres", self)
+        settingsAction.triggered.connect(self.show_settings)
+        toolbar.addAction(settingsAction)
+
+    def toggle_ai(self):
+        is_visible = self.aiPage.isVisible()
+        self.aiPage.setVisible(not is_visible)
+        self.aiAction.setChecked(not is_visible)
+
+    def show_settings(self):
         dialog = QDialog(self)
-        dialog.setWindowTitle("Settings")
-        layout = QVBoxLayout()
+        dialog.setWindowTitle("Configuration AERIS")
+        dialog.setMinimumWidth(400)
+        
+        layout = QVBoxLayout(dialog)
+        layout.setContentsMargins(10, 10, 10, 10)
         layout.addWidget(SettingsPage())
-        dialog.setLayout(layout)
+        
         dialog.exec()
 
 app = QApplication(sys.argv)
-
+    
+app.setStyle("Fusion") 
+    
 window = MainWindow()
 window.show()
 
