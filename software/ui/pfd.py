@@ -29,16 +29,6 @@ class PrimaryFlightDisplay(QWidget):
         self.setupMockPFD(size)
         self.setupInstruments(size)
 
-    def setupMockPFD(self, size): #Provisoire
-        pixmap = QPixmap("assets/maquette.png")
-        if not pixmap.isNull():
-            scaled_pixmap = pixmap.scaled(
-                size, size,
-                Qt.AspectRatioMode.KeepAspectRatio,
-                Qt.TransformationMode.SmoothTransformation
-            )
-            self.scene.setBackgroundBrush(QBrush(scaled_pixmap))
-
     def setupInstruments(self, size):
         from ui.artificialHorizon.instrument import ArtificialHorizonInstrument
         
@@ -51,9 +41,15 @@ class PrimaryFlightDisplay(QWidget):
             rect.center().y()
         )
 
+    def showEvent(self, event):
+        super().showEvent(event)
+        self.updateViewGeometry()
+
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        
+        self.updateViewGeometry()
+
+    def updateViewGeometry(self):
         target_w = self.width()
         target_h = self.height()
         side = min(target_w, target_h)
@@ -63,5 +59,14 @@ class PrimaryFlightDisplay(QWidget):
             y = (target_h - side) // 2
 
             self.view.setGeometry(x, y, side, side)
-            
             self.view.fitInView(self.scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
+
+    def setupMockPFD(self, size): #Provisoire
+        pixmap = QPixmap("assets/maquette.png")
+        if not pixmap.isNull():
+            scaled_pixmap = pixmap.scaled(
+                size, size,
+                Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation
+            )
+            self.scene.setBackgroundBrush(QBrush(scaled_pixmap))
