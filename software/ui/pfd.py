@@ -35,11 +35,7 @@ class PrimaryFlightDisplay(QWidget):
         self.artificialHorizon = ArtificialHorizonInstrument(size)
         self.scene.addItem(self.artificialHorizon)
         
-        rect = self.scene.sceneRect()
-        self.artificialHorizon.setPos(
-            rect.center().x(), 
-            rect.center().y()
-        )
+        self.artificialHorizon.setPos(271, 277)
 
     def showEvent(self, event):
         super().showEvent(event)

@@ -6,59 +6,49 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import QPen, QColor, QBrush
 from PyQt6.QtCore import Qt
 
-ecartMin, ecartMax, outline, dotRadius, lineWidth, lineHeigth = 0.15, 0.4, 3, 13, 21, 25
+ecartMin, ecartMax, outline, dotRadius, lineWidth, lineHeigth = 45, 120, 2, 5, 10, 12
 
 class ArtificialHorizonInstrument(QGraphicsItemGroup):
-    def __init__(self, size=600, scale=1.0):
+    def __init__(self, size=600):
         super().__init__()
 
         self.maquette = QGraphicsItemGroup()
         self.addToGroup(self.maquette)
 
+        
         self.drawIndicatorGeneric(
-            size=size,
             color="white",
-            pen_width=lineWidth + (outline + 3),
-            dot_radius_extra=outline
+            penWidth=lineWidth + (outline + 3),
+            dotRadiusExtra=outline
         )
         self.drawIndicatorGeneric(
-            size=size,
             color="black",
-            pen_width=lineWidth
+            penWidth=lineWidth
         )
 
-        self.setScale(scale)
         center = self.boundingRect().center()
         self.setTransformOriginPoint(center)
         self.setPos(-center)
 
-
-    def drawIndicatorGeneric(self, size, color, pen_width, dot_radius_extra=0):
-        pen = QPen(QColor(color), pen_width)
+    def drawIndicatorGeneric(self, color, penWidth, dotRadiusExtra=0):
+        pen = QPen(QColor(color), penWidth)
         pen.setCapStyle(Qt.PenCapStyle.RoundCap)
 
-        # Ailes
-        line_l = QGraphicsLineItem(-size * ecartMax, 0, -size * ecartMin, 0)
-        line_l.setPen(pen)
-        self.maquette.addToGroup(line_l)
+        for sign in [-1,1]:
+            # Ailes
+            wing = QGraphicsLineItem(sign*ecartMax, 0, sign*ecartMin, 0)
+            wing.setPen(pen)
+            self.maquette.addToGroup(wing)
 
-        line_r = QGraphicsLineItem(size * ecartMin, 0, size * ecartMax, 0)
-        line_r.setPen(pen)
-        self.maquette.addToGroup(line_r)
-
-        # Montants
-        v_l = QGraphicsLineItem(-size * ecartMin, 0, -size * ecartMin, lineHeigth)
-        v_l.setPen(pen)
-        self.maquette.addToGroup(v_l)
-
-        v_r = QGraphicsLineItem(size * ecartMin, 0, size * ecartMin, lineHeigth)
-        v_r.setPen(pen)
-        self.maquette.addToGroup(v_r)
+            # Montants
+            montant = QGraphicsLineItem(sign*ecartMin, 0, sign*ecartMin, lineHeigth)
+            montant.setPen(pen)
+            self.maquette.addToGroup(montant)
 
         # Point central
-        dot_r = dotRadius + dot_radius_extra
+        dotR = dotRadius + dotRadiusExtra
         dot = QGraphicsEllipseItem(
-            -dot_r, -dot_r, dot_r * 2, dot_r * 2
+            -dotR, -dotR, dotR * 2, dotR * 2
         )
         dot.setBrush(QBrush(QColor(color)))
         dot.setPen(QPen(Qt.PenStyle.NoPen))
