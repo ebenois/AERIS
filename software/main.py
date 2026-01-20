@@ -50,13 +50,13 @@ class MainWindow(QMainWindow):
 
     def setupAIDock(self):
         self.aiPage = QDockWidget("Assistant IA", self)
-        self.aiPage.setAllowedAreas(Qt.DockWidgetArea.RightDockWidgetArea | Qt.DockWidgetArea.LeftDockWidgetArea)
+        self.aiPage.setAllowedAreas(Qt.DockWidgetArea.RightDockWidgetArea | Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.TopDockWidgetArea | Qt.DockWidgetArea.BottomDockWidgetArea)
         
         self.aiWidget = AIWidget()
         self.aiWidget.setStyleSheet("background-color: #1E1E1E; color: white; border-left: 1px solid #333333;")
         
         self.aiPage.setWidget(self.aiWidget)
-        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.aiPage)
+        self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.aiPage)
         self.aiPage.hide()
 
     def setupToolbar(self):
@@ -65,21 +65,21 @@ class MainWindow(QMainWindow):
 
         self.aiAction = QAction("Assistant IA", self)
         self.aiAction.setCheckable(True)
-        self.aiAction.triggered.connect(self.toggle_ai)
+        self.aiAction.triggered.connect(self.toggleAI)
         toolbar.addAction(self.aiAction)
 
         toolbar.addSeparator()
 
         settingsAction = QAction("Paramètres", self)
-        settingsAction.triggered.connect(self.show_settings)
+        settingsAction.triggered.connect(self.showSettings)
         toolbar.addAction(settingsAction)
 
-    def toggle_ai(self):
+    def toggleAI(self):
         is_visible = self.aiPage.isVisible()
         self.aiPage.setVisible(not is_visible)
         self.aiAction.setChecked(not is_visible)
 
-    def show_settings(self):
+    def showSettings(self):
         dialog = QDialog(self)
         dialog.setWindowTitle("Configuration AERIS")
         dialog.setMinimumWidth(400)

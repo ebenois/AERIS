@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import QGraphicsItem, QGraphicsItemGroup, QGraphicsRectItem, QGraphicsLineItem
 from PyQt6.QtGui import QPen, QBrush, QColor, QPainterPath
 from PyQt6.QtCore import Qt, QRectF
+import math
 
 from ui.artificialHorizon.graduations import PitchGraduations
 
@@ -44,10 +45,23 @@ class ArtificialHorizonBackground(QGraphicsItem):
     def updatePositions(self, pitch, roll):
         pixelsPerDegree=6.5
 
+        actualPitch = math.degrees(math.asin(math.sin(math.radians(pitch)) * math.cos(math.radians(roll))))
+
+        horizonFlipped = False
+        if actualPitch > 90:
+            actualPitch = 180 - actualPitch
+            horizonFlipped = True
+        elif actualPitch < -90:
+            actualPitch = -180 - actualPitch
+            horizonFlipped = True
+        
         self.rollItems.setRotation(-roll)
 
-        offset = pitch * pixelsPerDegree
+        if (roll > 90 and roll < 270) or (roll < -90 and roll > -270):
+            offset = -actualPitch * pixelsPerDegree
+        else:
+            offset = actualPitch * pixelsPerDegree
             
         self.pitchItems.setPos(0, offset)
 
-        self.graduations.updatePositions(offset, pixelsPerDegree)
+        self.graduations.updatePositions(offset, horizonFlipped, pixelsPerDegree)

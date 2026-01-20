@@ -5,4 +5,4 @@ class AIWidget(QWidget):
         super().__init__()
 
         layout = QVBoxLayout(self)
-        layout.addWidget(QLabel("AI"))
+        layout.addWidget(QLabel("Ici, il y aura les instructions de l'assistant"))

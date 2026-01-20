@@ -43,11 +43,14 @@ class PitchGraduations(QGraphicsItemGroup):
                 'pitch_level': pitch_value
             })
 
-    def updatePositions(self, horizon_y_offset, pixels_per_degree):
+    def updatePositions(self, horizon_y_offset, flipped, pixels_per_degree):
         for grad in self.graduations_data:
             pitch_level = grad['pitch_level']
             
-            y_local = -pitch_level * pixels_per_degree + horizon_y_offset
+            if not flipped:
+                y_local = -pitch_level * pixels_per_degree + horizon_y_offset
+            else:
+                y_local = pitch_level * pixels_per_degree + horizon_y_offset
 
             grad['line'].setPos(0, y_local)
 

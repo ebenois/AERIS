@@ -5,4 +5,4 @@ class SettingsPage(QWidget):
         super().__init__()
 
         layout = QVBoxLayout(self)
-        layout.addWidget(QLabel("Paramètres"))
+        layout.addWidget(QLabel("Ici, il y aura les paramètres"))
