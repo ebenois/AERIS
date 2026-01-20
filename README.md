@@ -20,13 +20,11 @@ AERIS est un écosystème de monitoring de vol haute performance conçu pour les
 - **Liaison Radio Robuste** : Transmission optimisée pour résister aux interférences et couvrir de larges périmètres de vol.
 
 ## Structure du Dépôt
-- `bashfirmware/` : Code pour l'ESP32 et la gestion du module radio émetteur.
 - `software/` : Application Python/PyQt et décodage du flux radio entrant.
-- `design/` : Plans du boîtier et schémas des antennes.
 
 ## Installation
 - Connectez-vous au point d'accès Wi-Fi généré par l'ESP32.
-- Lancez l'interface : `python main_pfd.py`.
+- Lancez l'interface : `python software\main.py`.
 - Les données s'affichent automatiquement dès réception du premier paquet UDP.
 
 ## Galerie du Projet
