@@ -27,12 +27,12 @@ class PrimaryFlightDisplay(QWidget):
         self.view.setOptimizationFlag(QGraphicsView.OptimizationFlag.DontSavePainterState)
 
         self.setupMockPFD(size)
-        self.setupInstruments(size)
+        self.setupInstruments()
 
-    def setupInstruments(self, size):
+    def setupInstruments(self):
         from ui.artificialHorizon.instrument import ArtificialHorizonInstrument
         
-        self.artificialHorizon = ArtificialHorizonInstrument(size)
+        self.artificialHorizon = ArtificialHorizonInstrument()
         self.scene.addItem(self.artificialHorizon)
         
         self.artificialHorizon.setPos(271, 277)

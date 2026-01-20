@@ -6,16 +6,20 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import QPen, QColor, QBrush
 from PyQt6.QtCore import Qt
 
+from ui.artificialHorizon.background import ArtificialHorizonBackground
+
 ecartMin, ecartMax, outline, dotRadius, lineWidth, lineHeigth = 45, 120, 2, 5, 10, 12
 
 class ArtificialHorizonInstrument(QGraphicsItemGroup):
-    def __init__(self, size=600):
+    def __init__(self):
         super().__init__()
+
+        self.artificialHorizon = ArtificialHorizonBackground()
+        self.addToGroup(self.artificialHorizon)
 
         self.maquette = QGraphicsItemGroup()
         self.addToGroup(self.maquette)
 
-        
         self.drawIndicatorGeneric(
             color="white",
             penWidth=lineWidth + (outline + 3),
