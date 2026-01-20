@@ -1,9 +1,6 @@
 import sys
 import ctypes
-from PyQt6.QtWidgets import (
-    QMainWindow, QStackedWidget, QToolBar, QApplication,
-    QDockWidget, QWidget, QVBoxLayout, QDialog
-)
+from PyQt6.QtWidgets import QMainWindow, QToolBar, QApplication, QDockWidget, QVBoxLayout, QDialog
 from PyQt6.QtGui import QIcon, QAction
 from PyQt6.QtCore import Qt
 
