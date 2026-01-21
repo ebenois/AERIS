@@ -26,7 +26,7 @@ class PrimaryFlightDisplay(QWidget):
         self.view.setCacheMode(QGraphicsView.CacheModeFlag.CacheBackground)
         self.view.setOptimizationFlag(QGraphicsView.OptimizationFlag.DontSavePainterState)
 
-        #self.setupMockPFD(size) #Provisoire
+        self.setupMockPFD(size) #Provisoire
         self.setupInstruments()
         self.updateFromData()
 
@@ -65,6 +65,7 @@ class PrimaryFlightDisplay(QWidget):
 
     def updateFromData(self):
         self.artificialHorizon.updatePositions(10, 45)
+        self.altimeter.updatePositions(100)
 
     def setupMockPFD(self, size): #Provisoire
         pixmap = QPixmap("assets/maquette.png")
