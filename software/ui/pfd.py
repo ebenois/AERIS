@@ -26,7 +26,7 @@ class PrimaryFlightDisplay(QWidget):
         self.view.setCacheMode(QGraphicsView.CacheModeFlag.CacheBackground)
         self.view.setOptimizationFlag(QGraphicsView.OptimizationFlag.DontSavePainterState)
 
-        self.setupMockPFD(size) #Provisoire
+        #self.setupMockPFD(size) #Provisoire
         self.setupInstruments()
         self.updateFromData()
 

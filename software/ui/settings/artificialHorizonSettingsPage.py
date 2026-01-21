@@ -12,14 +12,17 @@ from PyQt6.QtCore import Qt, QSettings, pyqtSignal
 
 from ui.settings.settingGroup import SettingGroup
 
-class SettingsPage(QWidget):
+class ArtificialHorizonSettingsPage(QWidget):
     def __init__(self, instrument):
         super().__init__()
         self.settings = QSettings("ENSC", "AERIS")
         self.instrument = instrument
 
         mainLayout = QVBoxLayout(self)
+
         planeGroup, planeLayout = self.createSection("Avion")
+        backgroundGroup, backgroundLayout = self.createSection("Fond")
+        graduationsGroup, graduationsLayout = self.createSection("Graduations")
 
         lineWeight = self.settings.value("lineWeight", 10, int)
         dotSize = self.settings.value("dotSize", 10, int)
@@ -48,8 +51,10 @@ class SettingsPage(QWidget):
         planeLayout.addWidget(self.wingsDistanceControl)
         planeLayout.addWidget(self.wingsSpanControl)
         planeLayout.addWidget(self.wingsHeightControl)
-        
+
         mainLayout.addWidget(planeGroup)
+        mainLayout.addWidget(backgroundGroup)
+        mainLayout.addWidget(graduationsGroup)
 
     def saveAndUpdate(self, key, value, callbackFunc):
         self.settings.setValue(key, value)
