@@ -4,19 +4,21 @@ from PyQt6.QtWidgets import (
     QGraphicsLineItem
 )
 from PyQt6.QtGui import QPen, QColor, QBrush
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QSettings
 
 from ui.artificialHorizon.background import ArtificialHorizonBackground
 
-class ArtificialHorizonInstrument(QGraphicsItemGroup):
-    ecartMin, ecartMax, lineHeigth = 45, 120, 12
-    
+class ArtificialHorizonInstrument(QGraphicsItemGroup):  
     def __init__(self):
         super().__init__()
 
-        self.currentLineWeight = 10
-        self.currentDotRadius = 10
-        self.currentOutlineWeight = 5
+        settings = QSettings("ENSC", "AERIS")
+        self.currentLineWeight = settings.value("lineWeight", 10, int)
+        self.currentDotRadius = settings.value("dotSize", 10, int)
+        self.currentOutlineWeight = settings.value("outlineWeight", 5, int)
+        self.currentWingsDistance = settings.value("WingsDistance", 45, int)
+        self.currentWingsSpan = settings.value("WingsSpan", 75, int)
+        self.currentWingsHeight = settings.value("WingsHeight", 12, int)
 
         self.artificialHorizon = ArtificialHorizonBackground()
         self.addToGroup(self.artificialHorizon)
@@ -45,12 +47,12 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
 
         for sign in (-1, 1):
             # Ailes et Montants
-            wing = QGraphicsLineItem(sign*self.ecartMax, 0, sign*self.ecartMin, 0)
+            wing = QGraphicsLineItem(sign*(self.currentWingsSpan+self.currentWingsDistance), 0, sign*self.currentWingsDistance, 0)
             wing.setPen(pen)
             self.maquette.addToGroup(wing)
             self.lines.append((wing, isOutline))
 
-            montant = QGraphicsLineItem(sign*self.ecartMin, 0, sign*self.ecartMin, self.lineHeigth)
+            montant = QGraphicsLineItem(sign*self.currentWingsDistance, 0, sign*self.currentWingsDistance, self.currentWingsHeight)
             montant.setPen(pen)
             self.maquette.addToGroup(montant)
             self.lines.append((montant, isOutline))
@@ -88,6 +90,63 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
         self.currentOutlineWeight = weight
         self.setLineWeight(self.currentLineWeight)
         self.setDotSize(self.currentDotRadius)
+    
+    def setWingsDistance(self, width):
+        self.currentWingsDistance = width
+        for item, isOutline in self.lines:
+            currentLine = item.line()
+            if currentLine.x1() < 0:
+                sign = -1 
+            else:
+                sign = 1
+            if currentLine.y1() == currentLine.y2():
+                item.setLine(
+                    sign * (self.currentWingsSpan + self.currentWingsDistance), 0, 
+                    sign * self.currentWingsDistance, 0
+                )
+            else:
+                item.setLine(
+                    sign * self.currentWingsDistance, 0, 
+                    sign * self.currentWingsDistance, self.currentWingsHeight
+                )
+
+    def setWingsSpan(self, span):
+        self.currentWingsSpan = span
+        for item, isOutline in self.lines:
+            currentLine = item.line()
+            if currentLine.x1() < 0:
+                sign = -1 
+            else:
+                sign = 1
+            if currentLine.y1() == currentLine.y2():
+                item.setLine(
+                    sign * (self.currentWingsSpan + self.currentWingsDistance), 0, 
+                    sign * self.currentWingsDistance, 0
+                )
+            else:
+                item.setLine(
+                    sign * self.currentWingsDistance, 0, 
+                    sign * self.currentWingsDistance, self.currentWingsHeight
+                )
+    
+    def setWingsHeight(self, height):
+        self.currentWingsHeight = height
+        for item, isOutline in self.lines:
+            currentLine = item.line()
+            if currentLine.x1() < 0:
+                sign = -1 
+            else:
+                sign = 1
+            if currentLine.y1() == currentLine.y2():
+                item.setLine(
+                    sign * (self.currentWingsSpan + self.currentWingsDistance), 0, 
+                    sign * self.currentWingsDistance, 0
+                )
+            else:
+                item.setLine(
+                    sign * self.currentWingsDistance, 0, 
+                    sign * self.currentWingsDistance, self.currentWingsHeight
+                )
     
     def updatePositions(self, pitch, roll):
         self.artificialHorizon.updatePositions(pitch, roll)
