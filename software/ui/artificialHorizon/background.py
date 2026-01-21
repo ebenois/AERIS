@@ -1,16 +1,14 @@
 from PyQt6.QtWidgets import QGraphicsItem, QGraphicsItemGroup, QGraphicsRectItem, QGraphicsLineItem
-from PyQt6.QtGui import QPen, QBrush, QColor, QPainterPath
-from PyQt6.QtCore import Qt, QRectF
+from PyQt6.QtGui import QPen, QBrush, QColor
+from PyQt6.QtCore import Qt
 import math
 
 from ui.artificialHorizon.graduations import PitchGraduations
 
-class ArtificialHorizonBackground(QGraphicsItem):
+class ArtificialHorizonBackground(QGraphicsItemGroup):
     def __init__(self):
         super().__init__()
         self.size = 310
-
-        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
 
         self.pitchItems = QGraphicsItemGroup(self)
         self.rollItems = QGraphicsItemGroup(self.pitchItems)
@@ -30,17 +28,6 @@ class ArtificialHorizonBackground(QGraphicsItem):
         self.horizon.setPen(penHorizon)
 
         self.graduations = PitchGraduations(parent=self,width_reference=width)
-
-    def boundingRect(self):
-        return QRectF(-self.size / 2, -self.size / 2, self.size, self.size)
-
-    def shape(self):
-        path = QPainterPath()
-        path.addRect(self.boundingRect())
-        return path
-
-    def paint(self, painter, option, widget):
-        pass
 
     def updatePositions(self, pitch, roll):
         pixelsPerDegree=6.5

@@ -1,10 +1,11 @@
 from PyQt6.QtWidgets import (
     QGraphicsItemGroup,
     QGraphicsEllipseItem,
-    QGraphicsLineItem
+    QGraphicsLineItem,
+    QGraphicsItem
 )
-from PyQt6.QtGui import QPen, QColor, QBrush
-from PyQt6.QtCore import Qt, QSettings
+from PyQt6.QtGui import QPen, QColor, QBrush, QPainterPath
+from PyQt6.QtCore import Qt, QSettings, QRectF
 
 from ui.artificialHorizon.background import ArtificialHorizonBackground
 
@@ -13,12 +14,15 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
         super().__init__()
 
         settings = QSettings("ENSC", "AERIS")
+        self.size = 310
         self.currentLineWeight = settings.value("lineWeight", 10, int)
         self.currentDotRadius = settings.value("dotSize", 10, int)
         self.currentOutlineWeight = settings.value("outlineWeight", 5, int)
         self.currentWingsDistance = settings.value("WingsDistance", 45, int)
         self.currentWingsSpan = settings.value("WingsSpan", 75, int)
         self.currentWingsHeight = settings.value("WingsHeight", 12, int)
+
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
 
         self.artificialHorizon = ArtificialHorizonBackground()
         self.addToGroup(self.artificialHorizon)
@@ -36,6 +40,14 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
         center = self.boundingRect().center()
         self.setTransformOriginPoint(center)
         self.setPos(-center)
+
+    def boundingRect(self):
+        return QRectF(-self.size / 2, -self.size / 2, self.size, self.size)
+
+    def shape(self):
+        path = QPainterPath()
+        path.addRect(self.boundingRect())
+        return path
 
     def drawIndicatorGeneric(self, color, isOutline=False):
         if isOutline:

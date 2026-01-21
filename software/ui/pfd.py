@@ -26,17 +26,22 @@ class PrimaryFlightDisplay(QWidget):
         self.view.setCacheMode(QGraphicsView.CacheModeFlag.CacheBackground)
         self.view.setOptimizationFlag(QGraphicsView.OptimizationFlag.DontSavePainterState)
 
-        self.setupMockPFD(size) #Provisoire
+        #self.setupMockPFD(size) #Provisoire
         self.setupInstruments()
         self.updateFromData()
 
     def setupInstruments(self):
         from ui.artificialHorizon.instrument import ArtificialHorizonInstrument
+        from ui.altimeter.instrument import AltimeterInstrument
         
         self.artificialHorizon = ArtificialHorizonInstrument()
+        self.altimeter = AltimeterInstrument()
+        
         self.scene.addItem(self.artificialHorizon)
+        self.scene.addItem(self.altimeter)
         
         self.artificialHorizon.setPos(271, 277)
+        self.altimeter.setPos(510, 300)
 
     def showEvent(self, event):
         super().showEvent(event)
@@ -59,7 +64,7 @@ class PrimaryFlightDisplay(QWidget):
             self.view.fitInView(self.scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
 
     def updateFromData(self):
-        self.artificialHorizon.updatePositions(0, 0)
+        self.artificialHorizon.updatePositions(10, 45)
 
     def setupMockPFD(self, size): #Provisoire
         pixmap = QPixmap("assets/maquette.png")
