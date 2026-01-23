@@ -13,7 +13,7 @@ class ArtificialHorizonBackground(QGraphicsItemGroup):
         self.pitchItems = QGraphicsItemGroup(self)
         self.rollItems = QGraphicsItemGroup(self.pitchItems)
 
-        width, height = self.size*2, self.size*2
+        width, height = self.size*2, self.size*3
 
         self.sky = QGraphicsRectItem(-width / 2, -height, width, height, self.rollItems)
         self.sky.setBrush(QBrush(QColor("#0080FF")))
