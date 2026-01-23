@@ -28,7 +28,10 @@ class PrimaryFlightDisplay(QWidget):
 
         self.setupMockPFD(size) #Provisoire
         self.setupInstruments()
-        self.updateFromData()
+        #self.updateFromData()
+
+        self.artificialHorizon.updatePositions(0, 0)
+        self.altimeter.updatePositions(12000)
 
     def setupInstruments(self):
         from ui.artificialHorizon.instrument import ArtificialHorizonInstrument

@@ -45,7 +45,7 @@ class AltitudeGraduations(QGraphicsItemGroup):
             })
 
     def updatePositions(self, altitude):
-        baseAltitude = int(altitude // self.metersPerGraduation*2) * self.metersPerGraduation
+        baseAltitude = int(altitude // (self.metersPerGraduation * 2)) * self.metersPerGraduation
 
         for grad in self.graduationsData:
             altitudeValue = baseAltitude + grad["index"] * self.metersPerGraduation
