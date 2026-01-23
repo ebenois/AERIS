@@ -26,12 +26,12 @@ class PrimaryFlightDisplay(QWidget):
         self.view.setCacheMode(QGraphicsView.CacheModeFlag.CacheBackground)
         self.view.setOptimizationFlag(QGraphicsView.OptimizationFlag.DontSavePainterState)
 
-        self.setupMockPFD(size) #Provisoire
+        #self.setupMockPFD(size) #Provisoire
         self.setupInstruments()
         #self.updateFromData()
 
-        self.artificialHorizon.updatePositions(0, 0)
-        self.altimeter.updatePositions(12000)
+        self.artificialHorizon.updatePositions(10, 10)
+        self.altimeter.updatePositions(38566)
 
     def setupInstruments(self):
         from ui.artificialHorizon.instrument import ArtificialHorizonInstrument

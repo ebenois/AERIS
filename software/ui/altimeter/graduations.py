@@ -21,7 +21,7 @@ class AltitudeGraduations(QGraphicsItemGroup):
         bigFont = QFont("Arial", 18)
         smallFont = QFont("Arial", 13)
 
-        for i in range(-10, 11):
+        for i in range(-5, 6):
             line = QGraphicsLineItem(-width / 2, 0, -width / 2 + 12, 0, self)
             line.setPen(pen)
 
@@ -41,7 +41,7 @@ class AltitudeGraduations(QGraphicsItemGroup):
                 "index": i,
                 "line": line,
                 "bigText": bigText,
-                "smallText": smallText,
+                "smallText": smallText
             })
 
     def updatePositions(self, altitude):
