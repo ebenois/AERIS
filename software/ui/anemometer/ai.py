@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsPolygonItem
 from PyQt6.QtGui import QColor, QPen, QPolygonF
 from PyQt6.QtCore import Qt, QPointF
 
-class AltitudeAi(QGraphicsItemGroup):
+class SpeedAi(QGraphicsItemGroup):
     def __init__(self, parent=None):
         super().__init__(parent)
         size=600
@@ -11,24 +11,22 @@ class AltitudeAi(QGraphicsItemGroup):
         self.addToGroup(indicator)
 
         polygon = QPolygonF([
-            QPointF(-50, -25),
-            QPointF(-20, -25),
-            QPointF(-20, 25),
-            QPointF(-50, 25),
-            QPointF(-50, 10),
-            QPointF(-35, 0),
-            QPointF(-50, -10),
+            QPointF(60, -10),
+            QPointF(60, 10),
+            QPointF(40, 10),
+            QPointF(25, 0),
+            QPointF(40, -10),
         ])
 
         indicator.setPolygon(polygon)
         indicator.setPen(QPen(QColor("#FF00FF"), 3))
     
-    def updatePositions(self, altitude, aimedAltitude):
-        metersPerGraduation = 100
-        pixelsPerGraduation = 48
-        pxPerMeter = pixelsPerGraduation / metersPerGraduation
+    def updatePositions(self, speed, aimedSpeed):
+        knotsPerGraduation = 10
+        pixelsPerGraduation = 34
+        pxPerKnot = pixelsPerGraduation / knotsPerGraduation
 
-        offset=(altitude-aimedAltitude)*pxPerMeter
+        offset=(speed-aimedSpeed)*pxPerKnot
         if offset>205 :
             offset=205
         elif offset<-205 :

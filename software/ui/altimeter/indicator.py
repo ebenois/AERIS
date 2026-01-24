@@ -11,7 +11,7 @@ class AltitudeIndicator(QGraphicsItemGroup):
         self.height = height
 
         self.metersPerGraduation = 20
-        self.pixelsPerGraduation = 14
+        self.pixelsPerGraduation = 18
         self.pxPerMeter = self.pixelsPerGraduation / self.metersPerGraduation
 
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
@@ -34,7 +34,7 @@ class AltitudeIndicator(QGraphicsItemGroup):
         triangle.setPen(QPen(Qt.GlobalColor.white, 3))
 
         self.bigFont = QFont("Arial", 18)
-        self.smallFont = QFont("Arial", 13)
+        self.smallFont = QFont("Arial", 14)
 
         self.digits = []
         for i in range(-1, 4):
