@@ -28,23 +28,28 @@ class PrimaryFlightDisplay(QWidget):
 
         #self.setupMockPFD(size) #Provisoire
         self.setupInstruments()
-        self.updateFromData()
+        #self.updateFromData()
 
-        #self.artificialHorizon.updatePositions(10, 10)
-        #self.altimeter.updatePositions(38566)
+        self.artificialHorizon.updatePositions(10, 10)
+        self.altimeter.updatePositions(38000)
+        self.anemometer.updatePositions(250)
 
     def setupInstruments(self):
         from ui.artificialHorizon.instrument import ArtificialHorizonInstrument
         from ui.altimeter.instrument import AltimeterInstrument
+        from ui.anemometer.instrument import AnemometerInstrument
         
         self.artificialHorizon = ArtificialHorizonInstrument()
         self.altimeter = AltimeterInstrument()
+        self.anemometer = AnemometerInstrument()
         
         self.scene.addItem(self.artificialHorizon)
         self.scene.addItem(self.altimeter)
+        self.scene.addItem(self.anemometer)
         
         self.artificialHorizon.setPos(271, 277)
         self.altimeter.setPos(510, 300)
+        self.anemometer.setPos(45, 300)
 
     def showEvent(self, event):
         super().showEvent(event)
@@ -87,6 +92,7 @@ class PrimaryFlightDisplay(QWidget):
 
         self.artificialHorizon.updatePositions(pitch, roll)
         self.altimeter.updatePositions(pitch)
+        self.anemometer.updatePositions(roll)
 
     def setupMockPFD(self, size): #Provisoire
         pixmap = QPixmap("assets/maquette.png")
