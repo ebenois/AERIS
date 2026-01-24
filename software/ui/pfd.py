@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QWidget, QGraphicsView, QGraphicsScene, QSizePolicy
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QPixmap, QBrush, QPainter
 
 class PrimaryFlightDisplay(QWidget):
@@ -29,6 +29,9 @@ class PrimaryFlightDisplay(QWidget):
         #self.setupMockPFD(size) #Provisoire
         self.setupInstruments()
         self.updateFromData()
+
+        #self.artificialHorizon.updatePositions(10, 10)
+        #self.altimeter.updatePositions(38566)
 
     def setupInstruments(self):
         from ui.artificialHorizon.instrument import ArtificialHorizonInstrument
@@ -64,7 +67,26 @@ class PrimaryFlightDisplay(QWidget):
             self.view.fitInView(self.scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
 
     def updateFromData(self):
-        self.artificialHorizon.updatePositions(10, 45)
+        from services.arduino import ArduinoReader
+        self.arduino = ArduinoReader(port="COM3", baudrate=115200)
+
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.updateFromArduino)
+        self.timer.start(20)
+
+    def updateFromArduino(self):
+        data = self.arduino.read()
+
+        if data is None:
+            return
+
+        roll, pitch = data
+
+        self.last_roll = roll
+        self.last_pitch = pitch
+
+        self.artificialHorizon.updatePositions(pitch, roll)
+        self.altimeter.updatePositions(pitch)
 
     def setupMockPFD(self, size): #Provisoire
         pixmap = QPixmap("assets/maquette.png")

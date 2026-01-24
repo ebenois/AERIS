@@ -1,11 +1,12 @@
 import sys
 import ctypes
-from PyQt6.QtWidgets import QMainWindow, QToolBar, QApplication, QDockWidget, QVBoxLayout, QDialog
+from PyQt6.QtWidgets import QMainWindow, QToolBar, QApplication, QDockWidget, QVBoxLayout, QDialog, QStatusBar
 from PyQt6.QtGui import QIcon, QAction
 from PyQt6.QtCore import Qt
 
 from ui.pfd import PrimaryFlightDisplay
-from ui.settings.settingsPage import SettingsPage
+from ui.settings.altimeterSettingsPage import AltimeterSettingsPage
+from ui.settings.artificialHorizonSettingsPage import ArtificialHorizonSettingsPage
 from ui.ai import AIWidget
 
 try:
@@ -44,11 +45,11 @@ class MainWindow(QMainWindow):
         self.pfdPage.setStyleSheet("background-color: #000000;")
         self.setCentralWidget(self.pfdPage)
 
-        self.setupAIDock()
+        self.SetupAIDock()
 
-        self.setupToolbar()
+        self.SetupMenu()
 
-    def setupAIDock(self):
+    def SetupAIDock(self):
         self.aiPage = QDockWidget("Assistant IA", self)
         self.aiPage.setAllowedAreas(Qt.DockWidgetArea.RightDockWidgetArea | Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.TopDockWidgetArea | Qt.DockWidgetArea.BottomDockWidgetArea)
         
@@ -59,35 +60,63 @@ class MainWindow(QMainWindow):
         self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.aiPage)
         self.aiPage.hide()
 
-    def setupToolbar(self):
-        toolbar = self.addToolBar("Navigation")
-        toolbar.setMovable(False)
+    def SetupMenu(self):
+        toolbar = QToolBar("My main toolbar")
+        self.addToolBar(toolbar)
+        toolbar.hide()
 
         self.aiAction = QAction("Assistant IA", self)
         self.aiAction.setCheckable(True)
-        self.aiAction.triggered.connect(self.toggleAI)
+        self.aiAction.triggered.connect(self.ToggleAI)
         toolbar.addAction(self.aiAction)
 
         toolbar.addSeparator()
 
-        settingsAction = QAction("Paramètres", self)
-        settingsAction.triggered.connect(self.showSettings)
-        toolbar.addAction(settingsAction)
+        self.artificialHorizonAction = QAction("Horizon artificiel", self)
+        self.artificialHorizonAction.triggered.connect(self.ShowArtificialHorizonSettingsPage)
+        toolbar.addAction(self.artificialHorizonAction)
 
-    def toggleAI(self):
-        is_visible = self.aiPage.isVisible()
-        self.aiPage.setVisible(not is_visible)
-        self.aiAction.setChecked(not is_visible)
+        toolbar.addSeparator()
 
-    def showSettings(self):
+        self.altimeterAction = QAction("Altimètre", self)
+        self.altimeterAction.triggered.connect(self.ShowAltimeterSettingsPage)
+        toolbar.addAction(self.altimeterAction)
+
+        self.setStatusBar(QStatusBar(self))
+
+        menu = self.menuBar()
+        menu.addAction(self.aiAction)
+        menu.addSeparator()
+        settingsMenu = menu.addMenu("Paramètres")
+        settingsMenu.addAction(self.artificialHorizonAction)
+        settingsMenu.addAction(self.altimeterAction)
+
+    def ToggleAI(self):
+        isVisible = self.aiPage.isVisible()
+        self.aiPage.setVisible(not isVisible)
+        self.aiAction.setChecked(not isVisible)
+
+    def ShowAltimeterSettingsPage(self):
         dialog = QDialog(self)
-        dialog.setWindowTitle("Configuration AERIS")
+        dialog.setWindowTitle("Configuration de l'altimètre")
         dialog.setMinimumWidth(400)
         
         layout = QVBoxLayout(dialog)
 
-        settings_page = SettingsPage(self.pfdPage.artificialHorizon)
-        layout.addWidget(settings_page)
+        settingsPage = AltimeterSettingsPage(self.pfdPage.altimeter)
+        layout.addWidget(settingsPage)
+        
+        dialog.exec()
+
+    def ShowArtificialHorizonSettingsPage(self):
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Configuration de l'horizon artificiel")
+        dialog.setMinimumWidth(400)
+        
+        layout = QVBoxLayout(dialog)
+
+        settingsPage = ArtificialHorizonSettingsPage(self.pfdPage.artificialHorizon)
+        layout.addWidget(settingsPage)
         
         dialog.exec()
 
