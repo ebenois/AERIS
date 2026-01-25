@@ -56,8 +56,8 @@ class SpeedIndicator(QGraphicsItemGroup):
         smallText = mainDigit["smallText"]
 
         tensDigit = speed // 10
-        if speed<0:
-            smallText.setPlainText(f"{tensDigit:03d}")
+        if speed<=0:
+            smallText.setPlainText(f"-{abs(tensDigit):02d}")
             smallText.setPos(-45, -smallText.boundingRect().height() / 2)
         else:
             smallText.setPlainText(f"{tensDigit:02d}")
