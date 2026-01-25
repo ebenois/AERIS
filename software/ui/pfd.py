@@ -29,7 +29,7 @@ class PrimaryFlightDisplay(QWidget):
         #self.setupMockPFD(size) #Provisoire
         self.setupInstruments()
 
-        test=False
+        test=True
         if test == False:
             self.updateFromData()
         else:
