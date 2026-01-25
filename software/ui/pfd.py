@@ -26,7 +26,7 @@ class PrimaryFlightDisplay(QWidget):
         self.view.setCacheMode(QGraphicsView.CacheModeFlag.CacheBackground)
         self.view.setOptimizationFlag(QGraphicsView.OptimizationFlag.DontSavePainterState)
 
-        self.setupMockPFD(size) #Provisoire
+        #self.setupMockPFD(size) #Provisoire
         self.setupInstruments()
 
         test=False
@@ -37,8 +37,8 @@ class PrimaryFlightDisplay(QWidget):
 
     def updateTest(self):
         self.artificialHorizon.updatePositions(10, 10)
-        self.altimeter.updatePositions(-38000)
-        self.anemometer.updatePositions(-250)
+        self.altimeter.updatePositions(38000)
+        self.anemometer.updatePositions(250)
         self.compass.updatePositions(230)
 
     def setupInstruments(self):
