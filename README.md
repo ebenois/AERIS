@@ -26,4 +26,4 @@ AERIS est un écosystème de monitoring de vol haute performance conçu pour les
 ## Galerie du Projet
 ### AERIS Air
 ### AERIS Ground
-![État actuel de AERIS Air](https://github.com/ebenois/AERIS/blob/prototype/assets/EtatActuel.png?raw=true)
+![État actuel de AERIS Ground](https://github.com/ebenois/AERIS/blob/prototype/assets/EtatActuel.png?raw=true)
