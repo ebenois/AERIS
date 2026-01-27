@@ -75,7 +75,7 @@ class PitchGraduations(QGraphicsItemGroup):
             else:
                 line.setRotation(0)
 
-            if gradPitch % 10 == 0:
+            if gradPitch % 10 == 0 and gradPitch != 0:
                 leftText.setPlainText(f"{int(abs(gradPitch)):02d}")
                 leftText.setFont(self.font)
                 leftText.setVisible(True)
@@ -99,3 +99,6 @@ class PitchGraduations(QGraphicsItemGroup):
             else:
                 leftText.setVisible(False)
                 rigthText.setVisible(False)
+
+            if abs(gradPitch)>90:
+                line.setVisible(False)
