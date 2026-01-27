@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QGraphicsItem, QGraphicsItemGroup, QGraphicsRectItem, QGraphicsLineItem
+from PyQt6.QtWidgets import QGraphicsItem, QGraphicsItemGroup, QGraphicsRectItem, QGraphicsLineItem, QGraphicsEllipseItem
 from PyQt6.QtGui import QPen, QBrush, QColor
 from PyQt6.QtCore import Qt
 import math
@@ -26,6 +26,11 @@ class ArtificialHorizonBackground(QGraphicsItemGroup):
         penHorizon = QPen(QColor("white"), 3)
         self.horizon = QGraphicsLineItem(-width / 2, 0, width / 2, 0, self.rollItems)
         self.horizon.setPen(penHorizon)
+
+        r = 22
+        dot = QGraphicsEllipseItem(-r/2, -r/2, r, r)
+        dot.setPen(QPen(QColor("white"),3))
+        self.rollItems.addToGroup(dot)
 
         self.graduations = PitchGraduations(parent=self,width_reference=width)
 
