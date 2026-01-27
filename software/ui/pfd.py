@@ -29,14 +29,14 @@ class PrimaryFlightDisplay(QWidget):
         self.setupMockPFD(size) #Provisoire
         self.setupInstruments()
 
-        test=True
+        test=False
         if test == False:
             self.updateFromData()
         else:
             self.updateTest()
 
     def updateTest(self):
-        self.artificialHorizon.updatePositions(10, 10)
+        self.artificialHorizon.updatePositions(0, 0)
         self.altimeter.updatePositions(38000)
         self.anemometer.updatePositions(250)
         self.compass.updatePositions(230)
