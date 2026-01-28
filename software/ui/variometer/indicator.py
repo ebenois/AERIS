@@ -23,7 +23,6 @@ class RiseIndicator(QGraphicsItemGroup):
         triangle.setPen(QPen(Qt.GlobalColor.white, 3))
 
     def updatePositions(self, rise):
-        print(rise)
         if abs(rise) < 1:
             offset = 0
         else:
