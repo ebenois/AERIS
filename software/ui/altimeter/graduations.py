@@ -12,10 +12,6 @@ class AltitudeGraduations(QGraphicsItemGroup):
         self.step = 100
         self.span = 500
 
-        self.metersPerGraduation = 100
-        self.pixelsPerGraduation = 48
-        self.pxPerMeter = self.pixelsPerGraduation / self.metersPerGraduation
-
         self.nbGraduations = (self.span * 2) // self.step + 1
         self.graduationsPool = []
 

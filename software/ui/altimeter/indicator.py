@@ -87,7 +87,7 @@ class AltitudeIndicator(QGraphicsItemGroup):
             variableText.setVisible(True)
 
     def boundingRect(self):
-        return QRectF(-20, -26, 80, 52)
+        return QRectF(-30, -26, 80, 52)
 
     def shape(self):
         path = QPainterPath()
