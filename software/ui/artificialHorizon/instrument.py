@@ -29,12 +29,11 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
 
         self.maquette = QGraphicsItemGroup()
         self.addToGroup(self.maquette)
+        self.maquette.setZValue(10)
 
         self.lines = []
         self.dots = []
-
         self.drawIndicatorGeneric(color="white", isOutline=True)
-
         self.drawIndicatorGeneric(color="black", isOutline=False)
 
         center = self.boundingRect().center()

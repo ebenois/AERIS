@@ -2,6 +2,12 @@ from PyQt6.QtWidgets import QWidget, QGraphicsView, QGraphicsScene, QSizePolicy
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QPixmap, QBrush, QPainter
 
+from ui.artificialHorizon.instrument import ArtificialHorizonInstrument
+from ui.altimeter.instrument import AltimeterInstrument
+from ui.anemometer.instrument import AnemometerInstrument
+from ui.compass.instrument import CompassInstrument
+from ui.variometer.instrument import VariometerInstrument
+
 class PrimaryFlightDisplay(QWidget):
     def __init__(self, size=600):
         super().__init__()
@@ -40,23 +46,22 @@ class PrimaryFlightDisplay(QWidget):
         self.altimeter.updatePositions(38000)
         self.anemometer.updatePositions(250)
         self.compass.updatePositions(230)
+        self.variometer.updatePositions(1.5)
 
     def setupInstruments(self):
-        from ui.artificialHorizon.instrument import ArtificialHorizonInstrument
-        from ui.altimeter.instrument import AltimeterInstrument
-        from ui.anemometer.instrument import AnemometerInstrument
-        from ui.compass.instrument import CompassInstrument
-        
         self.artificialHorizon = ArtificialHorizonInstrument()
         self.altimeter = AltimeterInstrument()
         self.anemometer = AnemometerInstrument()
         self.compass = CompassInstrument()
-        
+        self.variometer = VariometerInstrument()
+
+        self.scene.addItem(self.variometer)
         self.scene.addItem(self.artificialHorizon)
         self.scene.addItem(self.altimeter)
         self.scene.addItem(self.anemometer)
         self.scene.addItem(self.compass)
         
+        self.variometer.setPos(577, 300)
         self.artificialHorizon.setPos(271, 277)
         self.altimeter.setPos(510, 300)
         self.anemometer.setPos(45, 300)
@@ -105,6 +110,7 @@ class PrimaryFlightDisplay(QWidget):
         self.altimeter.updatePositions(pitch)
         self.anemometer.updatePositions(roll)
         self.compass.updatePositions(roll)
+        self.variometer.updatePositions(pitch/60)
 
     def setupMockPFD(self, size): #Provisoire
         pixmap = QPixmap("assets/maquette.png")

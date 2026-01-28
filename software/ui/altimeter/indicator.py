@@ -25,8 +25,8 @@ class AltitudeIndicator(QGraphicsItemGroup):
             QPointF(-20, 0),
             QPointF(-10, 15),
             QPointF(-10, 25),
-            QPointF(50, 25),
-            QPointF(50, -25),
+            QPointF(52, 25),
+            QPointF(52, -25),
         ])
 
         triangle.setPolygon(polygon)
@@ -87,7 +87,7 @@ class AltitudeIndicator(QGraphicsItemGroup):
             variableText.setVisible(True)
 
     def boundingRect(self):
-        return QRectF(-20, -26, 80, 52)
+        return QRectF(-30, -26, 100, 52)
 
     def shape(self):
         path = QPainterPath()
