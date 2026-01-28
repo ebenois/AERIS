@@ -8,83 +8,94 @@ class AltitudeGraduations(QGraphicsItemGroup):
     def __init__(self, parent=None, width=600):
         super().__init__(parent)
 
+        self.width = width
+        self.step = 100
+        self.span = 500
+
         self.metersPerGraduation = 100
         self.pixelsPerGraduation = 48
         self.pxPerMeter = self.pixelsPerGraduation / self.metersPerGraduation
 
-        self.width = width
-        self.graduationsData = []
+        self.nbGraduations = (self.span * 2) // self.step + 1
+        self.graduationsPool = []
 
         pen = QPen(QColor("#FFFFFF"), 4)
         pen.setCapStyle(Qt.PenCapStyle.RoundCap)
 
-        bigFont = QFont("Arial", 18)
-        smallFont = QFont("Arial", 13)
+        self.bigFont = QFont("Arial", 18)
+        self.smallFont = QFont("Arial", 13)
 
-        for i in range(-5, 6):
+        for _ in range(self.nbGraduations):
             line = QGraphicsLineItem(-width / 2, 0, -width / 2 + 12, 0, self)
             line.setPen(pen)
 
-            bigText = None
-            smallText = None
+            bigText = QGraphicsTextItem("", self)
+            bigText.setDefaultTextColor(Qt.GlobalColor.white)
+            bigText.setFont(self.bigFont)
 
-            if i % 2 == 0:
-                bigText = QGraphicsTextItem("", self)
-                bigText.setDefaultTextColor(Qt.GlobalColor.white)
-                bigText.setFont(bigFont)
+            smallText = QGraphicsTextItem("", self)
+            smallText.setDefaultTextColor(Qt.GlobalColor.white)
+            smallText.setFont(self.smallFont)
 
-                smallText = QGraphicsTextItem("", self)
-                smallText.setDefaultTextColor(Qt.GlobalColor.white)
-                smallText.setFont(smallFont)
-
-            self.graduationsData.append({
-                "index": i,
+            self.graduationsPool.append({
                 "line": line,
                 "bigText": bigText,
                 "smallText": smallText
             })
 
     def updatePositions(self, altitude):
-        step = self.metersPerGraduation * 2
+        baseAltitude = round(altitude / self.step) * self.step
+        startOffset = -(self.nbGraduations // 2)
 
-        baseAltitude = (altitude // step) * step
+        for i in range(self.nbGraduations):
+            gradAltitude = baseAltitude + (startOffset + i) * self.step
+            relAltitude = gradAltitude - altitude
+            
+            item = self.graduationsPool[i]
+            line = item["line"]
+            bigText = item["bigText"]
+            smallText = item["smallText"]
 
-        for grad in self.graduationsData:
-            altitudeValue = baseAltitude + grad["index"] * self.metersPerGraduation
-
-            y_local = (altitude - altitudeValue) * self.pxPerMeter
-
-            grad["line"].setPos(0, y_local)
-
-            bigText = grad["bigText"]
-            smallText = grad["smallText"]
-
-            if not bigText:
+            if abs(relAltitude) > self.span:
+                line.setVisible(False)
+                bigText.setVisible(False)
+                smallText.setVisible(False)
                 continue
+            
+            line.setVisible(True)
 
-            if altitudeValue >= 1000:
-                thousands = altitudeValue // 1000
-                remainder = altitudeValue % 1000
+            y = relAltitude * -0.48
 
-                bigText.setPlainText(str(thousands))
-                bigText.setPos(
-                    -self.width / 3,
-                    y_local - bigText.boundingRect().height() / 2
-                )
-                bigText.setVisible(True)
+            line.setPos(0, y)
 
-                smallText.setPlainText(f"{remainder:03d}")
-                smallText.setPos(
-                    -self.width / 3 + bigText.boundingRect().width() - 8,
-                    y_local - smallText.boundingRect().height() / 2 +2
-                )
-                smallText.setVisible(True)
+            if gradAltitude % 200 == 0:
+                if gradAltitude >= 1000:
+                    thousands = gradAltitude // 1000
+                    remainder = gradAltitude % 1000
+
+                    bigText.setPlainText(str(thousands))
+                    bigText.setPos(
+                        -self.width / 3,
+                        y - bigText.boundingRect().height() / 2
+                    )
+                    bigText.setVisible(True)
+
+                    smallText.setPlainText(f"{remainder:03d}")
+                    smallText.setPos(
+                        -self.width / 3 + bigText.boundingRect().width() - 8,
+                        y - smallText.boundingRect().height() / 2 + 2
+                    )
+                    smallText.setVisible(True)
+                else:
+                    bigText.setVisible(False)
+
+                    smallText.setPlainText(str(gradAltitude))
+                    smallText.setPos(
+                        -self.width / 3,
+                        y - smallText.boundingRect().height() / 2
+                    )
+                    smallText.setVisible(True)
             else:
                 bigText.setVisible(False)
+                smallText.setVisible(False)
 
-                smallText.setPlainText(str(altitudeValue))
-                smallText.setPos(
-                    -self.width / 3,
-                    y_local - smallText.boundingRect().height() / 2
-                )
-                smallText.setVisible(True)
