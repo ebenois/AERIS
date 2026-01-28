@@ -29,8 +29,6 @@ class RiseIndicator(QGraphicsItemGroup):
         else:
             offset = math.copysign(math.log10(abs(rise)), rise)
 
-        print(offset)
-
         offset = max(-6, min(6, offset))
 
         pixels = offset/math.log10(6) * 125

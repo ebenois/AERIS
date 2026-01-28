@@ -8,7 +8,6 @@ from PyQt6.QtGui import QPen, QColor, QBrush, QPainterPath
 from PyQt6.QtCore import Qt, QSettings, QRectF
 
 from ui.artificialHorizon.background import ArtificialHorizonBackground
-from ui.artificialHorizon.ai import DirectionAi
 
 class ArtificialHorizonInstrument(QGraphicsItemGroup):  
     def __init__(self):
@@ -30,14 +29,12 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
 
         self.maquette = QGraphicsItemGroup()
         self.addToGroup(self.maquette)
+        self.maquette.setZValue(10)
 
         self.lines = []
         self.dots = []
         self.drawIndicatorGeneric(color="white", isOutline=True)
         self.drawIndicatorGeneric(color="black", isOutline=False)
-
-        self.ai = DirectionAi()
-        self.addToGroup(self.ai)
 
         center = self.boundingRect().center()
         self.setTransformOriginPoint(center)
@@ -164,4 +161,3 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
     
     def updatePositions(self, pitch, roll):
         self.artificialHorizon.updatePositions(pitch, roll)
-        self.ai.updatePositions(pitch, roll,50,50)
