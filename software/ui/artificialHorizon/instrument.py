@@ -159,5 +159,5 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
                     sign * self.currentWingsDistance, self.currentWingsHeight
                 )
     
-    def updatePositions(self, pitch, roll):
-        self.artificialHorizon.updatePositions(pitch, roll)
+    def updatePositions(self, pitch, roll, angle):
+        self.artificialHorizon.updatePositions(pitch, roll, angle)

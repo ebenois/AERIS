@@ -40,7 +40,7 @@ class ArtificialHorizonBackground(QGraphicsItemGroup):
         
         self.ai = DirectionAi(parent=self.movingItems)
 
-    def updatePositions(self, pitch, roll):
+    def updatePositions(self, pitch, roll, angle):
         self.movingItems.setRotation(-roll)
 
         y_offset = (pitch * self.pixelsPerDegree) % self.cycleHeight
@@ -49,4 +49,4 @@ class ArtificialHorizonBackground(QGraphicsItemGroup):
         self.bg2.setPos(0, y_offset - self.cycleHeight)
 
         self.graduations.updatePositions(pitch)
-        self.ai.updatePositions(pitch, roll, 50, 50)
+        self.ai.updatePositions(pitch, roll, angle, 20, 250)

@@ -15,7 +15,13 @@ class DirectionAi(QGraphicsItemGroup):
         line = QGraphicsLineItem(0, -heigth , 0, heigth, self)
         line.setPen(QPen(QColor("#FF00FF"), 3))
     
-    def updatePositions(self, pitch, roll, aimedPitch, aimedDirection):
+    def updatePositions(self, pitch, roll, angle, aimedPitch, aimedAngle):
         y=(pitch-aimedPitch)*6.5
-        x=aimedDirection
+        maxOffeset = 60
+        offset=aimedAngle-angle
+        if offset>maxOffeset :
+            offset=maxOffeset
+        elif offset<-maxOffeset :
+            offset=-maxOffeset
+        x=math.sin(math.radians(offset))*223
         self.setPos(x, y)

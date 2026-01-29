@@ -42,11 +42,12 @@ class PrimaryFlightDisplay(QWidget):
             self.updateTest()
 
     def updateTest(self):
-        self.artificialHorizon.updatePositions(10, 10)
-        self.altimeter.updatePositions(38000)
-        self.anemometer.updatePositions(250)
-        self.compass.updatePositions(230)
-        self.variometer.updatePositions(1.5)
+        pitch, roll, cap, speed, altitude, rise = 10, 10, 230, 250, 38000, 1.5
+        self.artificialHorizon.updatePositions(pitch, roll, cap)
+        self.altimeter.updatePositions(altitude)
+        self.anemometer.updatePositions(speed)
+        self.compass.updatePositions(cap)
+        self.variometer.updatePositions(rise)
 
     def setupInstruments(self):
         self.artificialHorizon = ArtificialHorizonInstrument()
@@ -106,7 +107,7 @@ class PrimaryFlightDisplay(QWidget):
         self.last_roll = roll
         self.last_pitch = pitch
 
-        self.artificialHorizon.updatePositions(pitch, roll)
+        self.artificialHorizon.updatePositions(pitch, roll, roll)
         self.altimeter.updatePositions(pitch)
         self.anemometer.updatePositions(roll)
         self.compass.updatePositions(roll)
