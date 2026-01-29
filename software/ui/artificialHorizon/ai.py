@@ -6,7 +6,7 @@ import math
 class DirectionAi(QGraphicsItemGroup):
     def __init__(self, parent=None):
         super().__init__(parent)
-        width=600
+        width=1000
         heigth=600
 
         line = QGraphicsLineItem(-width/2, 0 , width/2, 0, self)
