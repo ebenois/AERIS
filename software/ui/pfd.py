@@ -35,19 +35,7 @@ class PrimaryFlightDisplay(QWidget):
         #self.setupMockPFD(size) #Provisoire
         self.setupInstruments()
 
-        test=True
-        if test == False:
-            self.updateFromData()
-        else:
-            self.updateTest()
-
-    def updateTest(self):
-        pitch, roll, cap, speed, altitude, rise = 10, 10, 230, 250, 38000, 1.5
-        self.artificialHorizon.updatePositions(pitch, roll, cap)
-        self.altimeter.updatePositions(altitude)
-        self.anemometer.updatePositions(speed)
-        self.compass.updatePositions(cap)
-        self.variometer.updatePositions(rise)
+        self.updateFromData()
 
     def setupInstruments(self):
         self.artificialHorizon = ArtificialHorizonInstrument()
@@ -102,16 +90,37 @@ class PrimaryFlightDisplay(QWidget):
         if data is None:
             return
 
-        roll, pitch = data
+        x, y = data
 
-        self.last_roll = roll
-        self.last_pitch = pitch
+        instrument = 0
 
-        self.artificialHorizon.updatePositions(pitch, roll, roll)
-        self.altimeter.updatePositions(pitch)
-        self.anemometer.updatePositions(roll)
-        self.compass.updatePositions(roll)
-        self.variometer.updatePositions(pitch/60)
+        pitch, roll, cap, speed, altitude, rise = 10, 10, 230, 250, 38000, 1.5
+
+        if instrument == 1:
+            self.artificialHorizon.updatePositions(y, x, cap)
+        elif instrument != 4:
+            self.artificialHorizon.updatePositions(pitch, roll, cap)
+
+        if instrument == 2:
+            self.altimeter.updatePositions(y+38000)
+        else:
+            self.altimeter.updatePositions(altitude)
+
+        if instrument == 3:
+            self.anemometer.updatePositions(y)
+        else:
+            self.anemometer.updatePositions(speed)
+
+        if instrument == 4:
+            self.compass.updatePositions(x)
+            self.artificialHorizon.updatePositions(pitch, roll, x)
+        else:
+            self.compass.updatePositions(cap)
+
+        if instrument == 5:
+            self.variometer.updatePositions(y/60)
+        else:
+            self.variometer.updatePositions(rise)
 
     def setupMockPFD(self, size): #Provisoire
         pixmap = QPixmap("assets/maquette.png")
