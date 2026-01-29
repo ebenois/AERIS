@@ -25,10 +25,10 @@ class DirectionAi(QGraphicsItemGroup):
         indicator.setPen(QPen(QColor("#FF00FF"), 3))
     
     def updatePositions(self, angle, aimedAngle):
-        maxOffeset = 60
+        maxOffset = 60
         offset=aimedAngle-angle
-        if offset>maxOffeset :
-            offset=maxOffeset
-        elif offset<-maxOffeset :
-            offset=-maxOffeset
+        if offset>maxOffset :
+            offset=maxOffset
+        elif offset<-maxOffset :
+            offset=-maxOffset
         self.setRotation(offset)

@@ -92,7 +92,7 @@ class PrimaryFlightDisplay(QWidget):
 
         x, y = data
 
-        instrument = 0
+        instrument = 4
 
         pitch, roll, cap, speed, altitude, rise = 10, 10, 230, 250, 38000, 1.5
 
@@ -112,8 +112,8 @@ class PrimaryFlightDisplay(QWidget):
             self.anemometer.updatePositions(speed)
 
         if instrument == 4:
-            self.compass.updatePositions(x)
-            self.artificialHorizon.updatePositions(pitch, roll, x)
+            self.compass.updatePositions(x%360)
+            self.artificialHorizon.updatePositions(pitch, roll, x%360)
         else:
             self.compass.updatePositions(cap)
 
