@@ -23,14 +23,11 @@ class RiseIndicator(QGraphicsItemGroup):
         triangle.setPen(QPen(Qt.GlobalColor.white, 3))
 
     def updatePositions(self, rise):
-        # On utilise la même formule que les graduations : log10(abs(x) + 1)
-        # math.copysign permet de garder le signe (montée/descente)
         pxPerUnit = 145
         
         offset = math.log10(abs(rise) + 1)
         pixels = math.copysign(offset * pxPerUnit, rise)
 
-        # On limite le mouvement au span (6)
         max_y = math.log10(6 + 1) * pxPerUnit
         pixels = max(-max_y, min(max_y, pixels))
 

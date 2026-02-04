@@ -7,6 +7,7 @@ from ui.altimeter.instrument import AltimeterInstrument
 from ui.anemometer.instrument import AnemometerInstrument
 from ui.compass.instrument import CompassInstrument
 from ui.variometer.instrument import VariometerInstrument
+from ui.slipIndicator.instrument import SlipInstrument
 
 class PrimaryFlightDisplay(QWidget):
     def __init__(self, size=600):
@@ -32,7 +33,7 @@ class PrimaryFlightDisplay(QWidget):
         self.view.setCacheMode(QGraphicsView.CacheModeFlag.CacheBackground)
         self.view.setOptimizationFlag(QGraphicsView.OptimizationFlag.DontSavePainterState)
 
-        #self.setupMockPFD(size) #Provisoire
+        self.setupMockPFD(size) #Provisoire
         self.setupInstruments()
 
         self.updateFromData()
@@ -43,18 +44,21 @@ class PrimaryFlightDisplay(QWidget):
         self.anemometer = AnemometerInstrument()
         self.compass = CompassInstrument()
         self.variometer = VariometerInstrument()
+        self.slipIndicator = SlipInstrument()
 
         self.scene.addItem(self.variometer)
         self.scene.addItem(self.artificialHorizon)
         self.scene.addItem(self.altimeter)
         self.scene.addItem(self.anemometer)
         self.scene.addItem(self.compass)
+        self.scene.addItem(self.slipIndicator)
         
         self.variometer.setPos(577, 300)
         self.artificialHorizon.setPos(271, 277)
         self.altimeter.setPos(510, 300)
         self.anemometer.setPos(45, 300)
         self.compass.setPos(271, 715)
+        self.slipIndicator.setPos(271, 277)
 
     def showEvent(self, event):
         super().showEvent(event)
@@ -92,9 +96,9 @@ class PrimaryFlightDisplay(QWidget):
 
         x, y = data
 
-        instrument = 1
+        instrument = 6
 
-        pitch, roll, cap, speed, altitude, rise = 0, 0, 230, 250, 38000, 1.5
+        pitch, roll, cap, speed, altitude, rise, slip = 0, 0, 230, 250, 38000, 1.5, 20
 
         if instrument == 1:
             self.artificialHorizon.updatePositions(y, x, cap)
@@ -121,6 +125,11 @@ class PrimaryFlightDisplay(QWidget):
             self.variometer.updatePositions(y/60)
         else:
             self.variometer.updatePositions(rise)
+
+        if instrument == 6:
+            self.slipIndicator.updatePositions(y/6)
+        else:
+            self.slipIndicator.updatePositions(slip)
 
     def setupMockPFD(self, size): #Provisoire
         pixmap = QPixmap("assets/maquette.png")

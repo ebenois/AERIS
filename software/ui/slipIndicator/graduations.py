@@ -1,0 +1,60 @@
+from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsLineItem, QGraphicsTextItem
+from PyQt6.QtGui import QColor, QPen, QFont
+from PyQt6.QtCore import Qt
+import math
+
+class SlipGraduations(QGraphicsItemGroup):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.width = 25
+        self.radius = 140
+        self.step = 10
+        self.span = 60
+
+        self.nbGraduations = (self.span * 2) // self.step + 1
+        self.graduationsPool = []
+
+        pen = QPen(QColor("#FFFFFF"), 4)
+        pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+
+        for _ in range(self.nbGraduations):    
+            line = QGraphicsLineItem(
+                0,
+                -self.radius,
+                0,
+                -self.radius - self.width/2,
+                self
+            )
+            line.setPen(pen)
+
+            self.graduationsPool.append(line)
+
+        base = 0
+        offset = -(self.nbGraduations // 2)
+
+        for i, line in enumerate(self.graduationsPool):
+            grad = base + (offset + i) * self.step
+            rel = grad - base
+
+            if abs(rel) == 0:
+                line.setVisible(False)
+                continue
+            
+
+            if grad % 30 == 0:
+                line.setLine(
+                    0,
+                    -self.radius,
+                    0,
+                    -self.radius - self.width
+                )
+            else:
+                line.setLine(
+                    0,
+                    -self.radius,
+                    0,
+                    -self.radius - self.width / 2
+                )
+
+            line.setRotation(rel)
