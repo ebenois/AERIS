@@ -33,7 +33,7 @@ class PrimaryFlightDisplay(QWidget):
         self.view.setCacheMode(QGraphicsView.CacheModeFlag.CacheBackground)
         self.view.setOptimizationFlag(QGraphicsView.OptimizationFlag.DontSavePainterState)
 
-        self.setupMockPFD(size) #Provisoire
+        #self.setupMockPFD(size) #Provisoire
         self.setupInstruments()
 
         self.updateFromData()
@@ -96,7 +96,7 @@ class PrimaryFlightDisplay(QWidget):
 
         x, y = data
 
-        instrument = 6
+        instrument = 0
 
         pitch, roll, cap, speed, altitude, rise, slip = 0, 0, 230, 250, 38000, 1.5, 20
 
@@ -127,7 +127,7 @@ class PrimaryFlightDisplay(QWidget):
             self.variometer.updatePositions(rise)
 
         if instrument == 6:
-            self.slipIndicator.updatePositions(y/6)
+            self.slipIndicator.updatePositions(x/6)
         else:
             self.slipIndicator.updatePositions(slip)
 
