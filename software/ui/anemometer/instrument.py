@@ -4,7 +4,6 @@ from PyQt6.QtCore import Qt, QRectF
 
 from ui.anemometer.graduations import SpeedGraduations
 from ui.anemometer.indicator import SpeedIndicator
-from ui.anemometer.ai import SpeedAi
 
 class AnemometerInstrument(QGraphicsItemGroup):
     def __init__(self):
@@ -28,17 +27,13 @@ class AnemometerInstrument(QGraphicsItemGroup):
         self.graduations = SpeedGraduations(parent=self, width=self.width)
         self.addToGroup(self.graduations)
 
-        self.ai = SpeedAi(parent=self)
-        self.addToGroup(self.ai)
-
         self.indicator = SpeedIndicator(parent=self)
         self.addToGroup(self.indicator)
 
     def updatePositions(self, speed):
         self.graduations.updatePositions(speed)
         self.indicator.updatePositions(speed)
-        self.ai.updatePositions(speed,260)
-
+        
     def boundingRect(self,width=70,height=410):
         return QRectF(-width, -height / 2, width*2, height)
 

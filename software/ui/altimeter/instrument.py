@@ -4,7 +4,6 @@ from PyQt6.QtCore import Qt, QRectF
 
 from ui.altimeter.graduations import AltitudeGraduations
 from ui.altimeter.indicator import AltitudeIndicator
-from ui.altimeter.ai import AltitudeAi
 
 class AltimeterInstrument(QGraphicsItemGroup):
     def __init__(self):
@@ -28,16 +27,12 @@ class AltimeterInstrument(QGraphicsItemGroup):
         self.graduations = AltitudeGraduations(parent=self, width=self.width)
         self.addToGroup(self.graduations)
 
-        self.ai = AltitudeAi(parent=self)
-        self.addToGroup(self.ai)
-
         self.indicator = AltitudeIndicator(parent=self)
         self.addToGroup(self.indicator)
 
     def updatePositions(self, altitude):
         self.graduations.updatePositions(altitude)
         self.indicator.updatePositions(altitude)
-        self.ai.updatePositions(altitude,37800)
 
     def boundingRect(self,width=70,height=410):
         return QRectF(-width, -height / 2, width*2, height)

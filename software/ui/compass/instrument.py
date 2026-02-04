@@ -3,7 +3,6 @@ from PyQt6.QtGui import QBrush, QColor, QPen, QPolygonF
 from PyQt6.QtCore import Qt, QPointF
 
 from ui.compass.graduations import DirectionGraduations
-from ui.compass.ai import DirectionAi
 
 class CompassInstrument(QGraphicsItemGroup):
     def __init__(self):
@@ -17,9 +16,6 @@ class CompassInstrument(QGraphicsItemGroup):
 
         self.graduations = DirectionGraduations()
         self.addToGroup(self.graduations)
-
-        self.ai = DirectionAi(parent=self)
-        self.addToGroup(self.ai)
 
         indicator = QGraphicsPolygonItem()
         self.addToGroup(indicator)
@@ -40,4 +36,3 @@ class CompassInstrument(QGraphicsItemGroup):
 
     def updatePositions(self, direction):
         self.graduations.updatePositions(direction)
-        self.ai.updatePositions(direction,250)

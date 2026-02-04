@@ -92,9 +92,9 @@ class PrimaryFlightDisplay(QWidget):
 
         x, y = data
 
-        instrument = 4
+        instrument = 1
 
-        pitch, roll, cap, speed, altitude, rise = 10, 10, 230, 250, 38000, 1.5
+        pitch, roll, cap, speed, altitude, rise = 0, 0, 230, 250, 38000, 1.5
 
         if instrument == 1:
             self.artificialHorizon.updatePositions(y, x, cap)

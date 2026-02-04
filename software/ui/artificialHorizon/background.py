@@ -4,7 +4,6 @@ from PyQt6.QtCore import Qt
 import math
 
 from ui.artificialHorizon.graduations import PitchGraduations
-from ui.artificialHorizon.ai import DirectionAi
 
 class ArtificialHorizonBackground(QGraphicsItemGroup):
     def __init__(self):
@@ -37,8 +36,6 @@ class ArtificialHorizonBackground(QGraphicsItemGroup):
                 line.setPen(QPen(QColor("white"), 3))
 
         self.graduations = PitchGraduations(parent=self.movingItems)
-        
-        self.ai = DirectionAi(parent=self.movingItems)
 
     def updatePositions(self, pitch, roll, angle):
         self.movingItems.setRotation(-roll)
@@ -49,4 +46,3 @@ class ArtificialHorizonBackground(QGraphicsItemGroup):
         self.bg2.setPos(0, y_offset - self.cycleHeight)
 
         self.graduations.updatePositions(pitch)
-        self.ai.updatePositions(pitch, roll, angle, 20, 250)
