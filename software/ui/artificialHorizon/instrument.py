@@ -17,12 +17,12 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
         self.height = height
 
         settings = QSettings("ENSC", "AERIS")
-        self.currentLineWeight = settings.value("lineWeight", 10, int)
-        self.currentDotRadius = settings.value("dotSize", 10, int)
-        self.currentOutlineWeight = settings.value("outlineWeight", 5, int)
-        self.currentWingsDistance = settings.value("WingsDistance", 45, int)
-        self.currentWingsSpan = settings.value("WingsSpan", 75, int)
-        self.currentWingsHeight = settings.value("WingsHeight", 12, int)
+        self.currentLineWeight = settings.value("lineWeight", int(width/30), int)
+        self.currentDotRadius = settings.value("dotSize", int(width/30), int)
+        self.currentOutlineWeight = settings.value("outlineWeight", int(width/75), int)
+        self.currentWingsDistance = settings.value("WingsDistance", width/8, int)
+        self.currentWingsSpan = settings.value("WingsSpan", width/4, int)
+        self.currentWingsHeight = settings.value("WingsHeight", width/15, int)
 
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
 
