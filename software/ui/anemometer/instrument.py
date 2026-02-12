@@ -6,6 +6,7 @@ import numbers
 from ui.anemometer.graduations import SpeedGraduations
 from ui.anemometer.indicator import SpeedIndicator
 
+
 class AnemometerInstrument(QGraphicsItemGroup):
     def __init__(self, width, height):
         super().__init__()
@@ -24,7 +25,9 @@ class AnemometerInstrument(QGraphicsItemGroup):
         self.rect.setPen(QPen(Qt.PenStyle.NoPen))
         self.addToGroup(self.rect)
 
-        self.setTransformOriginPoint(0, 0)
+        self.noDataEffect = QPen(Qt.PenStyle.NoPen)
+        self.rect.setPen(self.noDataEffect)
+        self.addToGroup(self.rect)
 
         self.graduations = SpeedGraduations(width,height)
         self.addToGroup(self.graduations)
@@ -32,10 +35,21 @@ class AnemometerInstrument(QGraphicsItemGroup):
         self.indicator = SpeedIndicator(width,height)
         self.addToGroup(self.indicator)
 
+        self.isInError = False 
+
+    def drawAlert(self, showRed):
+        if showRed and self.isInError:
+            self.rect.setPen(QPen(QColor("red"), 15))
+        else:
+            self.rect.setPen(QPen(Qt.PenStyle.NoPen))
+
     def updatePositions(self, speed):
-        if (isinstance(speed, numbers.Number)):
+        if isinstance(speed, numbers.Number):
+            self.isInError = False
             self.graduations.updatePositions(speed)
             self.indicator.updatePositions(speed)
+        else:
+            self.isInError = True
         
     def boundingRect(self):
         return QRectF(0, 0, self.width, self.height)

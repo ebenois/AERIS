@@ -1,6 +1,8 @@
 from PyQt6.QtWidgets import QWidget, QGraphicsView, QGraphicsScene, QSizePolicy
-from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtGui import QPixmap, QBrush, QPainter
+from PyQt6.QtCore import Qt, QTimer, QUrl
+from PyQt6.QtGui import QPainter, QColor
+from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
+from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 
 from ui.artificialHorizon.instrument import ArtificialHorizonInstrument
 from ui.altimeter.instrument import AltimeterInstrument
@@ -8,6 +10,8 @@ from ui.anemometer.instrument import AnemometerInstrument
 from ui.compass.instrument import CompassInstrument
 from ui.variometer.instrument import VariometerInstrument
 from ui.slipIndicator.instrument import SlipInstrument
+from services.arduino import ArduinoReader
+
 
 class PrimaryFlightDisplay(QWidget):
     def __init__(self, size=1200):
@@ -20,23 +24,38 @@ class PrimaryFlightDisplay(QWidget):
         self.scene = QGraphicsScene(0, 0, size, size)
         self.view.setScene(self.scene)
         
+        self.view.setViewport(QOpenGLWidget())
+
         self.view.setFrameShape(QGraphicsView.Shape.NoFrame)
         self.view.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.view.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         
-        self.view.setRenderHints(
-            QPainter.RenderHint.Antialiasing | 
-            QPainter.RenderHint.SmoothPixmapTransform | 
-            QPainter.RenderHint.TextAntialiasing
-        )
-        self.view.setViewportUpdateMode(QGraphicsView.ViewportUpdateMode.SmartViewportUpdate)
+        self.view.setViewportUpdateMode(QGraphicsView.ViewportUpdateMode.FullViewportUpdate)
         self.view.setCacheMode(QGraphicsView.CacheModeFlag.CacheBackground)
         self.view.setOptimizationFlag(QGraphicsView.OptimizationFlag.DontSavePainterState)
 
-        #self.setupMockPFD(size) #Provisoire
         self.setupInstruments()
 
-        self.updateFromData()
+        self.audioOutput = QAudioOutput()
+        self.audioOutput.setVolume(0.5)
+        self.alertPlayer = QMediaPlayer()
+        self.alertPlayer.setAudioOutput(self.audioOutput)
+        self.alertPlayer.setSource(QUrl.fromLocalFile("assets/warning.wav"))
+
+        try:
+            self.arduino = ArduinoReader(port="COM3", baudrate=115200)
+        except Exception as e:
+            print(f"Erreur Arduino: {e}")
+            self.arduino = None
+
+        self.dataTimer = QTimer()
+        self.dataTimer.timeout.connect(self.updateFromArduino)
+        self.dataTimer.start(20)
+
+        self.masterTimer = QTimer()
+        self.masterTimer.timeout.connect(self.globalHeartbeat)
+        self.masterTimer.start(250)
+        self.cycleStep = 0
 
     def setupInstruments(self):
         self.artificialHorizon = ArtificialHorizonInstrument(625,625)
@@ -60,83 +79,80 @@ class PrimaryFlightDisplay(QWidget):
         self.compass.setPos(100, 990)
         self.slipIndicator.setPos(225, 240)
 
-    def showEvent(self, event):
-        super().showEvent(event)
-        self.updateViewGeometry()
+        self.instruments = [
+            self.artificialHorizon,
+            self.altimeter,
+            self.anemometer,
+            self.compass,
+            self.variometer,
+            self.slipIndicator
+        ]
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
+        self.updateViewGeometry()
+
+    def showEvent(self, event):
+        super().showEvent(event)
         self.updateViewGeometry()
 
     def updateViewGeometry(self):
         target_w = self.width()
         target_h = self.height()
         side = min(target_w, target_h)
-        
         if side > 0:
             x = (target_w - side) // 2
             y = (target_h - side) // 2
-
             self.view.setGeometry(x, y, side, side)
             self.view.fitInView(self.scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
 
-    def updateFromData(self):
-        from services.arduino import ArduinoReader
-        self.arduino = ArduinoReader(port="COM3", baudrate=115200)
-
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.updateFromArduino)
-        self.timer.start(20)
-
     def updateFromArduino(self):
-        data = self.arduino.read()
+        if self.arduino is None:
+            return
 
+        data = self.arduino.read()
         if data is None:
             return
 
         x, y = data
 
-        instrument = 0
+        pitch = 0
+        roll = 0
+        cap = 230
+        speed = ""
+        altitude =  38000
+        rise = 0
+        slip = 0
+        
+        self.artificialHorizon.updatePositions(pitch, roll)
+        self.altimeter.updatePositions(altitude)
+        self.anemometer.updatePositions(speed)
+        self.compass.updatePositions(cap)
+        self.variometer.updatePositions(rise)
+        self.slipIndicator.updatePositions(slip)
 
-        pitch, roll, cap, speed, altitude, rise, slip = 0, 0, 230, 250, 38000, 1.5, 20
+    def globalHeartbeat(self):
+        self.cycleStep = (self.cycleStep + 1) % 10
+        
+        isFlashOn = self.cycleStep in [0, 2]
+        shouldPlaySound = (self.cycleStep == 0)
+        
+        anyError = False
+        for instr in self.instruments:
+            if hasattr(instr, 'isInError') and instr.isInError:
+                anyError = True
+                break
 
-        if instrument == 1:
-            self.artificialHorizon.updatePositions(y, x)
+        if anyError:
+            if shouldPlaySound:
+                if self.alertPlayer.playbackState() == QMediaPlayer.PlaybackState.PlayingState:
+                    self.alertPlayer.stop()
+                self.alertPlayer.play()
+            
+            for instr in self.instruments:
+                if hasattr(instr, 'drawAlert'):
+                    instr.drawAlert(isFlashOn)
         else:
-            self.artificialHorizon.updatePositions(pitch, roll)
-
-        if instrument == 2:
-            self.altimeter.updatePositions(y+38000)
-        else:
-            self.altimeter.updatePositions(altitude)
-
-        if instrument == 3:
-            self.anemometer.updatePositions(y)
-        else:
-            self.anemometer.updatePositions(speed)
-
-        if instrument == 4:
-            self.compass.updatePositions(x%360)
-        else:
-            self.compass.updatePositions(cap)
-
-        if instrument == 5:
-            self.variometer.updatePositions(y/60)
-        else:
-            self.variometer.updatePositions(rise)
-
-        if instrument == 6:
-            self.slipIndicator.updatePositions(x/6)
-        else:
-            self.slipIndicator.updatePositions(slip)
-
-    def setupMockPFD(self, size): #Provisoire
-        path = "assets/maquette.png"
-        pixmap = QPixmap("assets/maquette.png")
-        if not pixmap.isNull():
-            scaled_pixmap = pixmap.scaled(
-                size, size,
-                Qt.AspectRatioMode.KeepAspectRatio,
-                Qt.TransformationMode.SmoothTransformation
-            )
-            self.scene.setBackgroundBrush(QBrush(scaled_pixmap))
+            for instr in self.instruments:
+                if hasattr(instr, 'drawAlert'):
+                    instr.drawAlert(False)
