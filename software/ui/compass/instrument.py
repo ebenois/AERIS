@@ -5,29 +5,28 @@ from PyQt6.QtCore import Qt, QPointF
 from ui.compass.graduations import DirectionGraduations
 
 class CompassInstrument(QGraphicsItemGroup):
-    def __init__(self):
+    def __init__(self, width, heigth):
         super().__init__()
 
-        radius = 222
-        dot = QGraphicsEllipseItem(-radius, -radius, radius*2, radius*2)
+        dot = QGraphicsEllipseItem(0, 0, width, heigth)
         dot.setBrush(QBrush(QColor("#808080")))
         dot.setPen(QPen(Qt.PenStyle.NoPen))
         self.addToGroup(dot)
 
-        self.graduations = DirectionGraduations()
+        self.graduations = DirectionGraduations(width)
         self.addToGroup(self.graduations)
+        self.graduations.setPos(width/2, heigth/2)
 
         indicator = QGraphicsPolygonItem()
         self.addToGroup(indicator)
 
-        width = 40
-        radius = 223
-        length = 10
+        polygonWidth = 55
+        polygonHeigth = 45
 
         polygon = QPolygonF([
-            QPointF(0, -radius),
-            QPointF(length, -(radius+width/2)),
-            QPointF(-length, -(radius+width/2)),
+            QPointF(width/2, 0),
+            QPointF(width/2+polygonWidth/2, -(polygonHeigth)),
+            QPointF(width/2-polygonWidth/2, -(polygonHeigth)),
         ])
 
         indicator.setPolygon(polygon)

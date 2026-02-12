@@ -6,15 +6,15 @@ from ui.variometer.graduations import RiseGraduations
 from ui.variometer.indicator import RiseIndicator
 
 class VariometerInstrument(QGraphicsItemGroup):
-    def __init__(self):
+    def __init__(self, width, height):
         super().__init__()
-        self.width = 48
-        self.height = 260
+        self.width = width
+        self.height = height
 
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
 
         self.rect = QGraphicsRectItem(
-            -self.width / 2, -self.height / 2,
+            0, 0,
             self.width, self.height
         )
         
@@ -24,17 +24,18 @@ class VariometerInstrument(QGraphicsItemGroup):
 
         self.setTransformOriginPoint(0, 0)
 
-        self.graduations = RiseGraduations(parent=self, width=self.width)
+        self.graduations = RiseGraduations(width, height)
         self.addToGroup(self.graduations)
 
-        self.indicator = RiseIndicator(parent=self)
+        self.indicator = RiseIndicator(width, height)
         self.addToGroup(self.indicator)
+        self.indicator.setPos(width*2/3,height/2)
 
     def updatePositions(self, altitude):
         self.indicator.updatePositions(altitude)
 
     def boundingRect(self):
-        return QRectF(-self.width, -self.height / 2, self.width*2, self.height)
+        return QRectF(0, 0, self.width, self.height)
 
     def shape(self):
         path = QPainterPath()

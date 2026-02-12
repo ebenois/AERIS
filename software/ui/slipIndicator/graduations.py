@@ -4,11 +4,11 @@ from PyQt6.QtCore import Qt
 import math
 
 class SlipGraduations(QGraphicsItemGroup):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-
-        self.width = 25
-        self.radius = 140
+    def __init__(self, width, height):
+        super().__init__()
+        
+        self.width = width/15
+        self.radius = height
         self.step = 10
         self.span = 60
 
@@ -20,10 +20,6 @@ class SlipGraduations(QGraphicsItemGroup):
 
         for _ in range(self.nbGraduations):    
             line = QGraphicsLineItem(
-                0,
-                -self.radius,
-                0,
-                -self.radius - self.width/2,
                 self
             )
             line.setPen(pen)
@@ -47,14 +43,15 @@ class SlipGraduations(QGraphicsItemGroup):
                     0,
                     -self.radius,
                     0,
-                    -self.radius - self.width
+                    -self.radius + self.width*3/4
                 )
             else:
                 line.setLine(
                     0,
-                    -self.radius,
+                    -self.radius + self.width/4,
                     0,
-                    -self.radius - self.width / 2
+                    -self.radius + self.width*3/4
                 )
 
-            line.setRotation(rel)
+            line.setRotation(rel*math.tanh(width/(2*self.radius)))
+            self.setPos(width/2,height)

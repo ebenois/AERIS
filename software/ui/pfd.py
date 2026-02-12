@@ -10,10 +10,10 @@ from ui.variometer.instrument import VariometerInstrument
 from ui.slipIndicator.instrument import SlipInstrument
 
 class PrimaryFlightDisplay(QWidget):
-    def __init__(self, size=600):
+    def __init__(self, size=1200):
         super().__init__()
         
-        self.setMinimumSize(100, 100)
+        self.setMinimumSize(500, 500)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 
         self.view = QGraphicsView(self)
@@ -39,12 +39,12 @@ class PrimaryFlightDisplay(QWidget):
         self.updateFromData()
 
     def setupInstruments(self):
-        self.artificialHorizon = ArtificialHorizonInstrument()
-        self.altimeter = AltimeterInstrument()
-        self.anemometer = AnemometerInstrument()
-        self.compass = CompassInstrument()
-        self.variometer = VariometerInstrument()
-        self.slipIndicator = SlipInstrument()
+        self.artificialHorizon = ArtificialHorizonInstrument(625,625)
+        self.altimeter = AltimeterInstrument(145,830)
+        self.anemometer = AnemometerInstrument(145,830)
+        self.compass = CompassInstrument(875,875)
+        self.variometer = VariometerInstrument(110,530)
+        self.slipIndicator = SlipInstrument(625,625)
 
         self.scene.addItem(self.variometer)
         self.scene.addItem(self.artificialHorizon)
@@ -53,12 +53,12 @@ class PrimaryFlightDisplay(QWidget):
         self.scene.addItem(self.compass)
         self.scene.addItem(self.slipIndicator)
         
-        self.variometer.setPos(577, 300)
-        self.artificialHorizon.setPos(271, 277)
-        self.altimeter.setPos(510, 300)
-        self.anemometer.setPos(45, 300)
-        self.compass.setPos(271, 715)
-        self.slipIndicator.setPos(271, 277)
+        self.variometer.setPos(1075, 335)
+        self.artificialHorizon.setPos(225, 240)
+        self.altimeter.setPos(915, 185)
+        self.anemometer.setPos(15, 185)
+        self.compass.setPos(100, 990)
+        self.slipIndicator.setPos(225, 240)
 
     def showEvent(self, event):
         super().showEvent(event)
@@ -101,9 +101,9 @@ class PrimaryFlightDisplay(QWidget):
         pitch, roll, cap, speed, altitude, rise, slip = 0, 0, 230, 250, 38000, 1.5, 20
 
         if instrument == 1:
-            self.artificialHorizon.updatePositions(y, x, cap)
-        elif instrument != 4:
-            self.artificialHorizon.updatePositions(pitch, roll, cap)
+            self.artificialHorizon.updatePositions(y, x)
+        else:
+            self.artificialHorizon.updatePositions(pitch, roll)
 
         if instrument == 2:
             self.altimeter.updatePositions(y+38000)
@@ -117,7 +117,6 @@ class PrimaryFlightDisplay(QWidget):
 
         if instrument == 4:
             self.compass.updatePositions(x%360)
-            self.artificialHorizon.updatePositions(pitch, roll, x%360)
         else:
             self.compass.updatePositions(cap)
 
@@ -132,6 +131,7 @@ class PrimaryFlightDisplay(QWidget):
             self.slipIndicator.updatePositions(slip)
 
     def setupMockPFD(self, size): #Provisoire
+        path = "assets/maquette.png"
         pixmap = QPixmap("assets/maquette.png")
         if not pixmap.isNull():
             scaled_pixmap = pixmap.scaled(

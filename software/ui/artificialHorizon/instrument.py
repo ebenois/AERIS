@@ -10,11 +10,13 @@ from PyQt6.QtCore import Qt, QSettings, QRectF
 from ui.artificialHorizon.background import ArtificialHorizonBackground
 
 class ArtificialHorizonInstrument(QGraphicsItemGroup):  
-    def __init__(self):
+    def __init__(self, width , height):
         super().__init__()
 
+        self.width = width
+        self.height = height
+
         settings = QSettings("ENSC", "AERIS")
-        self.size = 310
         self.currentLineWeight = settings.value("lineWeight", 10, int)
         self.currentDotRadius = settings.value("dotSize", 10, int)
         self.currentOutlineWeight = settings.value("outlineWeight", 5, int)
@@ -24,7 +26,11 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
 
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
 
-        self.artificialHorizon = ArtificialHorizonBackground()
+        center = self.boundingRect().center()
+        self.setTransformOriginPoint(center)
+        self.setPos(-center)
+
+        self.artificialHorizon = ArtificialHorizonBackground(width, height)
         self.addToGroup(self.artificialHorizon)
 
         self.maquette = QGraphicsItemGroup()
@@ -36,12 +42,10 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
         self.drawIndicatorGeneric(color="white", isOutline=True)
         self.drawIndicatorGeneric(color="black", isOutline=False)
 
-        center = self.boundingRect().center()
-        self.setTransformOriginPoint(center)
-        self.setPos(-center)
+        self.artificialHorizon.updatePositions(0, 0)
 
     def boundingRect(self):
-        return QRectF(-self.size / 2, -self.size / 2, self.size, self.size)
+        return QRectF(0, 0, self.width, self.height)
 
     def shape(self):
         path = QPainterPath()
@@ -159,5 +163,5 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
                     sign * self.currentWingsDistance, self.currentWingsHeight
                 )
     
-    def updatePositions(self, pitch, roll, angle):
-        self.artificialHorizon.updatePositions(pitch, roll, angle)
+    def updatePositions(self, pitch, roll):
+        self.artificialHorizon.updatePositions(pitch, roll)

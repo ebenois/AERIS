@@ -6,16 +6,14 @@ import math
 from ui.artificialHorizon.graduations import PitchGraduations
 
 class ArtificialHorizonBackground(QGraphicsItemGroup):
-    def __init__(self):
+    def __init__(self, width, height):
         super().__init__()
-        self.size = 310
-        self.pixelsPerDegree = 6.5
+        self.width = width
+        self.pixelsPerDegree = height/(2*22.5)
         
         self.movingItems = QGraphicsItemGroup(self)
         
         self.cycleHeight = 360 * self.pixelsPerDegree 
-        
-        width = self.size * 5 
 
         blockH = 180 * self.pixelsPerDegree 
 
@@ -23,21 +21,21 @@ class ArtificialHorizonBackground(QGraphicsItemGroup):
         self.bg2 = QGraphicsItemGroup(self.movingItems)
 
         for group in [self.bg1, self.bg2]:
-            sky = QGraphicsRectItem(-width/2, -blockH, width, blockH, group)
+            sky = QGraphicsRectItem(-width, -blockH, width*2, blockH, group)
             sky.setBrush(QBrush(QColor("#0080FF")))
             sky.setPen(QPen(Qt.PenStyle.NoPen))
             
-            ground = QGraphicsRectItem(-width/2, 0, width, blockH, group)
+            ground = QGraphicsRectItem(-width, 0, width*2, blockH, group)
             ground.setBrush(QBrush(QColor("#804000")))
             ground.setPen(QPen(Qt.PenStyle.NoPen))
 
             for i in [-1,0,1]:
-                line = QGraphicsLineItem(-width/2, i*blockH , width/2, i*blockH, group)
+                line = QGraphicsLineItem(-width, i*blockH , width*2, i*blockH, group)
                 line.setPen(QPen(QColor("white"), 3))
 
-        self.graduations = PitchGraduations(parent=self.movingItems)
+        self.graduations = PitchGraduations(self.movingItems, width, height)
 
-    def updatePositions(self, pitch, roll, angle):
+    def updatePositions(self, pitch, roll):
         self.movingItems.setRotation(-roll)
 
         y_offset = (pitch * self.pixelsPerDegree) % self.cycleHeight

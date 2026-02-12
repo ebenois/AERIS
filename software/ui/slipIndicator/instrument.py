@@ -6,25 +6,25 @@ from ui.slipIndicator.graduations import SlipGraduations
 from ui.slipIndicator.indicator import SlipIndicator
 
 class SlipInstrument(QGraphicsItemGroup):
-    def __init__(self):
+    def __init__(self, width, height):
         super().__init__()
 
-        width=25
-        height=15
+        polygonWidth=25
+        polygonHeight=15
 
-        self.graduations = SlipGraduations()
+        self.graduations = SlipGraduations(width, height)
         self.addToGroup(self.graduations)
 
-        self.indicator = SlipIndicator(parent=self)
+        self.indicator = SlipIndicator(width, height)
         self.addToGroup(self.indicator)
 
         triangle = QGraphicsPolygonItem()
         self.addToGroup(triangle)
 
         polygon = QPolygonF([
-            QPointF(0, -135),
-            QPointF(width/2, -135-height),
-            QPointF(-width/2, -135-height),
+            QPointF(width/2, width*3/(4*15) ),
+            QPointF(width/2 + polygonWidth/2, width*3/(4*15) - polygonHeight),
+            QPointF(width/2-polygonWidth/2, width*3/(4*15) - polygonHeight),
         ])
         
         triangle.setPolygon(polygon)

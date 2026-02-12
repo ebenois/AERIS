@@ -4,22 +4,24 @@ from PyQt6.QtCore import Qt
 import math
 
 class PitchGraduations(QGraphicsItemGroup):
-    def __init__(self, parent=None, width=24):
+    def __init__(self,parent, width, height):
         super().__init__(parent)
 
         self.width = width
+        self.height = height
         self.step = 2.5
-        self.span = 30
+        self.span = 20
 
-        self.nbGraduations = (self.span * 2) // int(self.step) + 1
+        self.nbGraduations = int((self.span * 2) / self.step)
+        print(self.nbGraduations)
         self.graduationsPool = []
 
         pen = QPen(QColor("#FFFFFF"), 3)
         pen.setCapStyle(Qt.PenCapStyle.RoundCap)
-        self.font = QFont("Arial", 18)
+        self.font = QFont("Arial", int(height/21))
 
         for _ in range(self.nbGraduations):
-            line = QGraphicsLineItem(-width/2, 0, width/2, 0, self)
+            line = QGraphicsLineItem(self)
             line.setPen(pen)
 
             leftText = QGraphicsTextItem("", line)
@@ -53,10 +55,6 @@ class PitchGraduations(QGraphicsItemGroup):
             leftText = item["leftText"]
             rigthText = item["rigthText"]
 
-            if abs(relPitch) > self.span:
-                line.setVisible(False)
-                continue
-
             displayPitch = gradPitch
             if displayPitch > 90: displayPitch = 180 - displayPitch
             if displayPitch < -90: displayPitch = -180 - displayPitch
@@ -67,13 +65,13 @@ class PitchGraduations(QGraphicsItemGroup):
                 line.setRotation(0)
 
             if displayPitch % 10 == 0:
-                line.setLine(-self.width*4/2, 0, self.width*4/2, 0)
+                line.setLine(-self.width/6, 0, self.width/6, 0)
             elif displayPitch % 5 == 0:
-                line.setLine(-self.width*2/2, 0, self.width*2/2, 0)
+                line.setLine(-self.width/10, 0, self.width/10, 0)
             else:
-                line.setLine(-self.width/2, 0, self.width/2, 0)
+                line.setLine(-self.width/16, 0, self.width/16, 0)
 
-            y = relPitch * 6.5
+            y = relPitch * self.height/(2*22.5)
             line.setPos(0, -y)
 
             val = int(abs(displayPitch))
@@ -84,13 +82,12 @@ class PitchGraduations(QGraphicsItemGroup):
                 leftText.setVisible(True)
                 rigthText.setVisible(True)
 
-                hDistX = 60
                 if isInverted:
-                    leftText.setPos(hDistX, -20) 
-                    rigthText.setPos(-hDistX - rigthText.boundingRect().width(), -20)
+                    leftText.setPos(self.width/6, -leftText.boundingRect().width()/2) 
+                    rigthText.setPos(-self.width/6 - rigthText.boundingRect().width(), -rigthText.boundingRect().height()/2)
                 else:
-                    leftText.setPos(-hDistX - leftText.boundingRect().width(), -20)
-                    rigthText.setPos(hDistX, -20)
+                    leftText.setPos(-self.width/6 - leftText.boundingRect().width(), -leftText.boundingRect().width()/2)
+                    rigthText.setPos(self.width/6, -rigthText.boundingRect().height()/2)
             else:
                 leftText.setVisible(False)
                 rigthText.setVisible(False)

@@ -5,10 +5,11 @@ import math
 
 
 class SpeedGraduations(QGraphicsItemGroup):
-    def __init__(self, parent=None, width=600):
-        super().__init__(parent)
+    def __init__(self, width, height):
+        super().__init__()
 
         self.width = width
+        self.height = height
         self.step = 10
         self.span = 70
 
@@ -17,10 +18,10 @@ class SpeedGraduations(QGraphicsItemGroup):
 
         pen = QPen(QColor("#FFFFFF"), 4)
         pen.setCapStyle(Qt.PenCapStyle.RoundCap)
-        self.font = QFont("Arial", 15)
+        self.font = QFont("Arial", int(height/21))
 
         for _ in range(self.nbGraduations):
-            line = QGraphicsLineItem(width / 2, 0, width / 2 - 12, 0, self)
+            line = QGraphicsLineItem(width * 7/8, 0, width, 0, self)
             line.setPen(pen)
 
             text = QGraphicsTextItem("", self)
@@ -51,7 +52,7 @@ class SpeedGraduations(QGraphicsItemGroup):
             
             line.setVisible(True)
 
-            y = relSpeed * -3.4
+            y = self.height/2 - relSpeed * self.height/120
 
             line.setPos(0, y)
 

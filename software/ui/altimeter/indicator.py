@@ -5,13 +5,13 @@ import math
 
 
 class AltitudeIndicator(QGraphicsItemGroup):
-    def __init__(self, parent=None, width=60, height=50):
-        super().__init__(parent)
+    def __init__(self, width, height):
+        super().__init__()
         self.width = width
         self.height = height
 
         self.metersPerGraduation = 20
-        self.pixelsPerGraduation = 18
+        self.pixelsPerGraduation = 40
         self.pxPerMeter = self.pixelsPerGraduation / self.metersPerGraduation
 
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
@@ -20,24 +20,23 @@ class AltitudeIndicator(QGraphicsItemGroup):
         self.addToGroup(triangle)
 
         polygon = QPolygonF([
-            QPointF(-10, -25),
-            QPointF(-10, -15),
-            QPointF(-20, 0),
-            QPointF(-10, 15),
-            QPointF(-10, 25),
-            QPointF(52, 25),
-            QPointF(52, -25),
+            QPointF(0, -height/15),
+            QPointF(-width/7, 0),
+            QPointF(0, height/15),
+            QPointF(width, height/15),
+            QPointF(width, -height/15),
         ])
 
         triangle.setPolygon(polygon)
         triangle.setBrush(QBrush(Qt.GlobalColor.black))
         triangle.setPen(QPen(Qt.GlobalColor.white, 3))
+        triangle.setPos(width/4,height/2)
 
-        self.bigFont = QFont("Arial", 18)
-        self.smallFont = QFont("Arial", 14)
+        self.bigFont = QFont("Arial", int(height/20))
+        self.smallFont = QFont("Arial", int(height/28))
 
         self.digits = []
-        for i in range(-1, 4):
+        for i in range(-2, 3):
             bigText = QGraphicsTextItem("", self)
             bigText.setDefaultTextColor(Qt.GlobalColor.white)
             bigText.setFont(self.bigFont)
@@ -62,20 +61,6 @@ class AltitudeIndicator(QGraphicsItemGroup):
         bigText = mainDigit["bigText"]
         smallText = mainDigit["smallText"]
 
-        thousandsDigit = abs(altitude)//1000
-        if altitude>=0:
-            bigText.setPlainText(f"{thousandsDigit:02d}")
-            bigText.setPos(-12, -bigText.boundingRect().height() / 2)
-        else:
-            bigText.setPlainText(f"-{thousandsDigit:02d}")
-            bigText.setPos(-20, -bigText.boundingRect().height() / 2)
-        bigText.setVisible(True)
-
-        hundredsDigit = (altitude % 1000) // 100
-        smallText.setPlainText(str(hundredsDigit))
-        smallText.setPos(15, -smallText.boundingRect().height() / 2)
-        smallText.setVisible(True)
-    
         for numbers in self.digits:
             altitudeValue = baseAltitude + numbers["index"] * self.metersPerGraduation
             y_local = (altitude - altitudeValue) * self.pxPerMeter
@@ -83,11 +68,25 @@ class AltitudeIndicator(QGraphicsItemGroup):
             variableText = numbers["variableText"]
             tensDigit = (altitudeValue % 100) // 10 * 10
             variableText.setPlainText(f"{tensDigit:02d}")
-            variableText.setPos(25, y_local - variableText.boundingRect().height() / 2)
+            variableText.setPos(self.width*17/16-variableText.boundingRect().width()/2, self.height/2+y_local - variableText.boundingRect().height() / 2)
             variableText.setVisible(True)
 
+        hundredsDigit = (altitude % 1000) // 100
+        smallText.setPlainText(str(hundredsDigit))
+        smallText.setPos(self.width*19/16-variableText.boundingRect().width()-smallText.boundingRect().width()/2, self.height/2-smallText.boundingRect().height() / 2)
+        smallText.setVisible(True)
+
+        thousandsDigit = abs(altitude)//1000
+        if altitude>=0:
+            bigText.setPlainText(f"{thousandsDigit:02d}")
+            bigText.setPos(self.width*19/17-bigText.boundingRect().width()/2-variableText.boundingRect().width()-smallText.boundingRect().width(), self.height/2-bigText.boundingRect().height() / 2)
+        else:
+            bigText.setPlainText(f"-{thousandsDigit:02d}")
+            bigText.setPos(self.width*17/16-bigText.boundingRect().width()/2-variableText.boundingRect().width()-smallText.boundingRect().width(), self.height/2-bigText.boundingRect().height() / 2)
+        bigText.setVisible(True)
+
     def boundingRect(self):
-        return QRectF(-30, -26, 100, 52)
+        return QRectF(0, self.height/2-self.height/15, self.width*2, self.height*2/15)
 
     def shape(self):
         path = QPainterPath()

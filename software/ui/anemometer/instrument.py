@@ -6,16 +6,17 @@ from ui.anemometer.graduations import SpeedGraduations
 from ui.anemometer.indicator import SpeedIndicator
 
 class AnemometerInstrument(QGraphicsItemGroup):
-    def __init__(self):
+    def __init__(self, width, height):
         super().__init__()
-        self.width = 70
-        self.height = 410
+
+        self.height = height
+        self.width = width
 
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
 
         self.rect = QGraphicsRectItem(
-            -self.width / 2, -self.height / 2,
-            self.width, self.height
+            0, 0,
+            width, height
         )
         
         self.rect.setBrush(QBrush(QColor("#808080")))
@@ -24,18 +25,18 @@ class AnemometerInstrument(QGraphicsItemGroup):
 
         self.setTransformOriginPoint(0, 0)
 
-        self.graduations = SpeedGraduations(parent=self, width=self.width)
+        self.graduations = SpeedGraduations(width,height)
         self.addToGroup(self.graduations)
 
-        self.indicator = SpeedIndicator(parent=self)
+        self.indicator = SpeedIndicator(width,height)
         self.addToGroup(self.indicator)
 
     def updatePositions(self, speed):
         self.graduations.updatePositions(speed)
         self.indicator.updatePositions(speed)
         
-    def boundingRect(self,width=70,height=410):
-        return QRectF(-width, -height / 2, width*2, height)
+    def boundingRect(self):
+        return QRectF(0, 0, self.width, self.height)
 
     def shape(self):
         path = QPainterPath()

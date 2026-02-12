@@ -4,8 +4,8 @@ from PyQt6.QtCore import Qt
 import math
 
 class RiseGraduations(QGraphicsItemGroup):
-    def __init__(self, parent=None, width=600):
-        super().__init__(parent)
+    def __init__(self, width, height):
+        super().__init__() #parent
 
         self.width = width
         self.step = 0.5
@@ -14,8 +14,8 @@ class RiseGraduations(QGraphicsItemGroup):
         self.nbGraduations = int(self.span * 2 / self.step) + 1
         self.graduations = []
 
-        pen = QPen(QColor("#FFFFFF"), 2, cap=Qt.PenCapStyle.RoundCap)
-        font = QFont("Arial", 12)
+        pen = QPen(QColor("#FFFFFF"), int(height/150), cap=Qt.PenCapStyle.RoundCap)
+        font = QFont("Arial", int(height/20))
 
         for _ in range(self.nbGraduations):
             line = QGraphicsLineItem(self)
@@ -39,7 +39,7 @@ class RiseGraduations(QGraphicsItemGroup):
                 text.hide()
                 continue
 
-            pxPerUnit = 145
+            pxPerUnit = height/(2 * math.log10(7)) * (14/15)
 
             if rel < 0:
                 y = math.log10(abs(rel) + 1) * pxPerUnit
@@ -50,13 +50,13 @@ class RiseGraduations(QGraphicsItemGroup):
 
             isInt = grad.is_integer()
 
-            line.setLine(-10, 0, 2 if isInt else -6, 0)
-            line.setPos(0, y)
+            line.setLine(width/4, 0, width/2 if isInt else width/3, 0)
+            line.setPos(0, y + height/2)
             line.show()
 
-            if isInt:
+            if isInt and (int(abs(grad))%2==0 or int(abs(grad))==1):
                 text.setPlainText(str(int(abs(grad))))
-                text.setPos(-26, y - text.boundingRect().height() / 2)
+                text.setPos(0, y + height/2 - text.boundingRect().height() / 2)
                 text.show()
             else:
                 text.hide()

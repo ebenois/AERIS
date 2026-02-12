@@ -4,11 +4,12 @@ from PyQt6.QtCore import Qt
 import math
 
 class DirectionGraduations(QGraphicsItemGroup):
-    def __init__(self, parent=None, width=15):
-        super().__init__(parent)
+    def __init__(self, size):
+        super().__init__()
 
-        self.width = width
-        self.radius = 222
+        self.radius = size / 2 
+        self.ratio2 = 29 / 30
+        self.ratio1 = 14 / 15
         self.step = 5
         self.span = 60
 
@@ -17,9 +18,8 @@ class DirectionGraduations(QGraphicsItemGroup):
 
         pen = QPen(QColor("#FFFFFF"), 4)
         pen.setCapStyle(Qt.PenCapStyle.RoundCap)
-        self.bigFont = QFont("Arial", 18)
-        self.smallFont = QFont("Arial", 13)
-
+        self.bigFont = QFont("Arial", int(size/20))
+        self.smallFont = QFont("Arial", int(size/30))
         for _ in range(self.nbGraduations):
             text = QGraphicsTextItem("", self)
             text.setDefaultTextColor(Qt.GlobalColor.white)
@@ -28,7 +28,7 @@ class DirectionGraduations(QGraphicsItemGroup):
                 0,
                 -self.radius,
                 0,
-                -self.radius + width/2,
+                -self.radius * self.ratio2,
                 self
             )
             line.setPen(pen)
@@ -62,16 +62,16 @@ class DirectionGraduations(QGraphicsItemGroup):
             if gradAngle % 10 == 0:
                 line.setLine(
                     0,
-                    -self.radius,
+                    -self.radius * self.ratio1,
                     0,
-                    -self.radius + self.width
+                    -self.radius
                 )
             else:
                 line.setLine(
                     0,
-                    -self.radius,
+                    -self.radius * self.ratio2,
                     0,
-                    -self.radius + self.width / 2
+                    -self.radius
                 )
 
             line.setRotation(relAngle)
@@ -84,8 +84,8 @@ class DirectionGraduations(QGraphicsItemGroup):
                 
                 angleRad = math.radians(relAngle)             
                 
-                x = (self.radius - 15) * math.sin(angleRad) - text.boundingRect().width()/2*math.cos(angleRad)
-                y = -(self.radius - 15) * math.cos(angleRad) - text.boundingRect().width()/2*math.sin(angleRad)
+                x = (self.radius * self.ratio1) * math.sin(angleRad) - text.boundingRect().width()/2*math.cos(angleRad)
+                y = -(self.radius * self.ratio1) * math.cos(angleRad) - text.boundingRect().height()/2*math.sin(angleRad)
                 
                 text.setPos(x, y)
                 text.setRotation(relAngle)
