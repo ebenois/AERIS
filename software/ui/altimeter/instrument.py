@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsRectItem, QGraphicsItem, QGraphicsLineItem
 from PyQt6.QtGui import QBrush, QColor, QPen, QPainterPath
 from PyQt6.QtCore import Qt, QRectF
+import numbers
 
 from ui.altimeter.graduations import AltitudeGraduations
 from ui.altimeter.indicator import AltitudeIndicator
@@ -31,8 +32,9 @@ class AltimeterInstrument(QGraphicsItemGroup):
         self.addToGroup(self.indicator)
 
     def updatePositions(self, altitude):
-        self.graduations.updatePositions(altitude)
-        self.indicator.updatePositions(altitude)
+        if (isinstance(altitude, numbers.Number)):
+            self.graduations.updatePositions(altitude)
+            self.indicator.updatePositions(altitude)
 
     def boundingRect(self):
         return QRectF(0, 0, self.width*2, self.heigth)

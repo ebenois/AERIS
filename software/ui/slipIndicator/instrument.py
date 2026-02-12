@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsEllipseItem, QGraphicsPolygonItem
 from PyQt6.QtGui import QBrush, QColor, QPen, QPolygonF
 from PyQt6.QtCore import Qt, QPointF
+import numbers
 
 from ui.slipIndicator.graduations import SlipGraduations
 from ui.slipIndicator.indicator import SlipIndicator
@@ -32,4 +33,5 @@ class SlipInstrument(QGraphicsItemGroup):
         triangle.setPen(QPen(Qt.PenStyle.NoPen))
 
     def updatePositions(self, slip):
-        self.indicator.updatePositions(slip)
+        if (isinstance(slip, numbers.Number)):
+            self.indicator.updatePositions(slip)

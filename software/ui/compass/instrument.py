@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsEllipseItem, QGraphicsPolygonItem
 from PyQt6.QtGui import QBrush, QColor, QPen, QPolygonF
 from PyQt6.QtCore import Qt, QPointF
+import numbers
 
 from ui.compass.graduations import DirectionGraduations
 
@@ -34,4 +35,5 @@ class CompassInstrument(QGraphicsItemGroup):
         indicator.setPen(QPen(Qt.GlobalColor.white, 3))
 
     def updatePositions(self, direction):
-        self.graduations.updatePositions(direction)
+        if (isinstance(direction, numbers.Number)):
+            self.graduations.updatePositions(direction)

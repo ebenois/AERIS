@@ -13,7 +13,6 @@ class PitchGraduations(QGraphicsItemGroup):
         self.span = 20
 
         self.nbGraduations = int((self.span * 2) / self.step)
-        print(self.nbGraduations)
         self.graduationsPool = []
 
         pen = QPen(QColor("#FFFFFF"), 3)

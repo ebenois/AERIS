@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QPen, QColor, QBrush, QPainterPath
 from PyQt6.QtCore import Qt, QSettings, QRectF
+import numbers
 
 from ui.artificialHorizon.background import ArtificialHorizonBackground
 
@@ -41,8 +42,6 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
         self.dots = []
         self.drawIndicatorGeneric(color="white", isOutline=True)
         self.drawIndicatorGeneric(color="black", isOutline=False)
-
-        self.artificialHorizon.updatePositions(0, 0)
 
     def boundingRect(self):
         return QRectF(0, 0, self.width, self.height)
@@ -164,4 +163,5 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
                 )
     
     def updatePositions(self, pitch, roll):
-        self.artificialHorizon.updatePositions(pitch, roll)
+        if (isinstance(pitch, numbers.Number)) and (isinstance(roll, numbers.Number)):
+            self.artificialHorizon.updatePositions(pitch, roll)

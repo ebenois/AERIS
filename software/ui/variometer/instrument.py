@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsRectItem, QGraphicsItem, QGraphicsLineItem
 from PyQt6.QtGui import QBrush, QColor, QPen, QPainterPath
 from PyQt6.QtCore import Qt, QRectF
+import numbers
 
 from ui.variometer.graduations import RiseGraduations
 from ui.variometer.indicator import RiseIndicator
@@ -26,13 +27,16 @@ class VariometerInstrument(QGraphicsItemGroup):
 
         self.graduations = RiseGraduations(width, height)
         self.addToGroup(self.graduations)
+        self.graduations.hide()
 
         self.indicator = RiseIndicator(width, height)
         self.addToGroup(self.indicator)
         self.indicator.setPos(width*2/3,height/2)
 
     def updatePositions(self, altitude):
-        self.indicator.updatePositions(altitude)
+        if (isinstance(altitude, numbers.Number)):
+            self.indicator.updatePositions(altitude)
+            self.graduations.show()
 
     def boundingRect(self):
         return QRectF(0, 0, self.width, self.height)
