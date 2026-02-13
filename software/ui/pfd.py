@@ -116,13 +116,13 @@ class PrimaryFlightDisplay(QWidget):
 
         x, y = data
 
-        pitch = 0
-        roll = ""
-        cap = ""
-        speed = ""
-        altitude =  ""
-        rise = ""
-        slip = ""
+        pitch = y
+        roll = x
+        cap = 250
+        speed = 280
+        altitude =  38000
+        rise = 2
+        slip = 20
         
         self.artificialHorizon.updatePositions(pitch, roll)
         self.altimeter.updatePositions(altitude)

@@ -2,7 +2,8 @@ from PyQt6.QtWidgets import (
     QGraphicsItemGroup,
     QGraphicsEllipseItem,
     QGraphicsLineItem,
-    QGraphicsItem
+    QGraphicsItem,
+    QGraphicsRectItem
 )
 from PyQt6.QtGui import QPen, QColor, QBrush, QPainterPath
 from PyQt6.QtCore import Qt, QSettings, QRectF
@@ -27,21 +28,29 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
 
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
 
-        center = self.boundingRect().center()
-        self.setTransformOriginPoint(center)
-        self.setPos(-center)
-
         self.artificialHorizon = ArtificialHorizonBackground(width, height)
         self.addToGroup(self.artificialHorizon)
+        self.artificialHorizon.setPos(width/2, height/2)
+
+        self.rect = QGraphicsRectItem(
+            0, 0,
+            width, height
+        )
+        self.addToGroup(self.rect)
+
+        self.noDataEffect = QPen(Qt.PenStyle.NoPen)
+        self.rect.setPen(self.noDataEffect)
+
+        self.isInError = False 
 
         self.maquette = QGraphicsItemGroup()
         self.addToGroup(self.maquette)
-        self.maquette.setZValue(10)
-
         self.lines = []
         self.dots = []
         self.drawIndicatorGeneric(color="white", isOutline=True)
         self.drawIndicatorGeneric(color="black", isOutline=False)
+        self.maquette.setPos(width/2, height/2)
+        self.maquette.setZValue(10)
 
     def boundingRect(self):
         return QRectF(0, 0, self.width, self.height)
@@ -161,7 +170,16 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
                     sign * self.currentWingsDistance, 0, 
                     sign * self.currentWingsDistance, self.currentWingsHeight
                 )
-    
+
+    def drawAlert(self, showRed):
+        if showRed and self.isInError:
+            self.rect.setPen(QPen(QColor("red"), 15))
+        else:
+            self.rect.setPen(QPen(Qt.PenStyle.NoPen))
+
     def updatePositions(self, pitch, roll):
-        if (isinstance(pitch, numbers.Number)) and (isinstance(roll, numbers.Number)):
+        if isinstance(pitch, numbers.Number) and isinstance(roll, numbers.Number):
+            self.isInError = False
             self.artificialHorizon.updatePositions(pitch, roll)
+        else:
+            self.isInError = True

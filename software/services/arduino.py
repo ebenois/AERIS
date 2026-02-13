@@ -23,6 +23,3 @@ class ArduinoReader:
 
         except Exception:
             return None
-
-
-
