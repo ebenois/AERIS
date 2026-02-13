@@ -27,7 +27,6 @@ class AnemometerInstrument(QGraphicsItemGroup):
 
         self.noDataEffect = QPen(Qt.PenStyle.NoPen)
         self.rect.setPen(self.noDataEffect)
-        self.addToGroup(self.rect)
 
         self.graduations = SpeedGraduations(width,height)
         self.addToGroup(self.graduations)

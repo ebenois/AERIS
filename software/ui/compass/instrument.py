@@ -9,10 +9,13 @@ class CompassInstrument(QGraphicsItemGroup):
     def __init__(self, width, heigth):
         super().__init__()
 
-        dot = QGraphicsEllipseItem(0, 0, width, heigth)
-        dot.setBrush(QBrush(QColor("#808080")))
-        dot.setPen(QPen(Qt.PenStyle.NoPen))
-        self.addToGroup(dot)
+        self.dot = QGraphicsEllipseItem(0, 0, width, heigth)
+        self.dot.setBrush(QBrush(QColor("#808080")))
+        self.dot.setPen(QPen(Qt.PenStyle.NoPen))
+        self.addToGroup(self.dot)
+
+        self.noDataEffect = QPen(Qt.PenStyle.NoPen)
+        self.dot.setPen(self.noDataEffect)
 
         self.graduations = DirectionGraduations(width)
         self.addToGroup(self.graduations)
@@ -33,7 +36,17 @@ class CompassInstrument(QGraphicsItemGroup):
         indicator.setPolygon(polygon)
         indicator.setBrush(QBrush(Qt.GlobalColor.black))
         indicator.setPen(QPen(Qt.GlobalColor.white, 3))
+        self.isInError = False 
+
+    def drawAlert(self, showRed):
+        if showRed and self.isInError:
+            self.dot.setPen(QPen(QColor("red"), 15))
+        else:
+            self.dot.setPen(QPen(Qt.PenStyle.NoPen))
 
     def updatePositions(self, direction):
-        if (isinstance(direction, numbers.Number)):
+        if isinstance(direction, numbers.Number):
+            self.isInError = False
             self.graduations.updatePositions(direction)
+        else:
+            self.isInError = True

@@ -23,7 +23,8 @@ class AltimeterInstrument(QGraphicsItemGroup):
         self.rect.setPen(QPen(Qt.PenStyle.NoPen))
         self.addToGroup(self.rect)
 
-        self.setTransformOriginPoint(0, 0)
+        self.noDataEffect = QPen(Qt.PenStyle.NoPen)
+        self.rect.setPen(self.noDataEffect)
 
         self.graduations = AltitudeGraduations(width, height)
         self.addToGroup(self.graduations)
@@ -31,10 +32,21 @@ class AltimeterInstrument(QGraphicsItemGroup):
         self.indicator = AltitudeIndicator(width, height)
         self.addToGroup(self.indicator)
 
+        self.isInError = False 
+
+    def drawAlert(self, showRed):
+        if showRed and self.isInError:
+            self.rect.setPen(QPen(QColor("red"), 15))
+        else:
+            self.rect.setPen(QPen(Qt.PenStyle.NoPen))
+
     def updatePositions(self, altitude):
-        if (isinstance(altitude, numbers.Number)):
+        if isinstance(altitude, numbers.Number):
+            self.isInError = False
             self.graduations.updatePositions(altitude)
             self.indicator.updatePositions(altitude)
+        else:
+            self.isInError = True
 
     def boundingRect(self):
         return QRectF(0, 0, self.width*2, self.heigth)

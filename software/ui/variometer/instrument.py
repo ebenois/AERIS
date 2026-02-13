@@ -23,7 +23,8 @@ class VariometerInstrument(QGraphicsItemGroup):
         self.rect.setPen(QPen(Qt.PenStyle.NoPen))
         self.addToGroup(self.rect)
 
-        self.setTransformOriginPoint(0, 0)
+        self.noDataEffect = QPen(Qt.PenStyle.NoPen)
+        self.rect.setPen(self.noDataEffect)
 
         self.graduations = RiseGraduations(width, height)
         self.addToGroup(self.graduations)
@@ -32,11 +33,21 @@ class VariometerInstrument(QGraphicsItemGroup):
         self.indicator = RiseIndicator(width, height)
         self.addToGroup(self.indicator)
         self.indicator.setPos(width*2/3,height/2)
+        
+        self.isInError = False 
 
-    def updatePositions(self, altitude):
-        if (isinstance(altitude, numbers.Number)):
-            self.indicator.updatePositions(altitude)
+    def drawAlert(self, showRed):
+        if showRed and self.isInError:
+            self.rect.setPen(QPen(QColor("red"), 15))
+        else:
+            self.rect.setPen(QPen(Qt.PenStyle.NoPen))
+
+    def updatePositions(self, speed):
+        if isinstance(speed, numbers.Number):
+            self.indicator.updatePositions(speed)
             self.graduations.show()
+        else:
+            self.isInError = True
 
     def boundingRect(self):
         return QRectF(0, 0, self.width, self.height)
