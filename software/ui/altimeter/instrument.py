@@ -1,10 +1,11 @@
-from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsRectItem, QGraphicsItem, QGraphicsLineItem
+from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsRectItem, QGraphicsItem
 from PyQt6.QtGui import QBrush, QColor, QPen, QPainterPath
 from PyQt6.QtCore import Qt, QRectF
 import numbers
 
 from ui.altimeter.graduations import AltitudeGraduations
 from ui.altimeter.indicator import AltitudeIndicator
+from ui.altimeter.trend import AltitudeTrend
 
 class AltimeterInstrument(QGraphicsItemGroup):
     def __init__(self, width , height):
@@ -32,6 +33,9 @@ class AltimeterInstrument(QGraphicsItemGroup):
         self.indicator = AltitudeIndicator(width, height)
         self.addToGroup(self.indicator)
 
+        self.trend = AltitudeTrend(width,height)
+        self.addToGroup(self.trend)
+
         self.isInError = False 
 
     def drawAlert(self, showRed):
@@ -40,14 +44,17 @@ class AltimeterInstrument(QGraphicsItemGroup):
         else:
             self.rect.setPen(QPen(Qt.PenStyle.NoPen))
 
-    def updatePositions(self, altitude):
+    def updatePositions(self, data):
+        altitude = 38000
+        speed = 280
+        roll, pitch = data
         if isinstance(altitude, numbers.Number):
             self.isInError = False
             self.graduations.updatePositions(altitude)
             self.indicator.updatePositions(altitude)
+            self.trend.updatePositions(speed,pitch)
         else:
             self.isInError = True
-            self.graduations.updatePositions(0)
             self.indicator.updatePositions("Error")
 
     def boundingRect(self):

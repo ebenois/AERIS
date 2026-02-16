@@ -61,7 +61,7 @@ class AltitudeGraduations(QGraphicsItemGroup):
             
             line.setVisible(True)
 
-            y = self.height/2 - relAltitude
+            y = self.height/2 - relAltitude * (self.height/2)/self.span
 
             line.setPos(0, y)
 
