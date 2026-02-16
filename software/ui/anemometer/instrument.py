@@ -49,6 +49,8 @@ class AnemometerInstrument(QGraphicsItemGroup):
             self.indicator.updatePositions(speed)
         else:
             self.isInError = True
+            self.graduations.updatePositions(0)
+            self.indicator.updatePositions("Err")
         
     def boundingRect(self):
         return QRectF(0, 0, self.width, self.height)

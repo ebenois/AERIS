@@ -119,8 +119,8 @@ class PrimaryFlightDisplay(QWidget):
         pitch = ""
         roll = ""
         cap = ""
-        speed = ""
-        altitude = ""
+        speed = -100
+        altitude = 38000
         rise = ""
         slip = ""
         
