@@ -37,7 +37,7 @@ class PrimaryFlightDisplay(QWidget):
         self.setupInstruments()
 
         self.audioOutput = QAudioOutput()
-        self.audioOutput.setVolume(0.5)
+        self.audioOutput.setVolume(1)
         self.alertPlayer = QMediaPlayer()
         self.alertPlayer.setAudioOutput(self.audioOutput)
         self.alertPlayer.setSource(QUrl.fromLocalFile("assets/warning.wav"))
@@ -116,13 +116,13 @@ class PrimaryFlightDisplay(QWidget):
 
         x, y = data
 
-        pitch = y
-        roll = x
-        cap = 250
-        speed = 280
-        altitude =  38000
-        rise = 2
-        slip = 20
+        pitch = ""
+        roll = ""
+        cap = ""
+        speed = ""
+        altitude = ""
+        rise = ""
+        slip = ""
         
         self.artificialHorizon.updatePositions(pitch, roll)
         self.altimeter.updatePositions(altitude)

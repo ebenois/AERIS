@@ -66,8 +66,14 @@ class AltitudeGraduations(QGraphicsItemGroup):
             line.setPos(0, y)
 
             if gradAltitude % 200 == 0:
-                thousands = gradAltitude // 1000
-                remainder = gradAltitude % 1000
+                abs_alt = abs(gradAltitude)
+                thousands = abs_alt // 1000
+                remainder = abs_alt % 1000
+
+                if gradAltitude < 0:
+                    str_thousands = f"-{thousands:02d}" 
+                else:
+                    str_thousands = f"{thousands:02d}"
 
                 smallText.setPlainText(f"{remainder:03d}")
                 smallText.setPos(
@@ -76,13 +82,9 @@ class AltitudeGraduations(QGraphicsItemGroup):
                 )
                 smallText.setVisible(True)
 
-                bigText.setPlainText(f"{thousands:02d}")
+                bigText.setPlainText(str_thousands)
                 bigText.setPos(
-                    self.width - smallText.boundingRect().width()-bigText.boundingRect().width()*7/8,
+                    self.width - smallText.boundingRect().width() - bigText.boundingRect().width() * 7/8,
                     y - bigText.boundingRect().height() / 2
                 )
                 bigText.setVisible(True)
-            else:
-                bigText.setVisible(False)
-                smallText.setVisible(False)
-

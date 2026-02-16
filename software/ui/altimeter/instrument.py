@@ -47,6 +47,8 @@ class AltimeterInstrument(QGraphicsItemGroup):
             self.indicator.updatePositions(altitude)
         else:
             self.isInError = True
+            self.graduations.updatePositions(0)
+            self.indicator.updatePositions("Error")
 
     def boundingRect(self):
         return QRectF(0, 0, self.width*2, self.heigth)
