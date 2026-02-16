@@ -113,22 +113,13 @@ class PrimaryFlightDisplay(QWidget):
         data = self.arduino.read()
         if data is None:
             return
-
-        x, y = data
-
-        pitch = y
-        roll = x
-        cap = 180
-        speed = 250
-        rise = 0
-        slip = 0
         
-        self.artificialHorizon.updatePositions(pitch, roll)
+        self.artificialHorizon.updatePositions(data)
         self.altimeter.updatePositions(data)
-        self.anemometer.updatePositions(speed)
-        self.compass.updatePositions(cap)
-        self.variometer.updatePositions(rise)
-        self.slipIndicator.updatePositions(slip)
+        self.anemometer.updatePositions(data)
+        self.compass.updatePositions(data)
+        self.variometer.updatePositions(data)
+        self.slipIndicator.updatePositions(data)
 
     def globalHeartbeat(self):
         self.cycleStep = (self.cycleStep + 1) % 10

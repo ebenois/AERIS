@@ -52,7 +52,8 @@ class AltimeterInstrument(QGraphicsItemGroup):
             self.isInError = False
             self.graduations.updatePositions(altitude)
             self.indicator.updatePositions(altitude)
-            self.trend.updatePositions(speed,pitch)
+            if isinstance(speed, numbers.Number) and isinstance(pitch, numbers.Number):
+                self.trend.updatePositions(speed,pitch)
         else:
             self.isInError = True
             self.indicator.updatePositions("Error")

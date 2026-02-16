@@ -21,8 +21,7 @@ class AltitudeTrend(QGraphicsItemGroup):
     def updatePositions(self,speed,pitch):
         self.span = 500
         knotToFeet = 1.68781
-        verticalSpeed =  speed * math.sin(math.radians(pitch)) * knotToFeet * 5 * (self.height/2)/self.span
+        verticalSpeed =  speed * math.sin(math.radians(pitch)) * knotToFeet * 3 * (self.height/2)/self.span
         nextPosition = max(-self.height, min(self.height,verticalSpeed))
         self.rect.setRect(0, self.height/2 ,
             self.width/17, -nextPosition)
-        return

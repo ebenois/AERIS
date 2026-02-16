@@ -32,6 +32,7 @@ class SlipInstrument(QGraphicsItemGroup):
         triangle.setBrush(QBrush(Qt.GlobalColor.white))
         triangle.setPen(QPen(Qt.PenStyle.NoPen))
 
-    def updatePositions(self, slip):
+    def updatePositions(self, data):
+        slip = 0
         if (isinstance(slip, numbers.Number)):
             self.indicator.updatePositions(slip)

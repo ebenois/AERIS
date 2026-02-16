@@ -42,7 +42,8 @@ class VariometerInstrument(QGraphicsItemGroup):
         else:
             self.rect.setPen(QPen(Qt.PenStyle.NoPen))
 
-    def updatePositions(self, speed):
+    def updatePositions(self, data):
+        speed = 250
         if isinstance(speed, numbers.Number):
             self.indicator.updatePositions(speed)
             self.graduations.show()

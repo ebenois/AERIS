@@ -44,9 +44,10 @@ class CompassInstrument(QGraphicsItemGroup):
         else:
             self.dot.setPen(QPen(Qt.PenStyle.NoPen))
 
-    def updatePositions(self, direction):
-        if isinstance(direction, numbers.Number):
+    def updatePositions(self, data):
+        cap = 180
+        if isinstance(cap, numbers.Number):
             self.isInError = False
-            self.graduations.updatePositions(direction)
+            self.graduations.updatePositions(cap)
         else:
             self.isInError = True
