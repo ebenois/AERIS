@@ -1,6 +1,5 @@
 from PyQt6.QtWidgets import QWidget, QGraphicsView, QGraphicsScene, QSizePolicy
 from PyQt6.QtCore import Qt, QTimer, QUrl
-from PyQt6.QtGui import QPainter, QColor
 from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 
@@ -40,7 +39,7 @@ class PrimaryFlightDisplay(QWidget):
         self.audioOutput.setVolume(1)
         self.alertPlayer = QMediaPlayer()
         self.alertPlayer.setAudioOutput(self.audioOutput)
-        self.alertPlayer.setSource(QUrl.fromLocalFile("assets/warning.wav"))
+        self.alertPlayer.setSource(QUrl.fromLocalFile("software\assets\warning.wav"))
 
         try:
             self.arduino = ArduinoReader(port="COM3", baudrate=115200)
