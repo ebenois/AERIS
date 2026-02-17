@@ -32,6 +32,9 @@ class PrimaryFlightDisplay(QWidget):
         self.view.setViewportUpdateMode(QGraphicsView.ViewportUpdateMode.FullViewportUpdate)
         self.view.setCacheMode(QGraphicsView.CacheModeFlag.CacheBackground)
         self.view.setOptimizationFlag(QGraphicsView.OptimizationFlag.DontSavePainterState)
+        
+        
+        self.setStyleSheet("background-color: #000000;")
 
         self.setupInstruments()
 
@@ -39,7 +42,7 @@ class PrimaryFlightDisplay(QWidget):
         self.audioOutput.setVolume(1)
         self.alertPlayer = QMediaPlayer()
         self.alertPlayer.setAudioOutput(self.audioOutput)
-        self.alertPlayer.setSource(QUrl.fromLocalFile("software\assets\warning.wav"))
+        self.alertPlayer.setSource(QUrl.fromLocalFile("software/assets/warning.wav"))
 
         try:
             self.arduino = ArduinoReader(port="COM3", baudrate=115200)

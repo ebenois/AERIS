@@ -51,7 +51,7 @@ class AnemometerInstrument(QGraphicsItemGroup):
             self.rect.setPen(QPen(Qt.PenStyle.NoPen))
 
     def updatePositions(self, data):
-        speed,a = data
+        speed = 280
         if isinstance(speed, numbers.Number):
             self.isInError = False
             self.graduations.updatePositions(speed)

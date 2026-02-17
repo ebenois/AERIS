@@ -42,7 +42,6 @@ class MainWindow(QMainWindow):
         """)
 
         self.pfdPage = PrimaryFlightDisplay()
-        self.pfdPage.setStyleSheet("background-color: #000000;")
         self.setCentralWidget(self.pfdPage)
 
         self.SetupAIDock()
