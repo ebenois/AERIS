@@ -6,6 +6,7 @@ import numbers
 from ui.anemometer.graduations import SpeedGraduations
 from ui.anemometer.indicator import SpeedIndicator
 from ui.anemometer.trend import SpeedTrend
+from ui.anemometer.limit import SpeedLimit
 
 
 class AnemometerInstrument(QGraphicsItemGroup):
@@ -28,15 +29,18 @@ class AnemometerInstrument(QGraphicsItemGroup):
 
         self.noDataEffect = QPen(Qt.PenStyle.NoPen)
         self.rect.setPen(self.noDataEffect)
+        
+        self.limit = SpeedLimit(width,height)
+        self.addToGroup(self.limit)
 
         self.graduations = SpeedGraduations(width,height)
         self.addToGroup(self.graduations)
-
-        self.indicator = SpeedIndicator(width,height)
-        self.addToGroup(self.indicator)
         
         self.trend = SpeedTrend(width,height)
         self.addToGroup(self.trend)
+        
+        self.indicator = SpeedIndicator(width,height)
+        self.addToGroup(self.indicator)
 
         self.isInError = False 
 
@@ -52,6 +56,7 @@ class AnemometerInstrument(QGraphicsItemGroup):
             self.isInError = False
             self.graduations.updatePositions(speed)
             self.indicator.updatePositions(speed)
+            self.limit.updatePositions(speed)
             self.trend.updatePositions(speed)
         else:
             self.isInError = True
