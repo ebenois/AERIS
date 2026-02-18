@@ -14,7 +14,7 @@ class AltitudeTrend(QGraphicsItemGroup):
             0, self.height/2 ,
             self.width/17, 0
         )
-        self.rect.setBrush(QBrush(QColor("#F6FF00")))
+        self.rect.setBrush(QBrush(QColor("#0080FF")))
         self.rect.setPen(QPen(Qt.PenStyle.NoPen))
         self.addToGroup(self.rect)
 

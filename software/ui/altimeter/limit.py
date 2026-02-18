@@ -2,13 +2,13 @@ from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsRectItem
 from PyQt6.QtGui import QBrush, QColor, QPen
 from PyQt6.QtCore import Qt, QElapsedTimer
 
-class SpeedLimit(QGraphicsItemGroup):
+class AltitudeLimit(QGraphicsItemGroup):
     def __init__(self, width, height):
         super().__init__()
 
         self.width = width
         self.height = height
-        self.span = 60
+        self.span = 500
         
         self.timer = QElapsedTimer()
         self.timer.start()
@@ -18,15 +18,15 @@ class SpeedLimit(QGraphicsItemGroup):
         self.rect.setPen(QPen(Qt.PenStyle.NoPen))
         self.addToGroup(self.rect)
 
-    def updatePositions(self, speed):
-        limit = 300        
+    def updatePositions(self, altitude):
+        limit = 39000 
         pixel_per_unit = (self.height / 2) / self.span
-        height_in_pixels = (limit-speed) * pixel_per_unit
+        height_in_pixels = (limit-altitude) * pixel_per_unit
 
         safe_height = max(-self.height/2, min(self.height/2, height_in_pixels))
         
         self.rect.setRect(
-            self.width, 
+            -self.width *2/ 17, 
             0,
             self.width *2/ 17, 
             self.height/2-safe_height

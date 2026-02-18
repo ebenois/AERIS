@@ -32,12 +32,12 @@ class AnemometerInstrument(QGraphicsItemGroup):
         
         self.limit = SpeedLimit(width,height)
         self.addToGroup(self.limit)
-
-        self.graduations = SpeedGraduations(width,height)
-        self.addToGroup(self.graduations)
         
         self.trend = SpeedTrend(width,height)
         self.addToGroup(self.trend)
+        
+        self.graduations = SpeedGraduations(width,height)
+        self.addToGroup(self.graduations)
         
         self.indicator = SpeedIndicator(width,height)
         self.addToGroup(self.indicator)
@@ -51,7 +51,8 @@ class AnemometerInstrument(QGraphicsItemGroup):
             self.rect.setPen(QPen(Qt.PenStyle.NoPen))
 
     def updatePositions(self, data):
-        speed = 280
+        pitch, roll = data
+        speed = 280 + pitch
         if isinstance(speed, numbers.Number):
             self.isInError = False
             self.graduations.updatePositions(speed)
@@ -63,7 +64,7 @@ class AnemometerInstrument(QGraphicsItemGroup):
             self.indicator.updatePositions("Err")
         
     def boundingRect(self):
-        return QRectF(0, 0, self.width, self.height)
+        return QRectF(0, 0, self.width*3/2, self.height)
 
     def shape(self):
         path = QPainterPath()

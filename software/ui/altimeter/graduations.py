@@ -88,3 +88,6 @@ class AltitudeGraduations(QGraphicsItemGroup):
                     y - bigText.boundingRect().height() / 2
                 )
                 bigText.setVisible(True)
+            else:
+                smallText.setVisible(False)
+                bigText.setVisible(False)

@@ -6,6 +6,7 @@ import numbers
 from ui.altimeter.graduations import AltitudeGraduations
 from ui.altimeter.indicator import AltitudeIndicator
 from ui.altimeter.trend import AltitudeTrend
+from ui.altimeter.limit import AltitudeLimit
 
 class AltimeterInstrument(QGraphicsItemGroup):
     def __init__(self, width , height):
@@ -26,15 +27,18 @@ class AltimeterInstrument(QGraphicsItemGroup):
 
         self.noDataEffect = QPen(Qt.PenStyle.NoPen)
         self.rect.setPen(self.noDataEffect)
+        
+        self.limit = AltitudeLimit(width,height)
+        self.addToGroup(self.limit)
+        
+        self.trend = AltitudeTrend(width,height)
+        self.addToGroup(self.trend)
 
         self.graduations = AltitudeGraduations(width, height)
         self.addToGroup(self.graduations)
 
         self.indicator = AltitudeIndicator(width, height)
         self.addToGroup(self.indicator)
-
-        self.trend = AltitudeTrend(width,height)
-        self.addToGroup(self.trend)
 
         self.isInError = False 
 
@@ -45,13 +49,14 @@ class AltimeterInstrument(QGraphicsItemGroup):
             self.rect.setPen(QPen(Qt.PenStyle.NoPen))
 
     def updatePositions(self, data):
-        altitude = 38000
         speed = 280
         roll, pitch = data
+        altitude = 38000 + roll*10
         if isinstance(altitude, numbers.Number):
             self.isInError = False
             self.graduations.updatePositions(altitude)
             self.indicator.updatePositions(altitude)
+            self.limit.updatePositions(altitude)
             if isinstance(speed, numbers.Number) and isinstance(pitch, numbers.Number):
                 self.trend.updatePositions(speed,pitch)
         else:
@@ -59,7 +64,7 @@ class AltimeterInstrument(QGraphicsItemGroup):
             self.indicator.updatePositions("Error")
 
     def boundingRect(self):
-        return QRectF(0, 0, self.width*2, self.heigth)
+        return QRectF(-self.width, 0, self.width*3, self.heigth)
 
     def shape(self):
         path = QPainterPath()

@@ -16,7 +16,7 @@ class SpeedTrend(QGraphicsItemGroup):
         self.timer.start()
 
         self.rect = QGraphicsRectItem()
-        self.rect.setBrush(QBrush(QColor("#F6FF00")))
+        self.rect.setBrush(QBrush(QColor("#0080FF")))
         self.rect.setPen(QPen(Qt.PenStyle.NoPen))
         self.addToGroup(self.rect)
 
