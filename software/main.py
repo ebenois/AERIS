@@ -9,6 +9,7 @@ from ui.settings.altimeterSettingsPage import AltimeterSettingsPage
 from ui.settings.artificialHorizonSettingsPage import ArtificialHorizonSettingsPage
 from ui.ai import AIWidget
 
+
 try:
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("AERIS")
 except (AttributeError, OSError):
@@ -20,7 +21,6 @@ class MainWindow(QMainWindow):
         
         self.setWindowTitle("AERIS")
         self.setWindowIcon(QIcon("software/assets/logo.png"))
-        self.resize(1000, 700)
 
         self.setStyleSheet("""
             QMainWindow { background-color: #000000; }
@@ -45,7 +45,6 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.pfdPage)
 
         self.SetupAIDock()
-
         self.SetupMenu()
 
     def SetupAIDock(self):
@@ -124,6 +123,6 @@ app = QApplication(sys.argv)
 app.setStyle("Fusion") 
     
 window = MainWindow()
-window.show()
+window.showMaximized()
 
 app.exec()
