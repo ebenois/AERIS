@@ -1,6 +1,6 @@
-from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsRectItem, QGraphicsItem
-from PyQt6.QtGui import QBrush, QColor, QPen, QPainterPath
-from PyQt6.QtCore import Qt, QRectF
+from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsRectItem
+from PyQt6.QtGui import QBrush, QColor, QPen
+from PyQt6.QtCore import Qt
 import numbers
 
 from ui.altimeter.graduations import AltitudeGraduations
@@ -13,8 +13,6 @@ class AltimeterInstrument(QGraphicsItemGroup):
         super().__init__()
         self.width = width
         self.heigth = height
-
-        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
 
         self.rect = QGraphicsRectItem(
             0, 0,
@@ -44,14 +42,14 @@ class AltimeterInstrument(QGraphicsItemGroup):
 
     def drawAlert(self, showRed):
         if showRed and self.isInError:
-            self.rect.setPen(QPen(QColor("red"), 15))
+            self.rect.setPen(QPen(QColor("red"), 10))
         else:
             self.rect.setPen(QPen(Qt.PenStyle.NoPen))
 
     def updatePositions(self, data):
         speed = 280
         roll, pitch = data
-        altitude = 38000 + roll*10
+        altitude = ""
         if isinstance(altitude, numbers.Number):
             self.isInError = False
             self.graduations.updatePositions(altitude)
@@ -62,11 +60,3 @@ class AltimeterInstrument(QGraphicsItemGroup):
         else:
             self.isInError = True
             self.indicator.updatePositions("Error")
-
-    def boundingRect(self):
-        return QRectF(-self.width, 0, self.width*3, self.heigth)
-
-    def shape(self):
-        path = QPainterPath()
-        path.addRect(self.boundingRect())
-        return path

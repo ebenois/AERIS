@@ -1,12 +1,13 @@
-from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsLineItem, QGraphicsTextItem
-from PyQt6.QtGui import QColor, QPen, QFont
-from PyQt6.QtCore import Qt
-import math
+from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsLineItem, QGraphicsTextItem, QGraphicsItem
+from PyQt6.QtGui import QColor, QPen, QFont, QPainterPath
+from PyQt6.QtCore import Qt, QRectF
 
 
 class AltitudeGraduations(QGraphicsItemGroup):
     def __init__(self, width, height):
         super().__init__()
+        
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
 
         self.height = height
         self.width = width
@@ -91,3 +92,11 @@ class AltitudeGraduations(QGraphicsItemGroup):
             else:
                 smallText.setVisible(False)
                 bigText.setVisible(False)
+                
+    def boundingRect(self):
+        return QRectF(0, 0, self.width, self.height)
+
+    def shape(self):
+        path = QPainterPath()
+        path.addRect(self.boundingRect())
+        return path
