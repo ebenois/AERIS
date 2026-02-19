@@ -1,45 +1,49 @@
-from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsRectItem, QGraphicsLineItem, QGraphicsEllipseItem
+from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsRectItem, QGraphicsLineItem
 from PyQt6.QtGui import QPen, QBrush, QColor
 from PyQt6.QtCore import Qt
-import math
 
 from ui.artificialHorizon.graduations import PitchGraduations
+
 
 class ArtificialHorizonBackground(QGraphicsItemGroup):
     def __init__(self, width, height):
         super().__init__()
+
         self.width = width
-        self.pixelsPerDegree = height/(2*22.5)
-        
-        self.movingItems = QGraphicsItemGroup(self)
-        
-        self.cycleHeight = 360 * self.pixelsPerDegree 
+        self.height = height
+        self.pixelsPerDegree = height / (2*22.5)
+        self.cycleHeight = 360 * self.pixelsPerDegree
+        blockHeight = 180 * self.pixelsPerDegree
 
-        blockH = 180 * self.pixelsPerDegree 
+        self.bg1 = self.CreateBlock(width, blockHeight)
+        self.bg2 = self.CreateBlock(width, blockHeight)
 
-        self.bg1 = QGraphicsItemGroup(self.movingItems)
-        self.bg2 = QGraphicsItemGroup(self.movingItems)
+        self.graduations = PitchGraduations(self, width, height)
 
-        for group in [self.bg1, self.bg2]:
-            sky = QGraphicsRectItem(-width, -blockH, width*2, blockH, group)
-            sky.setBrush(QBrush(QColor("#0080FF")))
-            sky.setPen(QPen(Qt.PenStyle.NoPen))
-            
-            ground = QGraphicsRectItem(-width, 0, width*2, blockH, group)
-            ground.setBrush(QBrush(QColor("#804000")))
-            ground.setPen(QPen(Qt.PenStyle.NoPen))
+    def CreateBlock(self, width, blockHeight):
+        group = QGraphicsItemGroup(self)
 
-            for i in [-1,0,1]:
-                line = QGraphicsLineItem(-width, i*blockH , width*2, i*blockH, group)
-                line.setPen(QPen(QColor("white"), 3))
+        sky = QGraphicsRectItem(-width, -blockHeight, width * 2, blockHeight, group)
+        sky.setBrush(QBrush(QColor("#0080FF")))
+        sky.setPen(QPen(Qt.PenStyle.NoPen))
 
-        self.graduations = PitchGraduations(self.movingItems, width, height)
+        ground = QGraphicsRectItem(-width, 0, width * 2, blockHeight, group)
+        ground.setBrush(QBrush(QColor("#804000")))
+        ground.setPen(QPen(Qt.PenStyle.NoPen))
+
+        pen = QPen(QColor("white"), 5)
+
+        for i in (-1, 0, 1):
+            line = QGraphicsLineItem(-width, i * blockHeight, width * 2, i * blockHeight, group)
+            line.setPen(pen)
+
+        return group
 
     def updatePositions(self, pitch, roll):
-        self.movingItems.setRotation(-roll)
+        self.setRotation(-roll)
 
         y_offset = (pitch * self.pixelsPerDegree) % self.cycleHeight
-        
+
         self.bg1.setPos(0, y_offset)
         self.bg2.setPos(0, y_offset - self.cycleHeight)
 

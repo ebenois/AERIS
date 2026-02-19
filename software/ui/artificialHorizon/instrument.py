@@ -28,9 +28,9 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
 
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
 
-        self.artificialHorizon = ArtificialHorizonBackground(width, height)
-        self.addToGroup(self.artificialHorizon)
-        self.artificialHorizon.setPos(width/2, height/2)
+        self.background = ArtificialHorizonBackground(width, height)
+        self.addToGroup(self.background)
+        self.background.setPos(width/2, height/2)
 
         self.rect = QGraphicsRectItem(
             0, 0,
@@ -181,6 +181,6 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
         roll, pitch = data
         if isinstance(pitch, numbers.Number) and isinstance(roll, numbers.Number):
             self.isInError = False
-            self.artificialHorizon.updatePositions(pitch, roll)
+            self.background.updatePositions(pitch, roll)
         else:
             self.isInError = True
