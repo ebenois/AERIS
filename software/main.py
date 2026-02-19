@@ -1,6 +1,9 @@
 import sys
 import ctypes
-from PyQt6.QtWidgets import QMainWindow, QToolBar, QApplication, QDockWidget, QVBoxLayout, QDialog, QStatusBar
+from PyQt6.QtWidgets import (
+    QMainWindow, QToolBar, QApplication,
+    QDockWidget, QVBoxLayout, QDialog, QStatusBar
+)
 from PyQt6.QtGui import QIcon, QAction
 from PyQt6.QtCore import Qt
 
@@ -15,114 +18,130 @@ try:
 except (AttributeError, OSError):
     pass
 
+
 class MainWindow(QMainWindow):
+    windowTitle = "AERIS"
+    windowIcon = "software/assets/logo.png"
+
     def __init__(self):
         super().__init__()
-        
-        self.setWindowTitle("AERIS")
-        self.setWindowIcon(QIcon("software/assets/logo.png"))
 
+        self.SetupWindow()
+        self.SetupStyle()
+        self.SetupCentralWidget()
+        self.SetupAiDock()
+        self.SetupMenu()
+
+
+
+    def SetupWindow(self):
+        self.setWindowTitle(self.windowTitle)
+        self.setWindowIcon(QIcon(self.windowIcon))
+
+    def SetupStyle(self):
         self.setStyleSheet("""
             QMainWindow { background-color: #000000; }
-            QToolBar { 
-                background-color: #121212; 
-                border-bottom: 1px solid #333333; 
-                spacing: 10px; 
+            QToolBar {
+                background-color: #121212;
+                border-bottom: 1px solid #333333;
+                spacing: 10px;
                 padding: 5px;
             }
             QToolBar QWidget { color: white; }
-            QStatusBar { 
-                background-color: #121212; 
-                border-top: 1px solid #333333; 
-                color: #888888; 
+            QStatusBar {
+                background-color: #121212;
+                border-top: 1px solid #333333;
+                color: #888888;
             }
-            QDockWidget {
-                color: white;
-            }
+            QDockWidget { color: white; }
         """)
 
+    def SetupCentralWidget(self):
         self.pfdPage = PrimaryFlightDisplay()
         self.setCentralWidget(self.pfdPage)
 
-        self.SetupAIDock()
-        self.SetupMenu()
+    def SetupAiDock(self):
+        self.aiDock = QDockWidget("Assistant IA", self)
+        self.aiDock.setAllowedAreas(Qt.DockWidgetArea.AllDockWidgetAreas)
 
-    def SetupAIDock(self):
-        self.aiPage = QDockWidget("Assistant IA", self)
-        self.aiPage.setAllowedAreas(Qt.DockWidgetArea.RightDockWidgetArea | Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.TopDockWidgetArea | Qt.DockWidgetArea.BottomDockWidgetArea)
-        
         self.aiWidget = AIWidget()
-        self.aiWidget.setStyleSheet("background-color: #1E1E1E; color: white; border-left: 1px solid #333333;")
-        
-        self.aiPage.setWidget(self.aiWidget)
-        self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.aiPage)
-        self.aiPage.hide()
+        self.aiWidget.setStyleSheet(
+            "background-color: #1E1E1E; color: white; border-left: 1px solid #333333;"
+        )
+
+        self.aiDock.setWidget(self.aiWidget)
+        self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.aiDock)
+        self.aiDock.hide()
 
     def SetupMenu(self):
-        toolbar = QToolBar("My main toolbar")
+        toolbar = QToolBar("Main toolbar")
         self.addToolBar(toolbar)
         toolbar.hide()
 
-        self.aiAction = QAction("Assistant IA", self)
-        self.aiAction.setCheckable(True)
-        self.aiAction.triggered.connect(self.ToggleAI)
-        toolbar.addAction(self.aiAction)
-
-        toolbar.addSeparator()
+        self.aiAction = QAction("Assistant IA", self, checkable=True)
+        self.aiAction.triggered.connect(self.ToggleAi)
 
         self.artificialHorizonAction = QAction("Horizon artificiel", self)
-        self.artificialHorizonAction.triggered.connect(self.ShowArtificialHorizonSettingsPage)
-        toolbar.addAction(self.artificialHorizonAction)
-
-        toolbar.addSeparator()
+        self.artificialHorizonAction.triggered.connect(
+            lambda: self.OpenSettingsDialog(
+                "Configuration de l'horizon artificiel",
+                ArtificialHorizonSettingsPage,
+                self.pfdPage.artificialHorizon
+            )
+        )
 
         self.altimeterAction = QAction("Altimètre", self)
-        self.altimeterAction.triggered.connect(self.ShowAltimeterSettingsPage)
-        toolbar.addAction(self.altimeterAction)
+        self.altimeterAction.triggered.connect(
+            lambda: self.OpenSettingsDialog(
+                "Configuration de l'altimètre",
+                AltimeterSettingsPage,
+                self.pfdPage.altimeter
+            )
+        )
+
+        toolbar.addActions([
+            self.aiAction,
+            self.artificialHorizonAction,
+            self.altimeterAction
+        ])
 
         self.setStatusBar(QStatusBar(self))
 
         menu = self.menuBar()
         menu.addAction(self.aiAction)
-        menu.addSeparator()
+
         settingsMenu = menu.addMenu("Paramètres")
-        settingsMenu.addAction(self.artificialHorizonAction)
-        settingsMenu.addAction(self.altimeterAction)
+        settingsMenu.addActions([
+            self.artificialHorizonAction,
+            self.altimeterAction
+        ])
 
-    def ToggleAI(self):
-        isVisible = self.aiPage.isVisible()
-        self.aiPage.setVisible(not isVisible)
-        self.aiAction.setChecked(not isVisible)
+    
 
-    def ShowAltimeterSettingsPage(self):
+    def ToggleAi(self, checked: bool):
+        self.aiDock.setVisible(checked)
+
+    def OpenSettingsDialog(self, title, pageClass, target):
         dialog = QDialog(self)
-        dialog.setWindowTitle("Configuration de l'altimètre")
+        dialog.setWindowTitle(title)
         dialog.setMinimumWidth(400)
-        
-        layout = QVBoxLayout(dialog)
 
-        settingsPage = AltimeterSettingsPage(self.pfdPage.altimeter)
-        layout.addWidget(settingsPage)
-        
+        layout = QVBoxLayout(dialog)
+        layout.addWidget(pageClass(target))
+
         dialog.exec()
 
-    def ShowArtificialHorizonSettingsPage(self):
-        dialog = QDialog(self)
-        dialog.setWindowTitle("Configuration de l'horizon artificiel")
-        dialog.setMinimumWidth(400)
-        
-        layout = QVBoxLayout(dialog)
 
-        settingsPage = ArtificialHorizonSettingsPage(self.pfdPage.artificialHorizon)
-        layout.addWidget(settingsPage)
-        
-        dialog.exec()
 
-app = QApplication(sys.argv)
-    
-app.setStyle("Fusion") 
-    
-window = MainWindow()
-window.showMaximized()
+def main():
+    app = QApplication(sys.argv)
+    app.setStyle("Fusion")
 
-app.exec()
+    window = MainWindow()
+    window.showMaximized()
+
+    sys.exit(app.exec())
+
+
+if __name__ == "__main__":
+    main()
