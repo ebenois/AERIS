@@ -42,56 +42,56 @@ class AltitudeGraduations(QGraphicsItemGroup):
             })
 
     def updatePositions(self, altitude):
-        baseAltitude = round(altitude / self.step) * self.step
-        startOffset = -(self.nbGraduations // 2)
+        halfHeight = self.height * 0.5
+        scale = halfHeight / self.span
+        baseAlt = round(altitude / self.step) * self.step
+        start = -(self.nbGraduations // 2)
 
-        for i in range(self.nbGraduations):
-            gradAltitude = baseAltitude + (startOffset + i) * self.step
-            relAltitude = gradAltitude - altitude
-            
-            item = self.graduationsPool[i]
-            line = item["line"]
-            bigText = item["bigText"]
-            smallText = item["smallText"]
+        for i, item in enumerate(self.graduationsPool):
+            gradAlt = baseAlt + (start + i) * self.step
+            relAlt = gradAlt - altitude
 
-            if abs(relAltitude) > self.span:
-                line.setVisible(False)
-                bigText.setVisible(False)
-                smallText.setVisible(False)
+            if abs(relAlt) > self.span:
+                item["line"].setVisible(False)
+                item["bigText"].setVisible(False)
+                item["smallText"].setVisible(False)
                 continue
-            
-            line.setVisible(True)
 
-            y = self.height/2 - relAltitude * (self.height/2)/self.span
+            y = halfHeight - relAlt * scale
+            item["line"].setVisible(True)
+            item["line"].setPos(0, y)
 
-            line.setPos(0, y)
+            if gradAlt % 200 == 0:
+                absAlt = abs(gradAlt)
+                thousands = absAlt // 1000
+                remainder = absAlt % 1000
 
-            if gradAltitude % 200 == 0:
-                abs_alt = abs(gradAltitude)
-                thousands = abs_alt // 1000
-                remainder = abs_alt % 1000
+                prefix = "-" if gradAlt < 0 else ""
+                bigStr = f"{prefix}{thousands:02d}"
+                smallStr = f"{remainder:03d}"
 
-                if gradAltitude < 0:
-                    str_thousands = f"-{thousands:02d}" 
-                else:
-                    str_thousands = f"{thousands:02d}"
+                big = item["bigText"]
+                small = item["smallText"]
 
-                smallText.setPlainText(f"{remainder:03d}")
-                smallText.setPos(
-                    self.width - smallText.boundingRect().width(),
-                    y - smallText.boundingRect().height() / 2 + 2
-                )
-                smallText.setVisible(True)
+                if big.toPlainText() != bigStr:
+                    big.setPlainText(bigStr)
+                if small.toPlainText() != smallStr:
+                    small.setPlainText(smallStr)
 
-                bigText.setPlainText(str_thousands)
-                bigText.setPos(
-                    self.width - smallText.boundingRect().width() - bigText.boundingRect().width() * 7/8,
-                    y - bigText.boundingRect().height() / 2
-                )
-                bigText.setVisible(True)
+                smallRect = small.boundingRect()
+                bigRect = big.boundingRect()
+
+                small.setPos(self.width - smallRect.width(),
+                            y - smallRect.height() * 0.5)
+
+                big.setPos(self.width - smallRect.width() - bigRect.width() * 0.875,
+                        y - bigRect.height() * 0.5)
+
+                big.setVisible(True)
+                small.setVisible(True)
             else:
-                smallText.setVisible(False)
-                bigText.setVisible(False)
+                item["bigText"].setVisible(False)
+                item["smallText"].setVisible(False)
                 
     def boundingRect(self):
         return QRectF(0, 0, self.width, self.height)

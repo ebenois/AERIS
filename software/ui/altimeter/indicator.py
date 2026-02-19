@@ -1,5 +1,5 @@
-from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsLineItem, QGraphicsTextItem, QGraphicsRectItem, QGraphicsItem, QGraphicsPolygonItem
-from PyQt6.QtGui import QColor, QPen, QFont, QBrush, QPainterPath, QPolygonF
+from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsTextItem, QGraphicsItem, QGraphicsPolygonItem
+from PyQt6.QtGui import QPen, QFont, QBrush, QPainterPath, QPolygonF
 from PyQt6.QtCore import Qt, QRectF, QPointF
 import numbers
 
@@ -54,43 +54,61 @@ class AltitudeIndicator(QGraphicsItemGroup):
             })
 
     def updatePositions(self, altitude):
-        mainDigit = self.digits[0]
-        bigText = mainDigit["bigText"]
-        if isinstance(altitude, numbers.Number):
-            step = self.metersPerGraduation * 2
-            baseAltitude = (altitude // step) * step
+        if not isinstance(altitude, numbers.Number):
+            main = self.digits[2]["bigText"]
+            main.setPlainText(str(altitude))
+            main.setVisible(True)
+            return
 
-            smallText = mainDigit["smallText"]
+        step = self.metersPerGraduation * 2
+        baseAlt = (altitude // step) * step
+        centerY = self.height * 0.5
 
-            for num in self.digits:
-                altitudeValue = baseAltitude + num["index"] * self.metersPerGraduation
-                y_local = (altitude - altitudeValue) * self.pxPerMeter
-                if altitude<0:
-                    y_local=y_local*-1
+        thousands = abs(altitude) // 1000
+        hundreds = (abs(altitude) % 1000) // 100
 
-                variableText = num["variableText"]
-                tensDigit = (altitudeValue % 100) // 10 * 10
-                variableText.setPlainText(f"{tensDigit:02d}")
-                variableText.setPos(self.width*17/16-variableText.boundingRect().width()/2, self.height/2+y_local - variableText.boundingRect().height() / 2)
-                variableText.setVisible(True)
+        for digit in self.digits:
+            altVal = baseAlt + digit["index"] * self.metersPerGraduation
+            yOffset = (altitude - altVal) * self.pxPerMeter
 
-            hundredsDigit = (altitude % 1000) // 100
-            smallText.setPlainText(str(hundredsDigit))
-            smallText.setPos(self.width*19/16-variableText.boundingRect().width()-smallText.boundingRect().width()/2, self.height/2-smallText.boundingRect().height() / 2)
-            smallText.setVisible(True)
+            tens = (abs(altVal) % 100) // 10 * 10
+            text = f"{tens:02d}"
 
-            thousandsDigit = abs(altitude)//1000
-            if altitude>=0:
-                bigText.setPlainText(f"{thousandsDigit:02d}")
-                bigText.setPos(self.width*19/17-bigText.boundingRect().width()/2-variableText.boundingRect().width()-smallText.boundingRect().width(), self.height/2-bigText.boundingRect().height() / 2)
-            else:
-                bigText.setPlainText(f"-{thousandsDigit:02d}")
-                bigText.setPos(self.width*19/18-bigText.boundingRect().width()/2-variableText.boundingRect().width()-smallText.boundingRect().width(), self.height/2-bigText.boundingRect().height() / 2)
-            bigText.setVisible(True)
-        else:
-            bigText.setPlainText(altitude)
-            bigText.setPos(self.width*19/17-bigText.boundingRect().width(), self.height/2-bigText.boundingRect().height() / 2)
-            bigText.setVisible(True)
+            var = digit["variableText"]
+            if var.toPlainText() != text:
+                var.setPlainText(text)
+
+            rect = var.boundingRect()
+            var.setPos(self.width * 1.0625 - rect.width() * 0.5,
+                    centerY + yOffset - rect.height() * 0.5)
+            var.setVisible(True)
+
+        main = self.digits[2]
+        big = main["bigText"]
+        small = main["smallText"]
+
+        bigStr = f"-{thousands:02d}" if altitude < 0 else f"{thousands:02d}"
+        smallStr = str(hundreds)
+
+        if big.toPlainText() != bigStr:
+            big.setPlainText(bigStr)
+        if small.toPlainText() != smallStr:
+            small.setPlainText(smallStr)
+
+        bigRect = big.boundingRect()
+        smallRect = small.boundingRect()
+
+        centerY = self.height / 2
+
+        xVar = self.width * 16 / 17
+        xSmall = xVar - smallRect.width()
+        xBig = xSmall - bigRect.width()
+
+        big.setPos(xBig, centerY - bigRect.height() / 2)
+        small.setPos(xSmall, centerY - smallRect.height() / 2)
+
+        big.setVisible(True)
+        small.setVisible(True)
 
     def boundingRect(self):
         return QRectF(0, self.height/2-self.height/15, self.width*2, self.height*2/15)

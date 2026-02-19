@@ -6,9 +6,11 @@ class AltitudeLimit(QGraphicsItemGroup):
     def __init__(self, width, height):
         super().__init__()
 
-        self.width = width
-        self.height = height
+        self.limit = 39000
         self.span = 500
+        self.height = height
+        self.pixelPerUnit = (self.height / 2) / self.span
+        self.width = width
         
         self.timer = QElapsedTimer()
         self.timer.start()
@@ -19,15 +21,11 @@ class AltitudeLimit(QGraphicsItemGroup):
         self.addToGroup(self.rect)
 
     def updatePositions(self, altitude):
-        limit = 39000 
-        pixel_per_unit = (self.height / 2) / self.span
-        height_in_pixels = (limit-altitude) * pixel_per_unit
-
-        safe_height = max(-self.height/2, min(self.height/2, height_in_pixels))
-        
+        height_px = (self.limit - altitude) * self.pixelPerUnit
+        safe = max(-self.height/2, min(self.height/2, height_px))
         self.rect.setRect(
-            -self.width *2/ 17, 
+            -self.width * 2/17,
             0,
-            self.width *2/ 17, 
-            self.height/2-safe_height
+            self.width * 2/17,
+            self.height/2 - safe
         )

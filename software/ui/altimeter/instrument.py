@@ -11,6 +11,7 @@ from ui.altimeter.limit import AltitudeLimit
 class AltimeterInstrument(QGraphicsItemGroup):
     def __init__(self, width , height):
         super().__init__()
+        
         self.width = width
         self.heigth = height
 
@@ -40,23 +41,25 @@ class AltimeterInstrument(QGraphicsItemGroup):
 
         self.isInError = False 
 
-    def drawAlert(self, showRed):
+    def DrawAlert(self, showRed):
         if showRed and self.isInError:
             self.rect.setPen(QPen(QColor("red"), 10))
         else:
             self.rect.setPen(QPen(Qt.PenStyle.NoPen))
 
     def updatePositions(self, data):
+        roll,pitch = data
+        altitude = 38000
         speed = 280
-        roll, pitch = data
-        altitude = ""
+
         if isinstance(altitude, numbers.Number):
             self.isInError = False
             self.graduations.updatePositions(altitude)
             self.indicator.updatePositions(altitude)
             self.limit.updatePositions(altitude)
+
             if isinstance(speed, numbers.Number) and isinstance(pitch, numbers.Number):
-                self.trend.updatePositions(speed,pitch)
+                self.trend.updatePositions(speed, pitch)
         else:
             self.isInError = True
             self.indicator.updatePositions("Error")
