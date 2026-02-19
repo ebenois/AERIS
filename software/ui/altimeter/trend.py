@@ -24,4 +24,4 @@ class AltitudeTrend(QGraphicsItemGroup):
         verticalSpeed =  speed * math.sin(math.radians(pitch)) * knotToFeet * 3 * (self.height/2)/self.span
         nextPosition = max(-self.height, min(self.height,verticalSpeed))
         self.rect.setRect(0, self.height/2 ,
-            self.width/17, -nextPosition)
+            self.width*2/17, -nextPosition)

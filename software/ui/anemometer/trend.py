@@ -38,9 +38,9 @@ class SpeedTrend(QGraphicsItemGroup):
         safe_height = max(-self.height/2, min(self.height/2, height_in_pixels))
         
         self.rect.setRect(
-            self.width * 16 / 17, 
+            self.width * 15 / 17, 
             self.height / 2,
-            self.width / 17, 
+            self.width * 2/ 17, 
             -safe_height
         )
         self.previousSpeed = speed
