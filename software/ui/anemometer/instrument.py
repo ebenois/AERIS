@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsRectItem, QGraphicsItem, QGraphicsLineItem
-from PyQt6.QtGui import QBrush, QColor, QPen, QPainterPath
-from PyQt6.QtCore import Qt, QRectF
+from PyQt6.QtGui import QBrush, QColor, QPen
+from PyQt6.QtCore import Qt
 import numbers
 
 from ui.anemometer.graduations import SpeedGraduations
@@ -15,8 +15,6 @@ class AnemometerInstrument(QGraphicsItemGroup):
 
         self.height = height
         self.width = width
-
-        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
 
         self.rect = QGraphicsRectItem(
             0, 0,
@@ -62,11 +60,3 @@ class AnemometerInstrument(QGraphicsItemGroup):
         else:
             self.isInError = True
             self.indicator.updatePositions("Err")
-        
-    def boundingRect(self):
-        return QRectF(0, 0, self.width*3/2, self.height)
-
-    def shape(self):
-        path = QPainterPath()
-        path.addRect(self.boundingRect())
-        return path

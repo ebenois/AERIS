@@ -98,8 +98,6 @@ class AltitudeIndicator(QGraphicsItemGroup):
         bigRect = big.boundingRect()
         smallRect = small.boundingRect()
 
-        centerY = self.height / 2
-
         xVar = self.width * 16 / 17
         xSmall = xVar - smallRect.width()
         xBig = xSmall - bigRect.width()

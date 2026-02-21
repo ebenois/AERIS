@@ -10,7 +10,7 @@ class SpeedIndicator(QGraphicsItemGroup):
         self.height = height
 
         self.knotsPerGraduation = 1
-        self.pixelsPerGraduation = height/20
+        self.pixelsPerGraduation = 40
         self.pxPerKnot = self.pixelsPerGraduation / self.knotsPerGraduation
 
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
@@ -48,37 +48,53 @@ class SpeedIndicator(QGraphicsItemGroup):
             })
 
     def updatePositions(self, speed):
-        mainDigit = self.digits[0]
-        smallText = mainDigit["smallText"]
-        if isinstance(speed, numbers.Number):
-            step = self.knotsPerGraduation * 2
-            baseSpeed = (speed // step) * step
-
-            tensDigit = speed // 10
-            if speed<0:
-                smallText.setPlainText(f"-{abs(tensDigit):02d}")
-                smallText.setPos(self.width/30, self.height/2-smallText.boundingRect().height() / 2)
-            else:
-                smallText.setPlainText(f"{tensDigit:02d}")
-                smallText.setPos(self.width/20, self.height/2-smallText.boundingRect().height() / 2)
-            smallText.setVisible(True)
+        if not isinstance(speed, numbers.Number):
+            main = self.digits["smallText"]
+            main.setPlainText(str(speed))
+            rect = main.boundingRect()
+            main.setPos(self.width/20, self.height/2-rect.height() / 2)
+            main.setVisible(True)
+            return
         
-            for num in self.digits:
-                speedValue = baseSpeed + num["index"] * self.knotsPerGraduation
-                y_local = (speed - speedValue) * self.pxPerKnot
+        step = self.knotsPerGraduation * 2
+        baseSpeed = (speed // step) * step
+        centerY = self.height * 0.5
+        
+        tens = speed // 10
 
-                if (speed < 0):
-                    y_local = -y_local
+        for digit in self.digits:
+            altVal = baseSpeed + digit["index"] * self.knotsPerGraduation
+            yOffset = (speed - altVal) * self.pxPerKnot
 
-                variableText = num["variableText"]
-                unitsDigit = (speedValue % 10)
-                variableText.setPlainText(str(unitsDigit))
-                variableText.setPos(smallText.boundingRect().width(), self.height/2 + y_local - variableText.boundingRect().height() / 2)
-                variableText.setVisible(True)
-        else:
-            smallText.setPlainText(speed)
-            smallText.setPos(self.width/20, self.height/2-smallText.boundingRect().height() / 2)
-            smallText.setVisible(True)
+            units = abs(altVal) % 10
+            text = f"{units}"
+
+            var = digit["variableText"]
+            if var.toPlainText() != text:
+                var.setPlainText(text)
+
+            main = digit["smallText"]
+
+            smallRect = main.boundingRect()
+            rect = var.boundingRect()
+
+            var.setPos(
+                smallRect.width(),
+                centerY + yOffset - rect.height() / 2
+            )
+            var.setVisible(True)
+
+            smallStr = f"{tens}"
+            if main.toPlainText() != smallStr:
+                main.setPlainText(smallStr)
+
+            xVar = self.width / 20
+            main.setPos(
+                xVar,
+                centerY - smallRect.height() / 2
+            )
+
+            main.setVisible(True)
 
     def boundingRect(self):
         return QRectF(0, self.height/2-self.height/15, self.width, self.height*2/15)

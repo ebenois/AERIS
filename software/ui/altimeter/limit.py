@@ -21,8 +21,8 @@ class AltitudeLimit(QGraphicsItemGroup):
         self.addToGroup(self.rect)
 
     def updatePositions(self, altitude):
-        height_px = (self.limit - altitude) * self.pixelPerUnit
-        safe = max(-self.height/2, min(self.height/2, height_px))
+        heightPx = (self.limit - altitude) * self.pixelPerUnit
+        safe = max(-self.height/2, min(self.height/2, heightPx))
         self.rect.setRect(
             -self.width * 2/17,
             0,

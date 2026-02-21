@@ -1,12 +1,13 @@
-from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsLineItem, QGraphicsTextItem
-from PyQt6.QtGui import QColor, QPen, QFont
-from PyQt6.QtCore import Qt
-import math
+from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsItem, QGraphicsLineItem, QGraphicsTextItem
+from PyQt6.QtGui import QColor, QPen, QFont, QPainterPath
+from PyQt6.QtCore import Qt, QRectF
 
 
 class SpeedGraduations(QGraphicsItemGroup):
     def __init__(self, width, height):
         super().__init__()
+        
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
 
         self.width = width
         self.height = height
@@ -18,6 +19,7 @@ class SpeedGraduations(QGraphicsItemGroup):
 
         pen = QPen(QColor("#FFFFFF"), 4)
         pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+        
         self.font = QFont("Arial", int(height/21))
 
         for _ in range(self.nbGraduations):
@@ -34,34 +36,40 @@ class SpeedGraduations(QGraphicsItemGroup):
             })
 
     def updatePositions(self, speed):
+        halfHeight = self.height * 0.5
+        scale = halfHeight / self.span
         baseSpeed = round(speed / self.step) * self.step
         startOffset = -(self.nbGraduations // 2)
 
-        for i in range(self.nbGraduations):
+        for i, item in enumerate(self.graduationsPool):
             gradSpeed = baseSpeed + (startOffset + i) * self.step
             relSpeed = gradSpeed - speed
             
-            item = self.graduationsPool[i]
-            line = item["line"]
-            text = item["text"]
-
             if abs(relSpeed) > self.span:
-                line.setVisible(False)
-                text.setVisible(False)
+                item["line"].setVisible(False)
+                item["text"].setVisible(False)
                 continue
             
-            line.setVisible(True)
-
-            y = self.height/2 - relSpeed * self.height/120
-
-            line.setPos(0, y)
-
+            y = halfHeight - relSpeed * scale
+            item["line"].setVisible(True)
+            item["line"].setPos(0, y)
+            
+            text = item["text"]
             if gradSpeed % 20 == 0:
                 text.setPlainText(str(gradSpeed))
+                rect = text.boundingRect()
                 text.setPos(
                     self.width / 3 - 45,
-                    y - text.boundingRect().height() / 2
+                    y -  rect.height() / 2
                 )
                 text.setVisible(True)
             else:
                 text.setVisible(False)
+                
+    def boundingRect(self):
+        return QRectF(0, 0, self.width, self.height)
+
+    def shape(self):
+        path = QPainterPath()
+        path.addRect(self.boundingRect())
+        return path
