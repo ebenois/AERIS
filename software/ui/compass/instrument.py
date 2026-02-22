@@ -1,53 +1,69 @@
-from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsEllipseItem, QGraphicsPolygonItem
+from PyQt6.QtWidgets import (
+    QGraphicsItemGroup,
+    QGraphicsEllipseItem,
+    QGraphicsPolygonItem,
+)
 from PyQt6.QtGui import QBrush, QColor, QPen, QPolygonF
 from PyQt6.QtCore import Qt, QPointF
-import numbers
 
 from ui.compass.graduations import DirectionGraduations
 
+
 class CompassInstrument(QGraphicsItemGroup):
-    def __init__(self, width, heigth):
+    def __init__(self, width, height):
         super().__init__()
 
-        self.dot = QGraphicsEllipseItem(0, 0, width, heigth)
-        self.dot.setBrush(QBrush(QColor("#808080")))
-        self.dot.setPen(QPen(Qt.PenStyle.NoPen))
+        self.width = width
+        self.height = height
+
+        centerX = width / 2
+        centerY = height / 2
+
+        self.noPen = QPen(Qt.PenStyle.NoPen)
+        self.alertPen = QPen(QColor("red"), 15)
+        self.bgBrush = QBrush(QColor("#808080"))
+        self.indicatorBrush = QBrush(Qt.GlobalColor.black)
+        self.indicatorPen = QPen(Qt.GlobalColor.white, 3)
+
+        self.dot = QGraphicsEllipseItem(0, 0, width, height)
+        self.dot.setBrush(self.bgBrush)
+        self.dot.setPen(self.noPen)
         self.addToGroup(self.dot)
 
-        self.noDataEffect = QPen(Qt.PenStyle.NoPen)
-        self.dot.setPen(self.noDataEffect)
-
         self.graduations = DirectionGraduations(width)
+        self.graduations.setPos(centerX, centerY)
         self.addToGroup(self.graduations)
-        self.graduations.setPos(width/2, heigth/2)
-
-        indicator = QGraphicsPolygonItem()
-        self.addToGroup(indicator)
 
         polygonWidth = 55
-        polygonHeigth = 45
+        polygonHeight = 45
 
         polygon = QPolygonF([
-            QPointF(width/2, 0),
-            QPointF(width/2+polygonWidth/2, -(polygonHeigth)),
-            QPointF(width/2-polygonWidth/2, -(polygonHeigth)),
+            QPointF(centerX, 0),
+            QPointF(centerX + polygonWidth / 2, -polygonHeight),
+            QPointF(centerX - polygonWidth / 2, -polygonHeight),
         ])
 
-        indicator.setPolygon(polygon)
-        indicator.setBrush(QBrush(Qt.GlobalColor.black))
-        indicator.setPen(QPen(Qt.GlobalColor.white, 3))
-        self.isInError = False 
+        self.indicator = QGraphicsPolygonItem(polygon)
+        self.indicator.setBrush(self.indicatorBrush)
+        self.indicator.setPen(self.indicatorPen)
+        self.addToGroup(self.indicator)
+
+        self.isInError = False
+
+    
 
     def drawAlert(self, showRed):
         if showRed and self.isInError:
-            self.dot.setPen(QPen(QColor("red"), 15))
+            self.dot.setPen(self.alertPen)
         else:
-            self.dot.setPen(QPen(Qt.PenStyle.NoPen))
+            self.dot.setPen(self.noPen)
+
+
 
     def updatePositions(self, data):
-        cap = 180
-        if isinstance(cap, numbers.Number):
+        heading = 250
+        if isinstance(heading, (int, float)):
             self.isInError = False
-            self.graduations.updatePositions(cap)
+            self.graduations.updatePositions(heading)
         else:
             self.isInError = True
