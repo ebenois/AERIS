@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsLineItem, QGraphicsTextItem
 from PyQt6.QtGui import QColor, QPen, QFont
-from PyQt6.QtCore import Qt, QRectF
+from PyQt6.QtCore import Qt
 
 
 class PitchGraduations(QGraphicsItemGroup):
@@ -17,11 +17,9 @@ class PitchGraduations(QGraphicsItemGroup):
         self.nbGraduations = int((self.span * 2) / self.step)
         self.graduationsPool = []
 
-        self.lineLengths = {
-            10: width / 6,
-            5: width / 10,
-            "minor": width / 16
-        }
+        self.lenMajor = width / 6
+        self.lenMedium = width / 10
+        self.lenMinor = width / 16
 
         pen = QPen(QColor("#FFFFFF"), 3)
         pen.setCapStyle(Qt.PenCapStyle.RoundCap)
@@ -40,74 +38,75 @@ class PitchGraduations(QGraphicsItemGroup):
             rightText.setDefaultTextColor(Qt.GlobalColor.white)
             rightText.setFont(self.font)
 
-            self.graduationsPool.append(
-                (line, leftText, rightText)
-            )
+            self.graduationsPool.append((line, leftText, rightText))
 
     def updatePositions(self, pitchDeg):
         pitchDeg = ((pitchDeg + 180) % 360) - 180
-        
+
         if pitchDeg > 90:
             displayPitch = 180 - pitchDeg
-            isInverted = True
+            self.setRotation(180)
         elif pitchDeg < -90:
             displayPitch = -180 - pitchDeg
-            isInverted = True
+            self.setRotation(180)
         else:
             displayPitch = pitchDeg
-            isInverted = False
+            self.setRotation(0)
 
-        self.setRotation(180 if isInverted else 0)
+        basePitch = round(displayPitch / self.step)
+        centerIndex = self.nbGraduations // 2
 
-        basePitch = round(displayPitch / self.step) * self.step
-        startOffset = -(self.nbGraduations // 2)
+        pixelsPerDegree = self.pixelsPerDegree
+        halfHeight = self.height / 2
+        step = self.step
 
         for i, (line, leftText, rightText) in enumerate(self.graduationsPool):
-            gradPitch = basePitch + (startOffset + i) * self.step
+            stepIndex = basePitch + (i - centerIndex)
+            gradPitch = stepIndex * step
 
-            if gradPitch < -90 or gradPitch > 90:
+            if not -90 <= gradPitch <= 90:
                 line.setVisible(False)
                 continue
 
             relPitch = gradPitch - displayPitch
-            
-            yPos = -(relPitch * self.pixelsPerDegree)
+            yPos = -(relPitch * pixelsPerDegree)
 
-            line.setPos(0, yPos)
-
-            if abs(yPos) > self.height / 2:
+            if abs(yPos) > halfHeight:
                 line.setVisible(False)
                 continue
 
             line.setVisible(True)
+            line.setPos(0, yPos)
 
-            absPitch = abs(gradPitch)
-            
-            mod10 = absPitch % 10
-            mod5 = absPitch % 5
+            absStepIndex = abs(stepIndex)
 
-            if mod10 == 0:
-                halfLen = self.lineLengths[10]
-            elif mod5 == 0:
-                halfLen = self.lineLengths[5]
+            if absStepIndex % 4 == 0:  # 10°
+                halfLen = self.lenMajor
+                isMajor = True
+            elif absStepIndex % 2 == 0:  # 5°
+                halfLen = self.lenMedium
+                isMajor = False
             else:
-                halfLen = self.lineLengths["minor"]
+                halfLen = self.lenMinor
+                isMajor = False
 
             line.setLine(-halfLen, 0, halfLen, 0)
 
-            if mod10 == 0 and absPitch != 0:
-                textStr = f"{int(absPitch):02d}"
+            if isMajor and stepIndex != 0:
+                textStr = f"{int(abs(gradPitch)):02d}"
                 leftText.setPlainText(textStr)
                 rightText.setPlainText(textStr)
 
                 leftText.setVisible(True)
                 rightText.setVisible(True)
 
-                textW = leftText.boundingRect().width()
-                textH = leftText.boundingRect().height()
+                rect = leftText.boundingRect()
+                textW = rect.width()
+                textH = rect.height()
 
-                leftText.setPos(-halfLen - textW - 4, -textH / 2)
-                rightText.setPos(halfLen + 4, -textH / 2)
+                yText = -textH / 2
+                leftText.setPos(-halfLen - textW - 4, yText)
+                rightText.setPos(halfLen + 4, yText)
             else:
                 leftText.setVisible(False)
                 rightText.setVisible(False)
