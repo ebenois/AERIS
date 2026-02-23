@@ -1,5 +1,5 @@
-from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsLineItem, QGraphicsTextItem
-from PyQt6.QtGui import QColor, QPen, QFont
+from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsLineItem
+from PyQt6.QtGui import QColor, QPen
 from PyQt6.QtCore import Qt
 import math
 
@@ -26,17 +26,14 @@ class SlipGraduations(QGraphicsItemGroup):
 
             self.graduationsPool.append(line)
 
-        base = 0
         offset = -(self.nbGraduations // 2)
 
         for i, line in enumerate(self.graduationsPool):
-            grad = base + (offset + i) * self.step
-            rel = grad - base
+            grad = (offset + i) * self.step
 
-            if abs(rel) == 0:
+            if abs(grad) == 0:
                 line.setVisible(False)
                 continue
-            
 
             if grad % 30 == 0:
                 line.setLine(
@@ -53,5 +50,5 @@ class SlipGraduations(QGraphicsItemGroup):
                     -self.radius + self.width*3/4
                 )
 
-            line.setRotation(rel*math.tanh(width/(2*self.radius)))
+            line.setRotation(grad*math.tanh(width/(2*self.radius)))
             self.setPos(width/2,height)

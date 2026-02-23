@@ -1,5 +1,5 @@
-from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsEllipseItem, QGraphicsPolygonItem
-from PyQt6.QtGui import QBrush, QColor, QPen, QPolygonF
+from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsPolygonItem
+from PyQt6.QtGui import QBrush, QPen, QPolygonF
 from PyQt6.QtCore import Qt, QPointF
 import numbers
 

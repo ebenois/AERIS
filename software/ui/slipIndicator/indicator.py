@@ -1,6 +1,6 @@
-from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsLineItem, QGraphicsTextItem, QGraphicsRectItem, QGraphicsItem, QGraphicsPolygonItem
-from PyQt6.QtGui import QColor, QPen, QFont, QBrush, QPainterPath, QPolygonF
-from PyQt6.QtCore import Qt, QRectF, QPointF
+from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsPolygonItem
+from PyQt6.QtGui import QPen, QBrush, QPolygonF
+from PyQt6.QtCore import Qt, QPointF
 import math
 
 class SlipIndicator(QGraphicsItemGroup):
@@ -8,6 +8,7 @@ class SlipIndicator(QGraphicsItemGroup):
         super().__init__()
         self.width = width
         self.radius = height
+        
         polygonWidth = 30
         polygonHeight = 15
 
