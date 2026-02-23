@@ -1,20 +1,25 @@
-from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsLineItem, QGraphicsTextItem
-from PyQt6.QtGui import QColor, QPen, QFont
-from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsItem, QGraphicsLineItem, QGraphicsTextItem
+from PyQt6.QtGui import QColor, QPen, QFont, QPainterPath
+from PyQt6.QtCore import Qt, QRectF
 import math
 
 class RiseGraduations(QGraphicsItemGroup):
     def __init__(self, width, height):
-        super().__init__() #parent
+        super().__init__()
+        
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
 
         self.width = width
+        self.height = height
         self.step = 0.5
         self.span = 6
 
         self.nbGraduations = int(self.span * 2 / self.step) + 1
         self.graduations = []
 
-        pen = QPen(QColor("#FFFFFF"), int(height/150), cap=Qt.PenCapStyle.RoundCap)
+        pen = QPen(QColor("#FFFFFF"), int(height/150))
+        pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+        
         font = QFont("Arial", int(height/20))
 
         for _ in range(self.nbGraduations):
@@ -27,24 +32,22 @@ class RiseGraduations(QGraphicsItemGroup):
 
             self.graduations.append((line, text))
 
-        base = 0
         offset = -(self.nbGraduations // 2)
 
         for i, (line, text) in enumerate(self.graduations):
-            grad = base + (offset + i) * self.step
-            rel = grad - base
+            grad = (offset + i) * self.step
 
-            if abs(rel) > self.span:
+            if abs(grad) > self.span:
                 line.hide()
                 text.hide()
                 continue
 
             pxPerUnit = height/(2 * math.log10(7)) * (14/15)
 
-            if rel < 0:
-                y = math.log10(abs(rel) + 1) * pxPerUnit
-            elif rel > 0:
-                y = -math.log10(abs(rel) + 1) * pxPerUnit
+            if grad < 0:
+                y = math.log10(abs(grad) + 1) * pxPerUnit
+            elif grad > 0:
+                y = -math.log10(abs(grad) + 1) * pxPerUnit
             else:
                 y = 0
 
@@ -60,3 +63,11 @@ class RiseGraduations(QGraphicsItemGroup):
                 text.show()
             else:
                 text.hide()
+
+    def boundingRect(self):
+        return QRectF(0, 0, self.width, self.height)
+
+    def shape(self):
+        path = QPainterPath()
+        path.addRect(self.boundingRect())
+        return path

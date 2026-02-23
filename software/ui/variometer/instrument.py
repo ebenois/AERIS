@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsRectItem, QGraphicsItem, QGraphicsLineItem
-from PyQt6.QtGui import QBrush, QColor, QPen, QPainterPath
-from PyQt6.QtCore import Qt, QRectF
+from PyQt6.QtGui import QBrush, QColor, QPen
+from PyQt6.QtCore import Qt
 import numbers
 
 from ui.variometer.graduations import RiseGraduations
@@ -9,10 +9,9 @@ from ui.variometer.indicator import RiseIndicator
 class VariometerInstrument(QGraphicsItemGroup):
     def __init__(self, width, height):
         super().__init__()
+        
         self.width = width
         self.height = height
-
-        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
 
         self.rect = QGraphicsRectItem(
             0, 0,
@@ -28,7 +27,6 @@ class VariometerInstrument(QGraphicsItemGroup):
 
         self.graduations = RiseGraduations(width, height)
         self.addToGroup(self.graduations)
-        self.graduations.hide()
 
         self.indicator = RiseIndicator(width, height)
         self.addToGroup(self.indicator)
@@ -36,24 +34,19 @@ class VariometerInstrument(QGraphicsItemGroup):
         
         self.isInError = False 
 
-    def drawAlert(self, showRed):
+    def DrawAlert(self, showRed):
         if showRed and self.isInError:
-            self.rect.setPen(QPen(QColor("red"), 15))
+            self.rect.setPen(QPen(QColor("red"), 10))
         else:
             self.rect.setPen(QPen(Qt.PenStyle.NoPen))
 
     def updatePositions(self, data):
         speed = 250
+        
         if isinstance(speed, numbers.Number):
+            self.isInError = False
             self.indicator.updatePositions(speed)
-            self.graduations.show()
+            
         else:
             self.isInError = True
-
-    def boundingRect(self):
-        return QRectF(0, 0, self.width, self.height)
-
-    def shape(self):
-        path = QPainterPath()
-        path.addRect(self.boundingRect())
-        return path
+            self.graduations.hide()
