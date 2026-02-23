@@ -10,6 +10,7 @@ from PyQt6.QtCore import Qt
 from ui.pfd import PrimaryFlightDisplay
 from ui.settings.altimeterSettingsPage import AltimeterSettingsPage
 from ui.settings.artificialHorizonSettingsPage import ArtificialHorizonSettingsPage
+from ui.settings.arduinoSettingsPage import ArduinoSettingsPage
 from ui.ai import AIWidget
 
 
@@ -98,17 +99,28 @@ class MainWindow(QMainWindow):
                 self.pfdPage.altimeter
             )
         )
+        
+        self.arduinoAction = QAction("Connexion", self)
+        self.arduinoAction.triggered.connect(
+            lambda: self.OpenSettingsDialog(
+                "Connexion Arduino",
+                ArduinoSettingsPage,
+                self.pfdPage
+            )
+        )
 
         toolbar.addActions([
             self.aiAction,
             self.artificialHorizonAction,
-            self.altimeterAction
+            self.altimeterAction,
+            self.arduinoAction
         ])
 
         self.setStatusBar(QStatusBar(self))
 
         menu = self.menuBar()
         menu.addAction(self.aiAction)
+        menu.addAction(self.arduinoAction)
 
         settingsMenu = menu.addMenu("Paramètres")
         settingsMenu.addActions([

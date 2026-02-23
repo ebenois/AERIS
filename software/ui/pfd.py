@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QWidget, QGraphicsView, QGraphicsScene, QSizePolicy
-from PyQt6.QtCore import Qt, QTimer, QUrl
+from PyQt6.QtCore import Qt, QSettings, QTimer, QUrl
 from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 
@@ -18,6 +18,8 @@ class PrimaryFlightDisplay(QWidget):
 
     def __init__(self, size=1200):
         super().__init__()
+
+        self.arduino = None
 
         self.setMinimumSize(500, 500)
         self.setSizePolicy(QSizePolicy.Policy.Expanding,
@@ -50,11 +52,7 @@ class PrimaryFlightDisplay(QWidget):
             QUrl.fromLocalFile("software/assets/warning.wav")
         )
 
-        try:
-            self.arduino = ArduinoReader(port="COM3", baudrate=115200)
-        except Exception as e:
-            print(f"Erreur Arduino: {e}")
-            self.arduino = None
+        
 
         self.dataTimer = QTimer(self)
         self.dataTimer.timeout.connect(self.updateFromArduino)
@@ -132,6 +130,9 @@ class PrimaryFlightDisplay(QWidget):
 
         for instr in self.instruments:
             instr.updatePositions(data)
+            
+    def setArduino(self, arduino):
+        self.arduino = arduino
 
     
 
