@@ -75,26 +75,25 @@ class SpeedIndicator(QGraphicsItemGroup):
 
             main = digit["smallText"]
 
-            smallRect = main.boundingRect()
-            rect = var.boundingRect()
-
-            var.setPos(
-                smallRect.width(),
-                centerY + yOffset - rect.height() / 2
-            )
-            var.setVisible(True)
-
             smallStr = f"{tens}"
             if main.toPlainText() != smallStr:
                 main.setPlainText(smallStr)
 
             xVar = self.width / 20
+            smallRect = main.boundingRect()
             main.setPos(
                 xVar,
                 centerY - smallRect.height() / 2
             )
 
             main.setVisible(True)
+            
+            rect = var.boundingRect()
+            var.setPos(
+                smallRect.width(),
+                centerY + yOffset - rect.height() / 2
+            )
+            var.setVisible(True)
 
     def boundingRect(self):
         return QRectF(0, self.height/2-self.height/15, self.width, self.height*2/15)

@@ -50,7 +50,7 @@ class AnemometerInstrument(QGraphicsItemGroup):
 
     def updatePositions(self, data):
         pitch, roll = data
-        speed = 280 + pitch
+        speed = 280
         if isinstance(speed, numbers.Number):
             self.isInError = False
             self.graduations.updatePositions(speed)

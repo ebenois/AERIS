@@ -41,7 +41,7 @@ class VariometerInstrument(QGraphicsItemGroup):
             self.rect.setPen(QPen(Qt.PenStyle.NoPen))
 
     def updatePositions(self, data):
-        speed = 250
+        speed = 4
         
         if isinstance(speed, numbers.Number):
             self.isInError = False
