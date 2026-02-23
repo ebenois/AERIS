@@ -1,13 +1,16 @@
 import serial
+import serial.tools.list_ports
+
 
 class ArduinoReader:
-    def __init__(self, port=None, baudrate=115200):
+    def __init__(self):
         self.serial = None
-        self.port = port
-        self.baudrate = baudrate
+        self.port = None
+        self.baudrate = 115200
 
-        if port:
-            self.connect(port, baudrate)
+    @staticmethod
+    def available_ports():
+        return [port.device for port in serial.tools.list_ports.comports()]
 
     def connect(self, port, baudrate=115200):
         self.disconnect()

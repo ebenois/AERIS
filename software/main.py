@@ -2,7 +2,7 @@ import sys
 import ctypes
 from PyQt6.QtWidgets import (
     QMainWindow, QToolBar, QApplication,
-    QDockWidget, QVBoxLayout, QDialog, QStatusBar
+    QDockWidget, QVBoxLayout, QDialog, QStatusBar, QLabel
 )
 from PyQt6.QtGui import QIcon, QAction
 from PyQt6.QtCore import Qt
@@ -103,9 +103,9 @@ class MainWindow(QMainWindow):
         self.arduinoAction = QAction("Connexion", self)
         self.arduinoAction.triggered.connect(
             lambda: self.OpenSettingsDialog(
-                "Connexion Arduino",
+                "Connexion appareils",
                 ArduinoSettingsPage,
-                self.pfdPage
+                self
             )
         )
 
@@ -117,6 +117,8 @@ class MainWindow(QMainWindow):
         ])
 
         self.setStatusBar(QStatusBar(self))
+        self.arduinoStatus = QLabel("🔴 Déconnecté")
+        self.statusBar().addPermanentWidget(self.arduinoStatus)
 
         menu = self.menuBar()
         menu.addAction(self.aiAction)
@@ -143,6 +145,11 @@ class MainWindow(QMainWindow):
 
         dialog.exec()
 
+    def updateArduinoStatus(self, connected: bool):
+        if connected:
+            self.arduinoStatus.setText("🟢 Connecté")
+        else:
+            self.arduinoStatus.setText("🔴 Déconnecté")
 
 
 def main():
