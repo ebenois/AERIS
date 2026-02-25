@@ -1,14 +1,9 @@
-import sys
 from PyQt6.QtWidgets import (
     QWidget,
-    QLabel,
     QVBoxLayout,
-    QHBoxLayout,
-    QSlider,
-    QPushButton,
     QGroupBox,
 )
-from PyQt6.QtCore import Qt, QSettings, pyqtSignal
+from PyQt6.QtCore import Qt, QSettings
 
 from ui.settings.settingGroup import SettingGroup
 
@@ -32,16 +27,16 @@ class ArtificialHorizonSettingsPage(QWidget):
         wingsSpan = self.settings.value("wingsSpan", 75, int)
         wingsHeight = self.settings.value("wingsHeight", 12, int)
 
-        self.lineWeightControl = SettingGroup("Line weight", 0, 30, lineWeight, 10)
-        self.dotSizeControl = SettingGroup("Dot size", 0, 30, dotSize, 10)
+        self.lineWeightControl = SettingGroup("Line weight", 0, 50, lineWeight, 10)
+        self.dotSizeControl = SettingGroup("Dot size", 0, 50, dotSize, 10)
         self.outlineWeightControl = SettingGroup(
-            "Outline weight", 0, 15, outlineWeight, 5
+            "Outline weight", 0, 50, outlineWeight, 10
         )
         self.wingsDistanceControl = SettingGroup(
-            "Distance between wings", 1, 100, wingsDistance, 45
+            "Distance between wings", 1, 100, wingsDistance, 20
         )
-        self.wingsSpanControl = SettingGroup("Wings span", 1, 100, wingsSpan, 75)
-        self.wingsHeightControl = SettingGroup("Wings height", 1, 100, wingsHeight, 12)
+        self.wingsSpanControl = SettingGroup("Wings span", 1, 200, wingsSpan, 20)
+        self.wingsHeightControl = SettingGroup("Wings height", 1, 100, wingsHeight, 20)
 
         self.lineWeightControl.valueChanged.connect(
             lambda v: self.saveAndUpdate("lineWeight", v, self.instrument.setLineWeight)

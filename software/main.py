@@ -90,7 +90,7 @@ class MainWindow(QMainWindow):
             lambda: self.OpenSettingsDialog(
                 "Configuration de l'horizon artificiel",
                 ArtificialHorizonSettingsPage,
-                self.pfdPage.artificialHorizon,
+                self.pfdPage.instruments[0],
             )
         )
 
@@ -99,7 +99,7 @@ class MainWindow(QMainWindow):
             lambda: self.OpenSettingsDialog(
                 "Configuration de l'altimètre",
                 AltimeterSettingsPage,
-                self.pfdPage.altimeter,
+                self.pfdPage.instruments[4],
             )
         )
 
@@ -120,7 +120,7 @@ class MainWindow(QMainWindow):
         )
 
         self.setStatusBar(QStatusBar(self))
-        self.arduinoStatus = QLabel("🔴 Déconnecté")
+        self.arduinoStatus = QLabel("🔴 Déconnecté ")
         self.statusBar().addPermanentWidget(self.arduinoStatus)
 
         menu = self.menuBar()
@@ -145,9 +145,9 @@ class MainWindow(QMainWindow):
 
     def updateArduinoStatus(self, connected: bool):
         if connected:
-            self.arduinoStatus.setText("🟢 Connecté")
+            self.arduinoStatus.setText("🟢 Connecté ")
         else:
-            self.arduinoStatus.setText("🔴 Déconnecté")
+            self.arduinoStatus.setText("🔴 Déconnecté ")
 
 
 def main():
