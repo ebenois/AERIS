@@ -36,15 +36,26 @@ class ArduinoReader:
         return self.serial is not None and self.serial.is_open
 
     def read(self):
-        if not self.is_connected() or self.serial.in_waiting == 0:
-            return None
-
         try:
-            line = self.serial.readline().decode(errors="ignore").strip()
-            if not line:
+            if not self.is_connected():
                 return None
 
-            x, y = map(int, line.split(","))
-            return x, y
-        except Exception:
+            if self.serial.in_waiting == 0:
+                return None
+
+            line = self.serial.readline().decode().strip()
+            return line.split(",")
+
+        except Exception as e:
+            print(f"⚠ Erreur série: {e}")
+
+            self.disconnect()
+
             return None
+
+    def disconnect(self):
+        try:
+            if self.serial and self.serial.is_open:
+                self.serial.close()
+        except:
+            pass

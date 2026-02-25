@@ -39,7 +39,7 @@ class AltimeterInstrument(QGraphicsItemGroup):
 
         self.isInError = False
 
-    def DrawAlert(self, showRed):
+    def drawAlert(self, showRed):
         if showRed and self.isInError:
             self.rect.setPen(QPen(QColor("red"), 10))
         else:

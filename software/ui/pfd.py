@@ -22,6 +22,10 @@ class PrimaryFlightDisplay(QWidget):
         self.lastDataTime = time.time()
         self.connectionTimeout = 1.0
         self.isConnected = False
+        
+        self.consecutivePacketLoss = 0
+        self.maxAllowedLoss = 3
+        self.dataIntegrityError = False
 
         self.expectedPacketId = None
         self.lostPackets = 0
@@ -126,36 +130,45 @@ class PrimaryFlightDisplay(QWidget):
                     self.window().updateArduinoStatus(False)
             return
 
-        packetId = int(data[0])
+        self.lastDataTime = time.time()
+
+        if not self.isConnected:
+            self.isConnected = True
+            self.window().updateArduinoStatus(True)
+
+        try:
+            packetId = int(data[0])
+        except (ValueError, IndexError, TypeError):
+            return
 
         if self.expectedPacketId is None:
             self.expectedPacketId = packetId
+
         else:
             if packetId != self.expectedPacketId:
+
+                if packetId < self.expectedPacketId:
+                    self.expectedPacketId = packetId
+                    return
+
                 missed = packetId - self.expectedPacketId
+
                 if missed > 0:
                     self.lostPackets += missed
+                    self.consecutivePacketLoss += 1
                     print(f"⚠ Paquets perdus: {missed}")
+            else:
+                self.consecutivePacketLoss = 0
 
         self.expectedPacketId = packetId + 1
+        
+        self.dataIntegrityError = (
+            self.consecutivePacketLoss > self.maxAllowedLoss
+        )
 
-        if data:
-            self.lastDataTime = time.time()
-
-            if not self.isConnected:
-                self.isConnected = True
-                self.window().updateArduinoStatus(True)
-
-            for instr in self.instruments:
+        for instr in self.instruments:
+            if not getattr(instr, "isInError", False):
                 instr.updatePositions(data)
-
-        if time.time() - self.lastDataTime > self.connectionTimeout:
-            if self.isConnected:
-                self.isConnected = False
-                self.window().updateArduinoStatus(False)
-
-    def setArduino(self, arduino):
-        self.arduino = arduino
 
     def globalHeartbeat(self):
         self.cycleStep = (self.cycleStep + 1) % 10
@@ -164,10 +177,10 @@ class PrimaryFlightDisplay(QWidget):
         playSound = self.cycleStep == 0
 
         connectionError = not self.isConnected
+        anyError = connectionError or self.dataIntegrityError
 
-        sensorError = any(i.isInError for i in self.errorCapable)
-
-        anyError = connectionError or sensorError
+        for instr in self.errorCapable:
+            instr.isInError = anyError
 
         if anyError:
             if (
@@ -182,3 +195,6 @@ class PrimaryFlightDisplay(QWidget):
         else:
             for instr in self.alertCapable:
                 instr.drawAlert(False)
+
+    def setArduino(self, arduino):
+        self.arduino = arduino
