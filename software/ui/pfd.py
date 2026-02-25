@@ -167,8 +167,7 @@ class PrimaryFlightDisplay(QWidget):
         )
 
         for instr in self.instruments:
-            if not getattr(instr, "isInError", False):
-                instr.updatePositions(data)
+            instr.updatePositions(data)
 
     def globalHeartbeat(self):
         self.cycleStep = (self.cycleStep + 1) % 10

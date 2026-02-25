@@ -41,7 +41,8 @@ class SpeedIndicator(QGraphicsItemGroup):
         triangle.setPen(QPen(Qt.GlobalColor.white, 3))
         triangle.setPos(0, height / 2)
 
-        self.font = QFont("Arial", int(height / 21))
+        self.font = QFont()
+        self.font.setPixelSize(int(height / 16))
 
         self.digits = []
         for i in range(-2, 3):
