@@ -119,6 +119,13 @@ class PrimaryFlightDisplay(QWidget):
 
         data = self.arduino.read()
 
+        if not data:
+            if time.time() - self.lastDataTime > self.connectionTimeout:
+                if self.isConnected:
+                    self.isConnected = False
+                    self.window().updateArduinoStatus(False)
+            return
+
         packetId = int(data[0])
 
         if self.expectedPacketId is None:
