@@ -21,8 +21,10 @@ class DirectionGraduations(QGraphicsItemGroup):
         pen = QPen(QColor("#FFFFFF"), 4)
         pen.setCapStyle(Qt.PenCapStyle.RoundCap)
 
-        self.bigFont = QFont("Arial", int(size / 20))
-        self.smallFont = QFont("Arial", int(size / 30))
+        self.bigFont = QFont()
+        self.bigFont.setPixelSize(int(size / 20))
+        self.smallFont = QFont()
+        self.smallFont.setPixelSize(int(size / 30))
 
         r = self.radius
         rMinor = r * self.ratioMinor
