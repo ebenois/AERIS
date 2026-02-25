@@ -39,8 +39,11 @@ class AltitudeIndicator(QGraphicsItemGroup):
         triangle.setPen(QPen(Qt.GlobalColor.white, 3))
         triangle.setPos(width / 4, height / 2)
 
-        self.bigFont = QFont("Arial", int(height / 20))
-        self.smallFont = QFont("Arial", int(height / 28))
+        self.bigFont = QFont()
+        self.bigFont.setPixelSize(int(height / 16))
+
+        self.smallFont = QFont()
+        self.smallFont.setPixelSize(int(height / 22))
 
         self.digits = []
         for i in range(-2, 3):
@@ -89,7 +92,7 @@ class AltitudeIndicator(QGraphicsItemGroup):
 
             rect = var.boundingRect()
             var.setPos(
-                self.width * 1.0625 - rect.width() * 0.5,
+                self.width - rect.width()/2 + 5,
                 centerY + yOffset - rect.height() * 0.5,
             )
             var.setVisible(True)
@@ -109,12 +112,8 @@ class AltitudeIndicator(QGraphicsItemGroup):
         bigRect = big.boundingRect()
         smallRect = small.boundingRect()
 
-        xVar = self.width * 16 / 17
-        xSmall = xVar - smallRect.width()
-        xBig = xSmall - bigRect.width()
-
-        big.setPos(xBig, centerY - bigRect.height() / 2)
-        small.setPos(xSmall, centerY - smallRect.height() / 2)
+        big.setPos(self.width - rect.width() - smallRect.width() - bigRect.width()/2 + 10, centerY - bigRect.height() / 2)
+        small.setPos(self.width - rect.width() - smallRect.width()/2 + 25, centerY - smallRect.height() / 2)
 
         big.setVisible(True)
         small.setVisible(True)

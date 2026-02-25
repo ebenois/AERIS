@@ -25,8 +25,11 @@ class AltitudeGraduations(QGraphicsItemGroup):
         pen = QPen(QColor("#FFFFFF"), 4)
         pen.setCapStyle(Qt.PenCapStyle.RoundCap)
 
-        self.bigFont = QFont("Arial", int(height / 22))
-        self.smallFont = QFont("Arial", int(height / 28))
+        self.bigFont = QFont()
+        self.bigFont.setPixelSize(int(height / 22))
+
+        self.smallFont = QFont()
+        self.smallFont.setPixelSize(int(height / 28))
 
         for _ in range(self.nbGraduations):
             line = QGraphicsLineItem(0, 0, width / 8, 0, self)
