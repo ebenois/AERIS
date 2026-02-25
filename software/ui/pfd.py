@@ -15,13 +15,16 @@ import time
 class PrimaryFlightDisplay(QWidget):
     def __init__(self, size=1200):
         super().__init__()
-        
+
         self.updateIntervalMs = 20
         self.heartbeatIntervalMs = 250
-        
+
         self.lastDataTime = time.time()
         self.connectionTimeout = 1.0
         self.isConnected = False
+
+        self.expectedPacketId = None
+        self.lostPackets = 0
 
         self.arduino = None
 
@@ -116,6 +119,19 @@ class PrimaryFlightDisplay(QWidget):
 
         data = self.arduino.read()
 
+        packetId = int(data[0])
+
+        if self.expectedPacketId is None:
+            self.expectedPacketId = packetId
+        else:
+            if packetId != self.expectedPacketId:
+                missed = packetId - self.expectedPacketId
+                if missed > 0:
+                    self.lostPackets += missed
+                    print(f"⚠ Paquets perdus: {missed}")
+
+        self.expectedPacketId = packetId + 1
+
         if data:
             self.lastDataTime = time.time()
 
@@ -140,10 +156,18 @@ class PrimaryFlightDisplay(QWidget):
         flashOn = self.cycleStep in (0, 2)
         playSound = self.cycleStep == 0
 
-        anyError = any(i.isInError for i in self.errorCapable)
+        connectionError = not self.isConnected
+
+        sensorError = any(i.isInError for i in self.errorCapable)
+
+        anyError = connectionError or sensorError
 
         if anyError:
-            if playSound:
+            if (
+                playSound
+                and self.alertPlayer.playbackState()
+                != QMediaPlayer.PlaybackState.PlayingState
+            ):
                 self.alertPlayer.play()
 
             for instr in self.alertCapable:
