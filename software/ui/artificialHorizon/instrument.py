@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import (
     QGraphicsItemGroup,
     QGraphicsEllipseItem,
     QGraphicsLineItem,
-    QGraphicsRectItem
+    QGraphicsRectItem,
 )
 from PyQt6.QtGui import QPen, QColor, QBrush, QPainterPath
 from PyQt6.QtCore import Qt, QSettings, QRectF
@@ -20,7 +20,6 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
 
         settings = QSettings("ENSC", "AERIS")
 
-        
         self.currentLineWeight = settings.value("lineWeight", width // 30, int)
         self.currentDotRadius = settings.value("dotSize", width // 30, int)
         self.currentOutlineWeight = settings.value("outlineWeight", width // 75, int)
@@ -30,18 +29,15 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
 
         self.setFlag(QGraphicsItemGroup.GraphicsItemFlag.ItemClipsChildrenToShape, True)
 
-
         self.background = ArtificialHorizonBackground(width, height)
         self.addToGroup(self.background)
         self.background.setPos(width / 2, height / 2)
 
-        
         self.rect = QGraphicsRectItem(0, 0, width, height)
         self.rect.setPen(QPen(Qt.PenStyle.NoPen))
         self.addToGroup(self.rect)
 
         self.isInError = False
-
 
         self.maquette = QGraphicsItemGroup()
 
@@ -51,12 +47,10 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
 
         self.DrawIndicator("white", isOutline=True)
         self.DrawIndicator("black", isOutline=False)
-        
-        self.addToGroup(self.maquette)
-        self.maquette.setPos(width/2,height/2)
-        self.maquette.setZValue(10)
 
-    
+        self.addToGroup(self.maquette)
+        self.maquette.setPos(width / 2, height / 2)
+        self.maquette.setZValue(10)
 
     def boundingRect(self):
         return QRectF(0, 0, self.width, self.height)
@@ -65,8 +59,6 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
         path = QPainterPath()
         path.addRect(self.boundingRect())
         return path
-
-
 
     def CreatePen(self, color, isOutline):
         extra = self.currentOutlineWeight if isOutline else 0
@@ -99,22 +91,23 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
         self.dots.append((dot, isOutline))
 
         self.UpdateWingsGeometry()
-        
 
     def UpdateWingsGeometry(self):
         for wing, _, sign in self.wings:
             wing.setLine(
-                sign * (self.currentWingsSpan + self.currentWingsDistance), 0,
-                sign * self.currentWingsDistance, 0
+                sign * (self.currentWingsSpan + self.currentWingsDistance),
+                0,
+                sign * self.currentWingsDistance,
+                0,
             )
 
         for montant, _, sign in self.montants:
             montant.setLine(
-                sign * self.currentWingsDistance, 0,
-                sign * self.currentWingsDistance, self.currentWingsHeight
+                sign * self.currentWingsDistance,
+                0,
+                sign * self.currentWingsDistance,
+                self.currentWingsHeight,
             )
-
-    
 
     def setLineWeight(self, width):
         self.currentLineWeight = width
@@ -149,15 +142,11 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
         self.currentWingsHeight = value
         self.UpdateWingsGeometry()
 
-    
-
     def drawAlert(self, showRed):
         if showRed and self.isInError:
             self.rect.setPen(QPen(QColor("red"), 15))
         else:
             self.rect.setPen(QPen(Qt.PenStyle.NoPen))
-
-    
 
     def updatePositions(self, data):
         roll, pitch = data

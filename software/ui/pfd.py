@@ -22,8 +22,7 @@ class PrimaryFlightDisplay(QWidget):
         self.arduino = None
 
         self.setMinimumSize(500, 500)
-        self.setSizePolicy(QSizePolicy.Policy.Expanding,
-                           QSizePolicy.Policy.Expanding)
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.setStyleSheet("background-color: #000000;")
 
         self.scene = QGraphicsScene(0, 0, size, size, self)
@@ -48,11 +47,7 @@ class PrimaryFlightDisplay(QWidget):
 
         self.alertPlayer = QMediaPlayer(self)
         self.alertPlayer.setAudioOutput(self.audioOutput)
-        self.alertPlayer.setSource(
-            QUrl.fromLocalFile("software/assets/warning.wav")
-        )
-
-        
+        self.alertPlayer.setSource(QUrl.fromLocalFile("software/assets/warning.wav"))
 
         self.dataTimer = QTimer(self)
         self.dataTimer.timeout.connect(self.updateFromArduino)
@@ -63,8 +58,6 @@ class PrimaryFlightDisplay(QWidget):
         self.masterTimer.start(self.heartbeatIntervalMs)
 
         self.cycleStep = 0
-        
-        
 
     def setupInstruments(self):
         self.instruments = [
@@ -77,22 +70,20 @@ class PrimaryFlightDisplay(QWidget):
         ]
 
         positions = [
-            (225, 240),   # artificial horizon
-            (15, 185),    # anemometer
-            (100, 990),   # compass
+            (225, 240),  # artificial horizon
+            (15, 185),  # anemometer
+            (100, 990),  # compass
             (1075, 335),  # variometer
-            (915, 185),   # altimeter
-            (225, 240),   # slip
+            (915, 185),  # altimeter
+            (225, 240),  # slip
         ]
 
         for instr, pos in zip(self.instruments, positions):
             self.scene.addItem(instr)
             instr.setPos(*pos)
 
-        self.errorCapable = [i for i in self.instruments if hasattr(i, 'isInError')]
-        self.alertCapable = [i for i in self.instruments if hasattr(i, 'drawAlert')]
-
-    
+        self.errorCapable = [i for i in self.instruments if hasattr(i, "isInError")]
+        self.alertCapable = [i for i in self.instruments if hasattr(i, "drawAlert")]
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
@@ -113,12 +104,7 @@ class PrimaryFlightDisplay(QWidget):
         y = (h - side) // 2
 
         self.view.setGeometry(x, y, side, side)
-        self.view.fitInView(
-            self.scene.sceneRect(),
-            Qt.AspectRatioMode.KeepAspectRatio
-        )
-
-    
+        self.view.fitInView(self.scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
 
     def updateFromArduino(self):
         if not self.arduino:
@@ -130,11 +116,9 @@ class PrimaryFlightDisplay(QWidget):
 
         for instr in self.instruments:
             instr.updatePositions(data)
-            
+
     def setArduino(self, arduino):
         self.arduino = arduino
-
-    
 
     def globalHeartbeat(self):
         self.cycleStep = (self.cycleStep + 1) % 10

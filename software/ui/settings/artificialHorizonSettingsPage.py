@@ -1,16 +1,17 @@
 import sys
 from PyQt6.QtWidgets import (
-    QWidget, 
-    QLabel, 
-    QVBoxLayout, 
-    QHBoxLayout, 
-    QSlider, 
+    QWidget,
+    QLabel,
+    QVBoxLayout,
+    QHBoxLayout,
+    QSlider,
     QPushButton,
-    QGroupBox
+    QGroupBox,
 )
 from PyQt6.QtCore import Qt, QSettings, pyqtSignal
 
 from ui.settings.settingGroup import SettingGroup
+
 
 class ArtificialHorizonSettingsPage(QWidget):
     def __init__(self, instrument):
@@ -33,17 +34,39 @@ class ArtificialHorizonSettingsPage(QWidget):
 
         self.lineWeightControl = SettingGroup("Line weight", 0, 30, lineWeight, 10)
         self.dotSizeControl = SettingGroup("Dot size", 0, 30, dotSize, 10)
-        self.outlineWeightControl = SettingGroup("Outline weight", 0, 15, outlineWeight, 5)
-        self.wingsDistanceControl = SettingGroup("Distance between wings", 1, 100, wingsDistance, 45)
+        self.outlineWeightControl = SettingGroup(
+            "Outline weight", 0, 15, outlineWeight, 5
+        )
+        self.wingsDistanceControl = SettingGroup(
+            "Distance between wings", 1, 100, wingsDistance, 45
+        )
         self.wingsSpanControl = SettingGroup("Wings span", 1, 100, wingsSpan, 75)
         self.wingsHeightControl = SettingGroup("Wings height", 1, 100, wingsHeight, 12)
 
-        self.lineWeightControl.valueChanged.connect(lambda v: self.saveAndUpdate("lineWeight", v, self.instrument.setLineWeight))
-        self.dotSizeControl.valueChanged.connect(lambda v: self.saveAndUpdate("dotSize", v, self.instrument.setDotSize))
-        self.outlineWeightControl.valueChanged.connect(lambda v: self.saveAndUpdate("outlineWeight", v, self.instrument.setOutlineWeight))
-        self.wingsDistanceControl.valueChanged.connect(lambda v: self.saveAndUpdate("wingsDistance", v, self.instrument.setWingsDistance))
-        self.wingsSpanControl.valueChanged.connect(lambda v: self.saveAndUpdate("wingsSpan", v, self.instrument.setWingsSpan))
-        self.wingsHeightControl.valueChanged.connect(lambda v: self.saveAndUpdate("wingsHeight", v, self.instrument.setWingsHeight))
+        self.lineWeightControl.valueChanged.connect(
+            lambda v: self.saveAndUpdate("lineWeight", v, self.instrument.setLineWeight)
+        )
+        self.dotSizeControl.valueChanged.connect(
+            lambda v: self.saveAndUpdate("dotSize", v, self.instrument.setDotSize)
+        )
+        self.outlineWeightControl.valueChanged.connect(
+            lambda v: self.saveAndUpdate(
+                "outlineWeight", v, self.instrument.setOutlineWeight
+            )
+        )
+        self.wingsDistanceControl.valueChanged.connect(
+            lambda v: self.saveAndUpdate(
+                "wingsDistance", v, self.instrument.setWingsDistance
+            )
+        )
+        self.wingsSpanControl.valueChanged.connect(
+            lambda v: self.saveAndUpdate("wingsSpan", v, self.instrument.setWingsSpan)
+        )
+        self.wingsHeightControl.valueChanged.connect(
+            lambda v: self.saveAndUpdate(
+                "wingsHeight", v, self.instrument.setWingsHeight
+            )
+        )
 
         planeLayout.addWidget(self.lineWeightControl)
         planeLayout.addWidget(self.dotSizeControl)

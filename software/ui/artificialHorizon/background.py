@@ -15,7 +15,7 @@ class ArtificialHorizonBackground(QGraphicsItemGroup):
 
         self.width = width
         self.height = height
-        
+
         self.pixelsPerDegree = height / 45.0
         self.cycleHeight = 360.0 * self.pixelsPerDegree
         self.blockHeight = 180.0 * self.pixelsPerDegree

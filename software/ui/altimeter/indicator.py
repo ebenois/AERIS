@@ -1,4 +1,9 @@
-from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsTextItem, QGraphicsItem, QGraphicsPolygonItem
+from PyQt6.QtWidgets import (
+    QGraphicsItemGroup,
+    QGraphicsTextItem,
+    QGraphicsItem,
+    QGraphicsPolygonItem,
+)
 from PyQt6.QtGui import QPen, QFont, QBrush, QPainterPath, QPolygonF
 from PyQt6.QtCore import Qt, QRectF, QPointF
 import numbers
@@ -19,21 +24,23 @@ class AltitudeIndicator(QGraphicsItemGroup):
         triangle = QGraphicsPolygonItem()
         self.addToGroup(triangle)
 
-        polygon = QPolygonF([
-            QPointF(0, -height/15),
-            QPointF(-width/7, 0),
-            QPointF(0, height/15),
-            QPointF(width, height/15),
-            QPointF(width, -height/15),
-        ])
+        polygon = QPolygonF(
+            [
+                QPointF(0, -height / 15),
+                QPointF(-width / 7, 0),
+                QPointF(0, height / 15),
+                QPointF(width, height / 15),
+                QPointF(width, -height / 15),
+            ]
+        )
 
         triangle.setPolygon(polygon)
         triangle.setBrush(QBrush(Qt.GlobalColor.black))
         triangle.setPen(QPen(Qt.GlobalColor.white, 3))
-        triangle.setPos(width/4,height/2)
+        triangle.setPos(width / 4, height / 2)
 
-        self.bigFont = QFont("Arial", int(height/20))
-        self.smallFont = QFont("Arial", int(height/28))
+        self.bigFont = QFont("Arial", int(height / 20))
+        self.smallFont = QFont("Arial", int(height / 28))
 
         self.digits = []
         for i in range(-2, 3):
@@ -46,12 +53,14 @@ class AltitudeIndicator(QGraphicsItemGroup):
             variableText = QGraphicsTextItem("", self)
             variableText.setDefaultTextColor(Qt.GlobalColor.white)
             variableText.setFont(self.smallFont)
-            self.digits.append({
-                "index": i,
-                "bigText": bigText,
-                "smallText": smallText,
-                "variableText": variableText
-            })
+            self.digits.append(
+                {
+                    "index": i,
+                    "bigText": bigText,
+                    "smallText": smallText,
+                    "variableText": variableText,
+                }
+            )
 
     def updatePositions(self, altitude):
         if not isinstance(altitude, numbers.Number):
@@ -79,8 +88,10 @@ class AltitudeIndicator(QGraphicsItemGroup):
                 var.setPlainText(text)
 
             rect = var.boundingRect()
-            var.setPos(self.width * 1.0625 - rect.width() * 0.5,
-                    centerY + yOffset - rect.height() * 0.5)
+            var.setPos(
+                self.width * 1.0625 - rect.width() * 0.5,
+                centerY + yOffset - rect.height() * 0.5,
+            )
             var.setVisible(True)
 
         main = self.digits[2]
@@ -109,7 +120,9 @@ class AltitudeIndicator(QGraphicsItemGroup):
         small.setVisible(True)
 
     def boundingRect(self):
-        return QRectF(0, self.height/2-self.height/15, self.width*2, self.height*2/15)
+        return QRectF(
+            0, self.height / 2 - self.height / 15, self.width * 2, self.height * 2 / 15
+        )
 
     def shape(self):
         path = QPainterPath()

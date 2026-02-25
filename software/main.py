@@ -1,8 +1,14 @@
 import sys
 import ctypes
 from PyQt6.QtWidgets import (
-    QMainWindow, QToolBar, QApplication,
-    QDockWidget, QVBoxLayout, QDialog, QStatusBar, QLabel
+    QMainWindow,
+    QToolBar,
+    QApplication,
+    QDockWidget,
+    QVBoxLayout,
+    QDialog,
+    QStatusBar,
+    QLabel,
 )
 from PyQt6.QtGui import QIcon, QAction
 from PyQt6.QtCore import Qt
@@ -12,7 +18,6 @@ from ui.settings.altimeterSettingsPage import AltimeterSettingsPage
 from ui.settings.artificialHorizonSettingsPage import ArtificialHorizonSettingsPage
 from ui.settings.arduinoSettingsPage import ArduinoSettingsPage
 from ui.ai import AIWidget
-
 
 try:
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("AERIS")
@@ -32,8 +37,6 @@ class MainWindow(QMainWindow):
         self.SetupCentralWidget()
         self.SetupAiDock()
         self.SetupMenu()
-
-
 
     def SetupWindow(self):
         self.setWindowTitle(self.windowTitle)
@@ -87,7 +90,7 @@ class MainWindow(QMainWindow):
             lambda: self.OpenSettingsDialog(
                 "Configuration de l'horizon artificiel",
                 ArtificialHorizonSettingsPage,
-                self.pfdPage.artificialHorizon
+                self.pfdPage.artificialHorizon,
             )
         )
 
@@ -96,25 +99,25 @@ class MainWindow(QMainWindow):
             lambda: self.OpenSettingsDialog(
                 "Configuration de l'altimètre",
                 AltimeterSettingsPage,
-                self.pfdPage.altimeter
-            )
-        )
-        
-        self.arduinoAction = QAction("Connexion", self)
-        self.arduinoAction.triggered.connect(
-            lambda: self.OpenSettingsDialog(
-                "Connexion appareils",
-                ArduinoSettingsPage,
-                self
+                self.pfdPage.altimeter,
             )
         )
 
-        toolbar.addActions([
-            self.aiAction,
-            self.artificialHorizonAction,
-            self.altimeterAction,
-            self.arduinoAction
-        ])
+        self.arduinoAction = QAction("Connexion", self)
+        self.arduinoAction.triggered.connect(
+            lambda: self.OpenSettingsDialog(
+                "Connexion appareils", ArduinoSettingsPage, self
+            )
+        )
+
+        toolbar.addActions(
+            [
+                self.aiAction,
+                self.artificialHorizonAction,
+                self.altimeterAction,
+                self.arduinoAction,
+            ]
+        )
 
         self.setStatusBar(QStatusBar(self))
         self.arduinoStatus = QLabel("🔴 Déconnecté")
@@ -125,12 +128,7 @@ class MainWindow(QMainWindow):
         menu.addAction(self.arduinoAction)
 
         settingsMenu = menu.addMenu("Paramètres")
-        settingsMenu.addActions([
-            self.artificialHorizonAction,
-            self.altimeterAction
-        ])
-
-    
+        settingsMenu.addActions([self.artificialHorizonAction, self.altimeterAction])
 
     def ToggleAi(self, checked: bool):
         self.aiDock.setVisible(checked)

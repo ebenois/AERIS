@@ -37,11 +37,13 @@ class CompassInstrument(QGraphicsItemGroup):
         polygonWidth = 55
         polygonHeight = 45
 
-        polygon = QPolygonF([
-            QPointF(centerX, 0),
-            QPointF(centerX + polygonWidth / 2, -polygonHeight),
-            QPointF(centerX - polygonWidth / 2, -polygonHeight),
-        ])
+        polygon = QPolygonF(
+            [
+                QPointF(centerX, 0),
+                QPointF(centerX + polygonWidth / 2, -polygonHeight),
+                QPointF(centerX - polygonWidth / 2, -polygonHeight),
+            ]
+        )
 
         self.indicator = QGraphicsPolygonItem(polygon)
         self.indicator.setBrush(self.indicatorBrush)
@@ -50,15 +52,11 @@ class CompassInstrument(QGraphicsItemGroup):
 
         self.isInError = False
 
-    
-
     def drawAlert(self, showRed):
         if showRed and self.isInError:
             self.dot.setPen(self.alertPen)
         else:
             self.dot.setPen(self.noPen)
-
-
 
     def updatePositions(self, data):
         heading = 250

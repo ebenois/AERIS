@@ -1,7 +1,15 @@
-from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsLineItem, QGraphicsTextItem, QGraphicsRectItem, QGraphicsItem, QGraphicsPolygonItem
+from PyQt6.QtWidgets import (
+    QGraphicsItemGroup,
+    QGraphicsLineItem,
+    QGraphicsTextItem,
+    QGraphicsRectItem,
+    QGraphicsItem,
+    QGraphicsPolygonItem,
+)
 from PyQt6.QtGui import QColor, QPen, QFont, QBrush, QPainterPath, QPolygonF
 from PyQt6.QtCore import Qt, QRectF, QPointF
 import numbers
+
 
 class SpeedIndicator(QGraphicsItemGroup):
     def __init__(self, width, height):
@@ -18,20 +26,22 @@ class SpeedIndicator(QGraphicsItemGroup):
         triangle = QGraphicsPolygonItem()
         self.addToGroup(triangle)
 
-        polygon = QPolygonF([
-            QPointF(width*5/7, -height/15),
-            QPointF(width*6/7, 0),
-            QPointF(width*5/7, height/15),
-            QPointF(0, height/15),
-            QPointF(0, -height/15),
-        ])
+        polygon = QPolygonF(
+            [
+                QPointF(width * 5 / 7, -height / 15),
+                QPointF(width * 6 / 7, 0),
+                QPointF(width * 5 / 7, height / 15),
+                QPointF(0, height / 15),
+                QPointF(0, -height / 15),
+            ]
+        )
 
         triangle.setPolygon(polygon)
         triangle.setBrush(QBrush(Qt.GlobalColor.black))
         triangle.setPen(QPen(Qt.GlobalColor.white, 3))
-        triangle.setPos(0,height/2)
+        triangle.setPos(0, height / 2)
 
-        self.font = QFont("Arial", int(height/21))
+        self.font = QFont("Arial", int(height / 21))
 
         self.digits = []
         for i in range(-2, 3):
@@ -41,25 +51,23 @@ class SpeedIndicator(QGraphicsItemGroup):
             variableText = QGraphicsTextItem("", self)
             variableText.setDefaultTextColor(Qt.GlobalColor.white)
             variableText.setFont(self.font)
-            self.digits.append({
-                "index": i,
-                "smallText": smallText,
-                "variableText": variableText
-            })
+            self.digits.append(
+                {"index": i, "smallText": smallText, "variableText": variableText}
+            )
 
     def updatePositions(self, speed):
         if not isinstance(speed, numbers.Number):
             main = self.digits["smallText"]
             main.setPlainText(str(speed))
             rect = main.boundingRect()
-            main.setPos(self.width/20, self.height/2-rect.height() / 2)
+            main.setPos(self.width / 20, self.height / 2 - rect.height() / 2)
             main.setVisible(True)
             return
-        
+
         step = self.knotsPerGraduation * 2
         baseSpeed = (speed // step) * step
         centerY = self.height * 0.5
-        
+
         tens = speed // 10
 
         for digit in self.digits:
@@ -81,22 +89,18 @@ class SpeedIndicator(QGraphicsItemGroup):
 
             xVar = self.width / 20
             smallRect = main.boundingRect()
-            main.setPos(
-                xVar,
-                centerY - smallRect.height() / 2
-            )
+            main.setPos(xVar, centerY - smallRect.height() / 2)
 
             main.setVisible(True)
-            
+
             rect = var.boundingRect()
-            var.setPos(
-                smallRect.width(),
-                centerY + yOffset - rect.height() / 2
-            )
+            var.setPos(smallRect.width(), centerY + yOffset - rect.height() / 2)
             var.setVisible(True)
 
     def boundingRect(self):
-        return QRectF(0, self.height/2-self.height/15, self.width, self.height*2/15)
+        return QRectF(
+            0, self.height / 2 - self.height / 15, self.width, self.height * 2 / 15
+        )
 
     def shape(self):
         path = QPainterPath()

@@ -1,10 +1,4 @@
-from PyQt6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QPushButton,
-    QLabel,
-    QComboBox
-)
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QLabel, QComboBox
 from PyQt6.QtCore import QSettings
 from services.arduino import ArduinoReader
 

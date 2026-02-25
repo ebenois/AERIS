@@ -1,4 +1,9 @@
-from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsRectItem, QGraphicsItem, QGraphicsLineItem
+from PyQt6.QtWidgets import (
+    QGraphicsItemGroup,
+    QGraphicsRectItem,
+    QGraphicsItem,
+    QGraphicsLineItem,
+)
 from PyQt6.QtGui import QBrush, QColor, QPen
 from PyQt6.QtCore import Qt
 import numbers
@@ -16,31 +21,28 @@ class AnemometerInstrument(QGraphicsItemGroup):
         self.height = height
         self.width = width
 
-        self.rect = QGraphicsRectItem(
-            0, 0,
-            width, height
-        )
-        
+        self.rect = QGraphicsRectItem(0, 0, width, height)
+
         self.rect.setBrush(QBrush(QColor("#808080")))
         self.rect.setPen(QPen(Qt.PenStyle.NoPen))
         self.addToGroup(self.rect)
 
         self.noDataEffect = QPen(Qt.PenStyle.NoPen)
         self.rect.setPen(self.noDataEffect)
-        
-        self.limit = SpeedLimit(width,height)
+
+        self.limit = SpeedLimit(width, height)
         self.addToGroup(self.limit)
-        
-        self.trend = SpeedTrend(width,height)
+
+        self.trend = SpeedTrend(width, height)
         self.addToGroup(self.trend)
-        
-        self.graduations = SpeedGraduations(width,height)
+
+        self.graduations = SpeedGraduations(width, height)
         self.addToGroup(self.graduations)
-        
-        self.indicator = SpeedIndicator(width,height)
+
+        self.indicator = SpeedIndicator(width, height)
         self.addToGroup(self.indicator)
 
-        self.isInError = False 
+        self.isInError = False
 
     def drawAlert(self, showRed):
         if showRed and self.isInError:

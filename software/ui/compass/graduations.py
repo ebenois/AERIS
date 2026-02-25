@@ -36,8 +36,6 @@ class DirectionGraduations(QGraphicsItemGroup):
 
             self.graduationsPool.append((line, text))
 
-    
-
     def updatePositions(self, direction):
         step = self.step
         span = self.span
@@ -62,7 +60,7 @@ class DirectionGraduations(QGraphicsItemGroup):
 
             line.setVisible(True)
 
-            isMajor = (gradAngle % 10 == 0)
+            isMajor = gradAngle % 10 == 0
 
             if isMajor:
                 line.setLine(0, -rMajor, 0, -radius)

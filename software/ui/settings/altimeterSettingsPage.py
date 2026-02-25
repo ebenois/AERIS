@@ -1,16 +1,17 @@
 import sys
 from PyQt6.QtWidgets import (
-    QWidget, 
-    QLabel, 
-    QVBoxLayout, 
-    QHBoxLayout, 
-    QSlider, 
+    QWidget,
+    QLabel,
+    QVBoxLayout,
+    QHBoxLayout,
+    QSlider,
     QPushButton,
-    QGroupBox
+    QGroupBox,
 )
 from PyQt6.QtCore import Qt, QSettings, pyqtSignal
 
 from ui.settings.settingGroup import SettingGroup
+
 
 class AltimeterSettingsPage(QWidget):
     def __init__(self, instrument):

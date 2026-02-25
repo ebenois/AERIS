@@ -1,4 +1,9 @@
-from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsLineItem, QGraphicsTextItem, QGraphicsItem
+from PyQt6.QtWidgets import (
+    QGraphicsItemGroup,
+    QGraphicsLineItem,
+    QGraphicsTextItem,
+    QGraphicsItem,
+)
 from PyQt6.QtGui import QColor, QPen, QFont, QPainterPath
 from PyQt6.QtCore import Qt, QRectF
 
@@ -6,7 +11,7 @@ from PyQt6.QtCore import Qt, QRectF
 class AltitudeGraduations(QGraphicsItemGroup):
     def __init__(self, width, height):
         super().__init__()
-        
+
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
 
         self.height = height
@@ -20,8 +25,8 @@ class AltitudeGraduations(QGraphicsItemGroup):
         pen = QPen(QColor("#FFFFFF"), 4)
         pen.setCapStyle(Qt.PenCapStyle.RoundCap)
 
-        self.bigFont = QFont("Arial", int(height/22))
-        self.smallFont = QFont("Arial", int(height/28))
+        self.bigFont = QFont("Arial", int(height / 22))
+        self.smallFont = QFont("Arial", int(height / 28))
 
         for _ in range(self.nbGraduations):
             line = QGraphicsLineItem(0, 0, width / 8, 0, self)
@@ -35,11 +40,9 @@ class AltitudeGraduations(QGraphicsItemGroup):
             smallText.setDefaultTextColor(Qt.GlobalColor.white)
             smallText.setFont(self.smallFont)
 
-            self.graduationsPool.append({
-                "line": line,
-                "bigText": bigText,
-                "smallText": smallText
-            })
+            self.graduationsPool.append(
+                {"line": line, "bigText": bigText, "smallText": smallText}
+            )
 
     def updatePositions(self, altitude):
         halfHeight = self.height * 0.5
@@ -81,18 +84,21 @@ class AltitudeGraduations(QGraphicsItemGroup):
                 smallRect = small.boundingRect()
                 bigRect = big.boundingRect()
 
-                small.setPos(self.width - smallRect.width(),
-                            y - smallRect.height() * 0.5)
+                small.setPos(
+                    self.width - smallRect.width(), y - smallRect.height() * 0.5
+                )
 
-                big.setPos(self.width - smallRect.width() - bigRect.width() * 0.875,
-                        y - bigRect.height() * 0.5)
+                big.setPos(
+                    self.width - smallRect.width() - bigRect.width() * 0.875,
+                    y - bigRect.height() * 0.5,
+                )
 
                 big.setVisible(True)
                 small.setVisible(True)
             else:
                 item["bigText"].setVisible(False)
                 item["smallText"].setVisible(False)
-                
+
     def boundingRect(self):
         return QRectF(0, 0, self.width, self.height)
 

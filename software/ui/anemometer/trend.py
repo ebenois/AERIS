@@ -2,6 +2,7 @@ from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsRectItem
 from PyQt6.QtGui import QBrush, QColor, QPen
 from PyQt6.QtCore import Qt, QElapsedTimer
 
+
 class SpeedTrend(QGraphicsItemGroup):
     def __init__(self, width, height):
         super().__init__()
@@ -9,8 +10,8 @@ class SpeedTrend(QGraphicsItemGroup):
         self.width = width
         self.height = height
         self.span = 70
-        self.pixelPerUnit = (self.height/2)/self.span
-        
+        self.pixelPerUnit = (self.height / 2) / self.span
+
         self.previousSpeed = None
         self.timer = QElapsedTimer()
         self.timer.start()
@@ -29,17 +30,14 @@ class SpeedTrend(QGraphicsItemGroup):
             return
 
         acceleration = (speed - self.previousSpeed) / dt
-        
+
         speedVariation = acceleration * 3
-        
+
         heightPx = speedVariation * self.pixelPerUnit
 
-        safe = max(-self.height/2, min(self.height/2, heightPx))
-        
+        safe = max(-self.height / 2, min(self.height / 2, heightPx))
+
         self.rect.setRect(
-            self.width * 15 / 17, 
-            self.height / 2,
-            self.width * 2/ 17, 
-            -safe
+            self.width * 15 / 17, self.height / 2, self.width * 2 / 17, -safe
         )
         self.previousSpeed = speed
