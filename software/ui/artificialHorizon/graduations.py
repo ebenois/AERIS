@@ -24,7 +24,8 @@ class PitchGraduations(QGraphicsItemGroup):
         pen = QPen(QColor("#FFFFFF"), 3)
         pen.setCapStyle(Qt.PenCapStyle.RoundCap)
 
-        self.font = QFont("Arial", int(height / 21))
+        self.font = QFont()
+        self.font.setPixelSize(int(height / 22))
 
         for _ in range(self.nbGraduations):
             line = QGraphicsLineItem(self)
