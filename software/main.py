@@ -10,7 +10,7 @@ from PyQt6.QtWidgets import (
     QStatusBar,
     QLabel,
 )
-from PyQt6.QtGui import QIcon, QAction
+from PyQt6.QtGui import QIcon, QAction, QFontDatabase, QFont
 from PyQt6.QtCore import Qt
 
 from ui.pfd import PrimaryFlightDisplay
@@ -58,6 +58,10 @@ class MainWindow(QMainWindow):
                 color: #888888;
             }
             QDockWidget { color: white; }
+            * {
+                font-family: "B612 Mono";
+            }
+            QMainWindow { background-color: #000000; }
         """)
 
     def SetupCentralWidget(self):
@@ -153,6 +157,17 @@ class MainWindow(QMainWindow):
 def main():
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
+
+    font_id = QFontDatabase.addApplicationFont(
+        "software/assets/B612_Mono/B612Mono-Regular.ttf"
+    )
+
+    if font_id != -1:
+        family = QFontDatabase.applicationFontFamilies(font_id)[0]
+        app.setFont(QFont(family))
+        print(f"Police chargée : {family}")
+    else:
+        print("Erreur chargement police")
 
     window = MainWindow()
     window.showMaximized()
