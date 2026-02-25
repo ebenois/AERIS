@@ -26,7 +26,8 @@ class RiseGraduations(QGraphicsItemGroup):
         pen = QPen(QColor("#FFFFFF"), int(height / 150))
         pen.setCapStyle(Qt.PenCapStyle.RoundCap)
 
-        font = QFont("Arial", int(height / 20))
+        self.font = QFont()
+        self.font.setPixelSize(int(height / 20))
 
         for _ in range(self.nbGraduations):
             line = QGraphicsLineItem(self)
@@ -34,7 +35,7 @@ class RiseGraduations(QGraphicsItemGroup):
 
             text = QGraphicsTextItem(self)
             text.setDefaultTextColor(Qt.GlobalColor.white)
-            text.setFont(font)
+            text.setFont(self.font)
 
             self.graduations.append((line, text))
 
