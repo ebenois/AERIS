@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QWidget, QGraphicsView, QGraphicsScene, QSizePolicy
-from PyQt6.QtCore import Qt, QSettings, QTimer, QUrl
+from PyQt6.QtCore import Qt, QTimer, QUrl
 from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 
@@ -9,15 +9,19 @@ from ui.anemometer.instrument import AnemometerInstrument
 from ui.compass.instrument import CompassInstrument
 from ui.variometer.instrument import VariometerInstrument
 from ui.slipIndicator.instrument import SlipInstrument
-from services.arduino import ArduinoReader
+import time
 
 
 class PrimaryFlightDisplay(QWidget):
-    updateIntervalMs = 20
-    heartbeatIntervalMs = 250
-
     def __init__(self, size=1200):
         super().__init__()
+        
+        self.updateIntervalMs = 20
+        self.heartbeatIntervalMs = 250
+        
+        self.lastDataTime = time.time()
+        self.connectionTimeout = 1.0
+        self.isConnected = False
 
         self.arduino = None
 
@@ -111,11 +115,21 @@ class PrimaryFlightDisplay(QWidget):
             return
 
         data = self.arduino.read()
-        if not data:
-            return
 
-        for instr in self.instruments:
-            instr.updatePositions(data)
+        if data:
+            self.lastDataTime = time.time()
+
+            if not self.isConnected:
+                self.isConnected = True
+                self.window().updateArduinoStatus(True)
+
+            for instr in self.instruments:
+                instr.updatePositions(data)
+
+        if time.time() - self.lastDataTime > self.connectionTimeout:
+            if self.isConnected:
+                self.isConnected = False
+                self.window().updateArduinoStatus(False)
 
     def setArduino(self, arduino):
         self.arduino = arduino
