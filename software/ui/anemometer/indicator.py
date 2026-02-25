@@ -58,11 +58,12 @@ class SpeedIndicator(QGraphicsItemGroup):
 
     def updatePositions(self, speed):
         if not isinstance(speed, numbers.Number):
-            main = self.digits["smallText"]
-            main.setPlainText(str(speed))
-            rect = main.boundingRect()
-            main.setPos(self.width / 20, self.height / 2 - rect.height() / 2)
-            main.setVisible(True)
+            for digit in self.digits:
+                main = digit["smallText"]
+                main.setPlainText(str(speed))
+                rect = main.boundingRect()
+                main.setPos(self.width / 20, self.height / 2 - rect.height() / 2)
+                main.setVisible(True)
             return
 
         step = self.knotsPerGraduation * 2

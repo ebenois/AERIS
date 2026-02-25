@@ -149,7 +149,7 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
             self.rect.setPen(QPen(Qt.PenStyle.NoPen))
 
     def updatePositions(self, data):
-        roll, pitch = data
+        packetId,roll,pitch,altitude,climbRate,windSpeed,heading,slip,button = data
 
         if isinstance(roll, numbers.Number) and isinstance(pitch, numbers.Number):
             self.isInError = False

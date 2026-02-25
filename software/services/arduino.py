@@ -16,7 +16,7 @@ class ArduinoReader:
         self.disconnect()
 
         try:
-            self.serial = serial.Serial(port, baudrate, timeout=0)
+            self.serial = serial.Serial(port, baudrate, timeout=0.1)
             self.port = port
             self.baudrate = baudrate
             print(f"Arduino connecté sur {port}")
@@ -27,9 +27,12 @@ class ArduinoReader:
             return False
 
     def disconnect(self):
-        if self.serial and self.serial.is_open:
-            self.serial.close()
-            print("Arduino déconnecté")
+        try:
+            if self.serial and self.serial.is_open:
+                self.serial.close()
+                print("Arduino déconnecté")
+        except Exception:
+            pass
         self.serial = None
 
     def is_connected(self):
@@ -43,19 +46,20 @@ class ArduinoReader:
             if self.serial.in_waiting == 0:
                 return None
 
-            line = self.serial.readline().decode().strip()
-            return line.split(",")
+            line = self.serial.readline().decode(errors="ignore").strip()
+            if not line:
+                return None
+
+            parts = line.split(",")
+            if len(parts) != 9:
+                print(f"⚠ Paquet invalide (attendu 9 valeurs) : {line}")
+                return None
+
+            # Convertir en float
+            data = [float(p) for p in parts]
+            return data
 
         except Exception as e:
             print(f"⚠ Erreur série: {e}")
-
             self.disconnect()
-
             return None
-
-    def disconnect(self):
-        try:
-            if self.serial and self.serial.is_open:
-                self.serial.close()
-        except:
-            pass

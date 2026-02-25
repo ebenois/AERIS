@@ -51,14 +51,13 @@ class AnemometerInstrument(QGraphicsItemGroup):
             self.rect.setPen(QPen(Qt.PenStyle.NoPen))
 
     def updatePositions(self, data):
-        pitch, roll = data
-        speed = 280
-        if isinstance(speed, numbers.Number):
+        packetId,roll,pitch,altitude,climbRate,windSpeed,heading,slip,button = data
+        if isinstance(windSpeed, numbers.Number):
             self.isInError = False
-            self.graduations.updatePositions(speed)
-            self.indicator.updatePositions(speed)
-            self.limit.updatePositions(speed)
-            self.trend.updatePositions(speed)
+            self.graduations.updatePositions(windSpeed)
+            self.indicator.updatePositions(windSpeed)
+            self.limit.updatePositions(windSpeed)
+            self.trend.updatePositions(windSpeed)
         else:
             self.isInError = True
             self.indicator.updatePositions("Err")

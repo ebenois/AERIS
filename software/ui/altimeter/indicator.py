@@ -76,14 +76,14 @@ class AltitudeIndicator(QGraphicsItemGroup):
         baseAlt = (altitude // step) * step
         centerY = self.height * 0.5
 
-        thousands = abs(altitude) // 1000
-        hundreds = (abs(altitude) % 1000) // 100
+        thousands = int(abs(altitude) // 1000)
+        hundreds = int((abs(altitude) % 1000) // 100)
 
         for digit in self.digits:
             altVal = baseAlt + digit["index"] * self.metersPerGraduation
             yOffset = (altitude - altVal) * self.pxPerMeter
 
-            tens = (abs(altVal) % 100) // 10 * 10
+            tens = int((abs(altVal) % 100) // 10 * 10)
             text = f"{tens:02d}"
 
             var = digit["variableText"]
@@ -117,13 +117,3 @@ class AltitudeIndicator(QGraphicsItemGroup):
 
         big.setVisible(True)
         small.setVisible(True)
-
-    def boundingRect(self):
-        return QRectF(
-            0, self.height / 2 - self.height / 15, self.width * 2, self.height * 2 / 15
-        )
-
-    def shape(self):
-        path = QPainterPath()
-        path.addRect(self.boundingRect())
-        return path

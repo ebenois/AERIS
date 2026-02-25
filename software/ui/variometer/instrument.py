@@ -45,11 +45,11 @@ class VariometerInstrument(QGraphicsItemGroup):
             self.rect.setPen(QPen(Qt.PenStyle.NoPen))
 
     def updatePositions(self, data):
-        speed = 4
+        packetId,roll,pitch,altitude,climbRate,windSpeed,heading,slip,button = data
 
-        if isinstance(speed, numbers.Number):
+        if isinstance(climbRate, numbers.Number):
             self.isInError = False
-            self.indicator.updatePositions(speed)
+            self.indicator.updatePositions(climbRate)
             self.graduations.show()
         else:
             self.isInError = True
