@@ -31,7 +31,7 @@ class RiseIndicator(QGraphicsItemGroup):
     def updatePositions(self, rise):
         pxPerUnit = self.height / (2 * math.log10(7)) * (14 / 15)
 
-        offset = math.log10(abs(rise) + 1)
+        offset = math.log10(abs(rise/10000) + 1)
         pixels = math.copysign(offset * pxPerUnit, rise)
 
         max_y = math.log10(6 + 1) * pxPerUnit

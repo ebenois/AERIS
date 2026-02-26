@@ -6,11 +6,12 @@ const int buttonPin = 2;
 unsigned int packetId = 0;
 
 // Variables d'état de l'avion
-float altitude = 3000.0;   // Altitude initiale (mètres)
-float climbRate = 0.0;     // Taux de montée (m/s)
-float airspeed = 250.0;    // Vitesse (km/h) - On va la faire varier selon le pitch
+float altitude = 3000.0;   // Altitude initiale (feet)
+float climbRate = 0.0;     // Taux de montée (feet/knot)
+float airspeed = 250.0;    // Vitesse (knot)
 float heading = 0.0;       // Cap (0-360)
 float slip = 0.0;          // Bille (dérapage)
+float knotPerFeet = 1.68781;
 
 void setup() {
   Serial.begin(115200);
@@ -26,6 +27,7 @@ void loop() {
   if (resetPressed) {
     altitude = 3000.0;
     heading = 0.0;
+    airspeed = 250;
   }
 
   // 2. Calcul du Pitch et Roll (Angles en degrés)
@@ -37,19 +39,25 @@ void loop() {
   
   // Le pitch influence le taux de montée (Climb Rate)
   // Si on cabre (pitch positif), on monte.
-  climbRate = pitch * 0.5; 
-  altitude += climbRate * 0.02; // 0.02 car delay de 20ms
-  if (altitude < 0) altitude = 0; // On ne s'écrase pas sous le sol
+  float pitchRad = pitch * PI / 180.0;
+  float rollRad  = roll  * PI / 180.0;
 
-  // Le roll influence le changement de cap (Heading)
-  // Plus on penche, plus on tourne vite.
-  float turnRate = roll * 0.1;
+  // Montée (vertical speed)
+  climbRate = sin(pitchRad) * airspeed * 101.27; // knots → ft/min approx
+  altitude += climbRate * 0.000333; // conversion ft/min vers 20ms
+
+  if (altitude < 0) altitude = 0;
+
+  // Taux de virage réaliste simplifié
+  float turnRate = tan(rollRad) * (airspeed / 100.0);
   heading += turnRate;
+
   if (heading >= 360) heading -= 360;
   if (heading < 0) heading += 360;
 
-  // La vitesse (Airspeed) diminue quand on monte et augmente quand on pique
-  airspeed = 250.0 - (pitch * 1.5) + (abs(roll) * -0.2);
+  // Vitesse simplifiée
+  airspeed += (-sin(pitchRad) * 2.0);
+  airspeed -= abs(rollRad) * 0.5;
 
   // La bille (Slip) réagit à l'inclinaison
   slip = (roll / 45.0) + (0.1 * sin(millis() / 500.0));
