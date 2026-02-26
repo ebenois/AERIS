@@ -45,8 +45,8 @@ class AltimeterInstrument(QGraphicsItemGroup):
         else:
             self.rect.setPen(QPen(Qt.PenStyle.NoPen))
 
-    def updatePositions(self, data):
-        packetId,roll,pitch,altitude,climbRate,windSpeed,heading,slip,button = data
+    def updatePositions(self, pitch,altitude,windSpeed ):
+
         if isinstance(altitude, numbers.Number):
             self.isInError = False
             self.graduations.updatePositions(altitude)

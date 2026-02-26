@@ -40,20 +40,21 @@ class ArduinoReader:
 
     def read(self):
         try:
-            if not self.is_connected():
+            if not self.is_connected() or self.serial.in_waiting == 0:
                 return None
 
-            if self.serial.in_waiting == 0:
+            # On lit TOUT ce qui est en attente pour ne garder que la ligne la plus récente
+            last_line = None
+            while self.serial.in_waiting > 0:
+                last_line = self.serial.readline().decode(errors="ignore").strip()
+
+            if not last_line:
                 return None
 
-            line = self.serial.readline().decode(errors="ignore").strip()
-            if not line:
-                return None
-
-            parts = line.split(",")
-            if len(parts) != 9:
-                print(f"⚠ Paquet invalide (attendu 9 valeurs) : {line}")
-                return None
+            parts = last_line.split(",")
+            if len(parts) == 9:
+                return [float(p) for p in parts]
+            return None
 
             # Convertir en float
             data = [float(p) for p in parts]

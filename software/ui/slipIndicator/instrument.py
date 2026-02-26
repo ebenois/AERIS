@@ -41,8 +41,7 @@ class SlipInstrument(QGraphicsItemGroup):
 
         self.hide()
 
-    def updatePositions(self, data):
-        packetId,roll,pitch,altitude,climbRate,windSpeed,heading,slip,button = data
+    def updatePositions(self,slip):
         if isinstance(slip, numbers.Number):
             self.indicator.updatePositions(slip)
             self.show()

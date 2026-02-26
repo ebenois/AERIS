@@ -1,17 +1,16 @@
-// Définir les broches simulées pour joystick (pour horizon)
-const int pinX = A0;
-const int pinY = A1;
+// Broches joystick
+const int pinX = A0; // Roll (Axe X)
+const int pinY = A1; // Pitch (Axe Y)
 const int buttonPin = 2;
 
-// Identifiant de paquet
 unsigned int packetId = 0;
 
-// Variables simulées pour autres instruments
-float altitude = 30000.0;       // en mètres
-float climbRate = 0.0;         // m/s
-float windSpeed = 200.0;         // m/s
-float heading = 0.0;           // en degrés 0-360
-float slip = 0.0;              // -1 à 1
+// Variables d'état de l'avion
+float altitude = 3000.0;   // Altitude initiale (mètres)
+float climbRate = 0.0;     // Taux de montée (m/s)
+float airspeed = 250.0;    // Vitesse (km/h) - On va la faire varier selon le pitch
+float heading = 0.0;       // Cap (0-360)
+float slip = 0.0;          // Bille (dérapage)
 
 void setup() {
   Serial.begin(115200);
@@ -19,46 +18,63 @@ void setup() {
 }
 
 void loop() {
-  // Lire joystick pour pitch/roll
+  // 1. Lecture des entrées
   int xValue = analogRead(pinX);  
   int yValue = analogRead(pinY);  
+  bool resetPressed = (digitalRead(buttonPin) == LOW);
 
-  int roll = map(xValue, 0, 1023, -360, 360);
-  int pitch = map(yValue, 0, 1023, -360, 360);
+  if (resetPressed) {
+    altitude = 3000.0;
+    heading = 0.0;
+  }
 
-  // Lire bouton
-  int buttonState = digitalRead(buttonPin); // 0 = pressé, 1 = relâché
+  // 2. Calcul du Pitch et Roll (Angles en degrés)
+  // On mappe vers des angles réalistes (-45° à 45°)
+  float roll = map(xValue, 0, 1023, -45, 45);
+  float pitch = map(yValue, 0, 1023, -45, 45);
 
-  // Simuler des variations pour les autres instruments
-  altitude += climbRate * 0.02; // incrément selon taux de montée (20ms interval)
-  heading += 0.5;                // rotation lente
-  if (heading > 360) heading -= 360;
-  windSpeed = 250 + 30 * sin(millis() / 10000.0);
-  climbRate = 2 * sin(millis() / 5000.0);
-  slip = 0.5 * sin(millis() / 3000.0);
+  // 3. Physique du simulateur (Modèle simplifié)
+  
+  // Le pitch influence le taux de montée (Climb Rate)
+  // Si on cabre (pitch positif), on monte.
+  climbRate = pitch * 0.5; 
+  altitude += climbRate * 0.02; // 0.02 car delay de 20ms
+  if (altitude < 0) altitude = 0; // On ne s'écrase pas sous le sol
 
-  // Envoyer paquet CSV complet
-  // Format attendu : packetId,roll,pitch,altitude,climbRate,windSpeed,heading,slip,button
+  // Le roll influence le changement de cap (Heading)
+  // Plus on penche, plus on tourne vite.
+  float turnRate = roll * 0.1;
+  heading += turnRate;
+  if (heading >= 360) heading -= 360;
+  if (heading < 0) heading += 360;
+
+  // La vitesse (Airspeed) diminue quand on monte et augmente quand on pique
+  airspeed = 250.0 - (pitch * 1.5) + (abs(roll) * -0.2);
+
+  // La bille (Slip) réagit à l'inclinaison
+  slip = (roll / 45.0) + (0.1 * sin(millis() / 500.0));
+
+  // 4. Envoi du paquet CSV
+  // Format : id, roll, pitch, alt, climb, speed, head, slip, button
   Serial.print(packetId);
   Serial.print(",");
-  Serial.print(-roll);
+  Serial.print(-roll, 1);    // 1 décimale pour la fluidité
   Serial.print(",");
-  Serial.print(-pitch);
+  Serial.print(pitch, 1);
   Serial.print(",");
-  Serial.print(altitude);
+  Serial.print(altitude, 1);
   Serial.print(",");
-  Serial.print(climbRate);
+  Serial.print(climbRate, 1);
   Serial.print(",");
-  Serial.print(windSpeed);
+  Serial.print(airspeed, 1);
   Serial.print(",");
-  Serial.print(heading);
+  Serial.print(heading, 1);
   Serial.print(",");
-  Serial.print(slip);
+  Serial.print(slip, 2);
   Serial.print(",");
-  Serial.println(buttonState);
+  Serial.println(resetPressed ? 0 : 1);
 
-  // Incrémenter packetId
   packetId = (packetId + 1) % 65536;
 
-  delay(20); // Correspond à updateIntervalMs = 20ms
+  delay(20); // 50 Hz
 }

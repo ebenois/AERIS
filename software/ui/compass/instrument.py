@@ -58,8 +58,7 @@ class CompassInstrument(QGraphicsItemGroup):
         else:
             self.dot.setPen(self.noPen)
 
-    def updatePositions(self, data):
-        packetId,roll,pitch,altitude,climbRate,windSpeed,heading,slip,button = data
+    def updatePositions(self, heading):
         if isinstance(heading, (int, float)):
             self.isInError = False
             self.graduations.updatePositions(heading)
