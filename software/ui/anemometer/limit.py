@@ -9,9 +9,9 @@ class SpeedLimit(QGraphicsItemGroup):
 
         self.width = width
         self.height = height
-        self.span = 60
         self.limit = 300
-        self.pixelPerUnit = (self.height / 2) / self.span
+        self.span = 70
+        self.pxPerKnot = self.height / (2*self.span)
 
         self.timer = QElapsedTimer()
         self.timer.start()
@@ -22,6 +22,6 @@ class SpeedLimit(QGraphicsItemGroup):
         self.addToGroup(self.rect)
 
     def updatePositions(self, speed):
-        heightPx = (self.limit - speed) * self.pixelPerUnit
-        safe = max(-self.height / 2, min(self.height / 2, heightPx))
-        self.rect.setRect(self.width, 0, self.width * 2 / 17, self.height / 2 - safe)
+        heightPx = self.height/2 - (self.limit - speed) * self.pxPerKnot
+        safe = min(self.height, max(0,heightPx))
+        self.rect.setRect(self.width, 0, self.width * 2 / 17, safe)

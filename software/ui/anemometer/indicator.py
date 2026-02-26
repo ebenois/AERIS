@@ -45,7 +45,7 @@ class SpeedIndicator(QGraphicsItemGroup):
         self.font.setPixelSize(int(height / 16))
 
         self.digits = []
-        for i in range(-2, 3):
+        for i in range(-2, 4):
             smallText = QGraphicsTextItem("", self)
             smallText.setDefaultTextColor(Qt.GlobalColor.white)
             smallText.setFont(self.font)
@@ -70,13 +70,14 @@ class SpeedIndicator(QGraphicsItemGroup):
         baseSpeed = (speed // step) * step
         centerY = self.height * 0.5
 
-        tens = speed // 10
+        tens = int(speed // 10) 
 
         for digit in self.digits:
             altVal = baseSpeed + digit["index"] * self.knotsPerGraduation
+            
             yOffset = (speed - altVal) * self.pxPerKnot
 
-            units = abs(altVal) % 10
+            units = abs(int(altVal)) % 10
             text = f"{units}"
 
             var = digit["variableText"]

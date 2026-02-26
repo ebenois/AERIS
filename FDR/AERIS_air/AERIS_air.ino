@@ -7,9 +7,9 @@ const int buttonPin = 2;
 unsigned int packetId = 0;
 
 // Variables simulées pour autres instruments
-float altitude = 1000.0;       // en mètres
+float altitude = 30000.0;       // en mètres
 float climbRate = 0.0;         // m/s
-float windSpeed = 5.0;         // m/s
+float windSpeed = 200.0;         // m/s
 float heading = 0.0;           // en degrés 0-360
 float slip = 0.0;              // -1 à 1
 
@@ -33,7 +33,7 @@ void loop() {
   altitude += climbRate * 0.02; // incrément selon taux de montée (20ms interval)
   heading += 0.5;                // rotation lente
   if (heading > 360) heading -= 360;
-  windSpeed = 5 + 2 * sin(millis() / 10000.0);
+  windSpeed = 250 + 30 * sin(millis() / 10000.0);
   climbRate = 2 * sin(millis() / 5000.0);
   slip = 0.5 * sin(millis() / 3000.0);
 
