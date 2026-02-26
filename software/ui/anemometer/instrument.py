@@ -43,8 +43,6 @@ class AnemometerInstrument(QGraphicsItemGroup):
         self.addToGroup(self.indicator)
 
         self.isInError = False
-        
-        self.updatePositions((0,0,0,0,0,40,0,0,0))
 
     def drawAlert(self, showRed):
         if showRed and self.isInError:
