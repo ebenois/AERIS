@@ -1,9 +1,4 @@
-from PyQt6.QtWidgets import (
-    QGraphicsItemGroup,
-    QGraphicsRectItem,
-    QGraphicsItem,
-    QGraphicsLineItem,
-)
+from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsRectItem
 from PyQt6.QtGui import QBrush, QColor, QPen
 from PyQt6.QtCore import Qt
 import numbers
@@ -17,41 +12,46 @@ from ui.anemometer.limit import SpeedLimit
 class AnemometerInstrument(QGraphicsItemGroup):
     def __init__(self, width, height):
         super().__init__()
-
         self.height = height
         self.width = width
 
         self.rect = QGraphicsRectItem(0, 0, width, height)
-
         self.rect.setBrush(QBrush(QColor("#808080")))
         self.rect.setPen(QPen(Qt.PenStyle.NoPen))
         self.addToGroup(self.rect)
 
-        self.noDataEffect = QPen(Qt.PenStyle.NoPen)
-        self.rect.setPen(self.noDataEffect)
+        self.alertFrame = QGraphicsRectItem(0, 0, self.width, self.height)
+        self.alertFrame.setPen(QPen(QColor("red"), 10))
+        self.alertFrame.setVisible(False)
+        self.addToGroup(self.alertFrame)
 
         self.limit = SpeedLimit(width, height)
-        self.addToGroup(self.limit)
-
         self.trend = SpeedTrend(width, height)
-        self.addToGroup(self.trend)
-
         self.graduations = SpeedGraduations(width, height)
-        self.addToGroup(self.graduations)
-
         self.indicator = SpeedIndicator(width, height)
-        self.addToGroup(self.indicator)
 
-        self.isInError = False
+        for item in [self.limit, self.trend, self.graduations, self.indicator]:
+            self.addToGroup(item)
 
-    def drawAlert(self, showRed):
-        if showRed and self.isInError:
-            self.rect.setPen(QPen(QColor("red"), 15))
+        self.isInError = True
+
+    def drawAlert(self, flashOn):
+        if self.isInError:
+            self.alertFrame.setVisible(flashOn)
+            self.graduations.hide()
+            self.trend.hide()
+            self.limit.hide()
+            self.indicator.updatePositions("ERR")
         else:
-            self.rect.setPen(QPen(Qt.PenStyle.NoPen))
+            self.alertFrame.setVisible(False)
+            self.graduations.show()
+            self.trend.show()
+            self.limit.show()
 
     def updatePositions(self, windSpeed):
-        if isinstance(windSpeed, numbers.Number):
+        dataValid = isinstance(windSpeed, numbers.Number)
+
+        if dataValid:
             self.isInError = False
             self.graduations.updatePositions(windSpeed)
             self.indicator.updatePositions(windSpeed)
@@ -59,4 +59,3 @@ class AnemometerInstrument(QGraphicsItemGroup):
             self.trend.updatePositions(windSpeed)
         else:
             self.isInError = True
-            self.indicator.updatePositions("Err")

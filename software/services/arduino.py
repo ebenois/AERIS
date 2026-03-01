@@ -43,7 +43,6 @@ class ArduinoReader:
             if not self.is_connected() or self.serial.in_waiting == 0:
                 return None
 
-            # On lit TOUT ce qui est en attente pour ne garder que la ligne la plus récente
             last_line = None
             while self.serial.in_waiting > 0:
                 last_line = self.serial.readline().decode(errors="ignore").strip()
@@ -56,7 +55,6 @@ class ArduinoReader:
                 return [float(p) for p in parts]
             return None
 
-            # Convertir en float
             data = [float(p) for p in parts]
             return data
 

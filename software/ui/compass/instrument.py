@@ -5,6 +5,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QBrush, QColor, QPen, QPolygonF
 from PyQt6.QtCore import Qt, QPointF
+import numbers
 
 from ui.compass.graduations import DirectionGraduations
 
@@ -12,7 +13,6 @@ from ui.compass.graduations import DirectionGraduations
 class CompassInstrument(QGraphicsItemGroup):
     def __init__(self, width, height):
         super().__init__()
-
         self.width = width
         self.height = height
 
@@ -28,11 +28,9 @@ class CompassInstrument(QGraphicsItemGroup):
         self.dot = QGraphicsEllipseItem(0, 0, width, height)
         self.dot.setBrush(self.bgBrush)
         self.dot.setPen(self.noPen)
-        self.addToGroup(self.dot)
 
         self.graduations = DirectionGraduations(width)
         self.graduations.setPos(centerX, centerY)
-        self.addToGroup(self.graduations)
 
         polygonWidth = 55
         polygonHeight = 45
@@ -48,18 +46,24 @@ class CompassInstrument(QGraphicsItemGroup):
         self.indicator = QGraphicsPolygonItem(polygon)
         self.indicator.setBrush(self.indicatorBrush)
         self.indicator.setPen(self.indicatorPen)
-        self.addToGroup(self.indicator)
 
-        self.isInError = False
+        for item in [self.dot, self.graduations, self.indicator]:
+            self.addToGroup(item)
 
-    def drawAlert(self, showRed):
-        if showRed and self.isInError:
-            self.dot.setPen(self.alertPen)
+        self.isInError = True
+
+    def drawAlert(self, flashOn):
+        if self.isInError:
+            self.dot.setPen(self.alertPen if flashOn else self.noPen)
+            self.graduations.hide()
         else:
             self.dot.setPen(self.noPen)
+            self.graduations.show()
 
     def updatePositions(self, heading):
-        if isinstance(heading, (int, float)):
+        dataValid = isinstance(heading, numbers.Number)
+
+        if dataValid:
             self.isInError = False
             self.graduations.updatePositions(heading)
         else:

@@ -39,11 +39,19 @@ class SlipInstrument(QGraphicsItemGroup):
         triangle.setBrush(QBrush(Qt.GlobalColor.white))
         triangle.setPen(QPen(Qt.PenStyle.NoPen))
 
-        self.hide()
+        self.isInError = True
+
+    def drawAlert(self, flashOn):
+        if self.isInError:
+            self.hide()
+        else:
+            self.show()
 
     def updatePositions(self, slip):
-        if isinstance(slip, numbers.Number):
+        dataValid = isinstance(slip, numbers.Number)
+
+        if dataValid:
+            self.isInError = False
             self.indicator.updatePositions(slip)
-            self.show()
         else:
-            self.hide()
+            self.isInError = True

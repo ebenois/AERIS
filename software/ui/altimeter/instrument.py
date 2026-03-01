@@ -12,51 +12,53 @@ from ui.altimeter.limit import AltitudeLimit
 class AltimeterInstrument(QGraphicsItemGroup):
     def __init__(self, width, height):
         super().__init__()
-
         self.width = width
-        self.heigth = height
+        self.height = height
 
-        self.rect = QGraphicsRectItem(0, 0, self.width, self.heigth)
-
+        self.rect = QGraphicsRectItem(0, 0, self.width, self.height)
         self.rect.setBrush(QBrush(QColor("#808080")))
         self.rect.setPen(QPen(Qt.PenStyle.NoPen))
         self.addToGroup(self.rect)
 
-        self.noDataEffect = QPen(Qt.PenStyle.NoPen)
-        self.rect.setPen(self.noDataEffect)
+        self.alertFrame = QGraphicsRectItem(0, 0, self.width, self.height)
+        self.alertFrame.setPen(QPen(QColor("red"), 10))
+        self.alertFrame.setVisible(False)
+        self.addToGroup(self.alertFrame)
 
         self.limit = AltitudeLimit(width, height)
-        self.addToGroup(self.limit)
-
         self.trend = AltitudeTrend(width, height)
-        self.addToGroup(self.trend)
-
         self.graduations = AltitudeGraduations(width, height)
-        self.addToGroup(self.graduations)
-
         self.indicator = AltitudeIndicator(width, height)
-        self.addToGroup(self.indicator)
 
-        self.isInError = False
+        for item in [self.limit, self.trend, self.graduations, self.indicator]:
+            self.addToGroup(item)
 
-    def drawAlert(self, showRed):
-        if showRed and self.isInError:
-            self.rect.setPen(QPen(QColor("red"), 10))
+        self.isInError = True
+
+    def drawAlert(self, flashOn):
+        if self.isInError:
+            self.alertFrame.setVisible(flashOn)
+            self.graduations.hide()
+            self.trend.hide()
+            self.limit.hide()
+            self.indicator.updatePositions("ERR")
         else:
-            self.rect.setPen(QPen(Qt.PenStyle.NoPen))
+            self.alertFrame.setVisible(False)
+            self.graduations.show()
+            self.trend.show()
+            self.limit.show()
 
     def updatePositions(self, pitch, altitude, windSpeed):
+        data_valid = isinstance(altitude, (int, float))
 
-        if isinstance(altitude, numbers.Number):
+        if data_valid:
             self.isInError = False
             self.graduations.updatePositions(altitude)
             self.indicator.updatePositions(altitude)
             self.limit.updatePositions(altitude)
-
             if isinstance(windSpeed, numbers.Number) and isinstance(
                 pitch, numbers.Number
             ):
                 self.trend.updatePositions(windSpeed, pitch)
         else:
             self.isInError = True
-            self.indicator.updatePositions("Error")

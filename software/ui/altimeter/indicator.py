@@ -4,9 +4,8 @@ from PyQt6.QtWidgets import (
     QGraphicsItem,
     QGraphicsPolygonItem,
 )
-from PyQt6.QtGui import QPen, QFont, QBrush, QPainterPath, QPolygonF
+from PyQt6.QtGui import QPen, QFont, QBrush, QPainterPath, QPolygonF, QColor
 from PyQt6.QtCore import Qt, QRectF, QPointF
-import numbers
 
 
 class AltitudeIndicator(QGraphicsItemGroup):
@@ -66,11 +65,22 @@ class AltitudeIndicator(QGraphicsItemGroup):
             )
 
     def updatePositions(self, altitude):
-        if not isinstance(altitude, numbers.Number):
-            main = self.digits[2]["bigText"]
-            main.setPlainText(str(altitude))
-            main.setVisible(True)
+        if not isinstance(altitude, (int, float)):
+            for digit in self.digits:
+                digit["bigText"].setVisible(False)
+                digit["smallText"].setVisible(False)
+                digit["variableText"].setVisible(False)
+
+            error_item = self.digits[2]["bigText"]
+            error_item.setPlainText("XXX")
+            error_item.setDefaultTextColor(QColor("red"))
+            error_item.setVisible(True)
+
+            rect = error_item.boundingRect()
+            error_item.setPos((self.width) / 2, (self.height - rect.height()) / 2)
             return
+
+        self.digits[2]["bigText"].setDefaultTextColor(Qt.GlobalColor.white)
 
         step = self.metersPerGraduation * 2
         baseAlt = (altitude // step) * step
@@ -90,12 +100,16 @@ class AltitudeIndicator(QGraphicsItemGroup):
             if var.toPlainText() != text:
                 var.setPlainText(text)
 
-            rect = var.boundingRect()
+            v_rect = var.boundingRect()
             var.setPos(
-                self.width - rect.width() / 2 + 5,
-                centerY + yOffset - rect.height() * 0.5,
+                self.width - v_rect.width() / 2 + 5,
+                centerY + yOffset - v_rect.height() * 0.5,
             )
             var.setVisible(True)
+
+            if digit["index"] != 0:
+                digit["bigText"].setVisible(False)
+                digit["smallText"].setVisible(False)
 
         main = self.digits[2]
         big = main["bigText"]
@@ -111,13 +125,14 @@ class AltitudeIndicator(QGraphicsItemGroup):
 
         bigRect = big.boundingRect()
         smallRect = small.boundingRect()
+        varRect = main["variableText"].boundingRect()
 
         big.setPos(
-            self.width - rect.width() - smallRect.width() - bigRect.width() / 2 + 10,
+            self.width - varRect.width() - smallRect.width() - bigRect.width() / 2 + 10,
             centerY - bigRect.height() / 2,
         )
         small.setPos(
-            self.width - rect.width() - smallRect.width() / 2 + 25,
+            self.width - varRect.width() - smallRect.width() / 2 + 25,
             centerY - smallRect.height() / 2,
         )
 

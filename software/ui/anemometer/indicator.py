@@ -1,8 +1,6 @@
 from PyQt6.QtWidgets import (
     QGraphicsItemGroup,
-    QGraphicsLineItem,
     QGraphicsTextItem,
-    QGraphicsRectItem,
     QGraphicsItem,
     QGraphicsPolygonItem,
 )
@@ -57,14 +55,21 @@ class SpeedIndicator(QGraphicsItemGroup):
             )
 
     def updatePositions(self, speed):
-        if not isinstance(speed, numbers.Number):
+        if not isinstance(speed, (int, float)):
             for digit in self.digits:
-                main = digit["smallText"]
-                main.setPlainText(str(speed))
-                rect = main.boundingRect()
-                main.setPos(self.width / 20, self.height / 2 - rect.height() / 2)
-                main.setVisible(True)
+                digit["smallText"].setVisible(False)
+                digit["variableText"].setVisible(False)
+
+            error_item = self.digits[2]["smallText"]
+            error_item.setPlainText("XXX")
+            error_item.setDefaultTextColor(QColor("red"))
+            error_item.setVisible(True)
+
+            rect = error_item.boundingRect()
+            error_item.setPos(self.width / 20, self.height / 2 - rect.height() / 2)
             return
+
+        self.digits[2]["smallText"].setDefaultTextColor(Qt.GlobalColor.white)
 
         step = self.knotsPerGraduation * 2
         baseSpeed = (speed // step) * step

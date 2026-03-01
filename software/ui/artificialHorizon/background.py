@@ -5,6 +5,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QPen, QBrush, QColor
 from PyQt6.QtCore import Qt
+import numbers
 
 from ui.artificialHorizon.graduations import PitchGraduations
 
@@ -51,6 +52,15 @@ class ArtificialHorizonBackground(QGraphicsItemGroup):
         return group
 
     def updatePositions(self, pitch, roll):
+        if not isinstance(roll, numbers.Number) or not isinstance(
+            pitch, numbers.Number
+        ):
+            self.setRotation(0)
+            self.bg1.setPos(0, 0)
+            self.bg2.setPos(0, 0)
+            self.graduations.hide()
+            return
+
         self.setRotation(-roll)
 
         pixelsPerDegree = self.pixelsPerDegree
@@ -62,3 +72,4 @@ class ArtificialHorizonBackground(QGraphicsItemGroup):
         self.bg2.setPos(0, yOffset - cycleHeight)
 
         self.graduations.updatePositions(pitch)
+        self.graduations.show()

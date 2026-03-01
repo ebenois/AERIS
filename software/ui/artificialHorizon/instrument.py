@@ -14,7 +14,6 @@ from ui.artificialHorizon.background import ArtificialHorizonBackground
 class ArtificialHorizonInstrument(QGraphicsItemGroup):
     def __init__(self, width, height):
         super().__init__()
-
         self.width = width
         self.height = height
 
@@ -33,11 +32,12 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
         self.addToGroup(self.background)
         self.background.setPos(width / 2, height / 2)
 
-        self.rect = QGraphicsRectItem(0, 0, width, height)
-        self.rect.setPen(QPen(Qt.PenStyle.NoPen))
-        self.addToGroup(self.rect)
+        self.alertFrame = QGraphicsRectItem(0, 0, self.width, self.height)
+        self.alertFrame.setPen(QPen(QColor("red"), 10))
+        self.alertFrame.setVisible(False)
+        self.addToGroup(self.alertFrame)
 
-        self.isInError = False
+        self.isInError = True
 
         self.maquette = QGraphicsItemGroup()
 
@@ -142,14 +142,19 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
         self.currentWingsHeight = value
         self.UpdateWingsGeometry()
 
-    def drawAlert(self, showRed):
-        if showRed and self.isInError:
-            self.rect.setPen(QPen(QColor("red"), 15))
+    def drawAlert(self, flashOn):
+        if self.isInError:
+            self.alertFrame.setVisible(flashOn)
+            self.background.updatePositions("ERR", "ERR")
         else:
-            self.rect.setPen(QPen(Qt.PenStyle.NoPen))
+            self.alertFrame.setVisible(False)
 
     def updatePositions(self, roll, pitch):
-        if isinstance(roll, numbers.Number) and isinstance(pitch, numbers.Number):
+        dataValid = isinstance(roll, numbers.Number) and isinstance(
+            pitch, numbers.Number
+        )
+
+        if dataValid:
             self.isInError = False
             self.background.updatePositions(pitch, roll)
         else:

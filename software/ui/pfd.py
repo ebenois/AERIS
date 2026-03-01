@@ -20,11 +20,13 @@ class PrimaryFlightDisplay(QWidget):
         self.heartbeatIntervalMs = 250
 
         self.lastDataTime = time.time()
-        self.connectionTimeout = 1.0
         self.isConnected = False
+        self.connectionTimeout = 0.5
+        self.flashState = False
+        self.cycleStep = 0
 
         self.consecutivePacketLoss = 0
-        self.maxAllowedLoss = 3
+        self.maxAllowedLoss = 5
         self.dataIntegrityError = False
 
         self.expectedPacketId = None
@@ -122,38 +124,38 @@ class PrimaryFlightDisplay(QWidget):
             return
 
         data = self.arduino.read()
+        currentTime = time.time()
 
         if not data:
-            if time.time() - self.lastDataTime > self.connectionTimeout:
+            if currentTime - self.lastDataTime > self.connectionTimeout:
                 if self.isConnected:
                     self.isConnected = False
                     self.window().updateArduinoStatus(False)
+                    print("⚠ Connexion perdue avec l'Arduino")
+
+                for instr in self.errorCapable:
+                    instr.isInError = True
             return
 
-        self.lastDataTime = time.time()
+        self.lastDataTime = currentTime
 
         if not self.isConnected:
             self.isConnected = True
             self.window().updateArduinoStatus(True)
+            print("Connexion rétablie")
 
+        # data = [id, roll, pitch, alt, climb, speed, head, slip, btn]
         try:
             packetId = int(data[0])
         except (ValueError, IndexError, TypeError):
             return
 
-        if self.expectedPacketId is None:
-            self.expectedPacketId = packetId
-
-        else:
+        if self.expectedPacketId is not None:
             if packetId != self.expectedPacketId:
-
                 if packetId < self.expectedPacketId:
                     self.expectedPacketId = packetId
-                    return
-
-                missed = packetId - self.expectedPacketId
-
-                if missed > 0:
+                else:
+                    missed = packetId - self.expectedPacketId
                     self.lostPackets += missed
                     self.consecutivePacketLoss += 1
                     print(f"⚠ Paquets perdus: {missed}")
@@ -164,9 +166,11 @@ class PrimaryFlightDisplay(QWidget):
 
         self.dataIntegrityError = self.consecutivePacketLoss > self.maxAllowedLoss
 
-        self.updatePositions(data)
-
-        print(data)
+        if not self.dataIntegrityError:
+            self.updatePositions(data)
+        else:
+            for instr in self.errorCapable:
+                instr.isInError = True
 
     def updatePositions(
         self, data
@@ -181,28 +185,31 @@ class PrimaryFlightDisplay(QWidget):
         self.instruments[5].updatePositions(data[7])  # Bille (slip)
 
     def globalHeartbeat(self):
-        self.cycleStep = (self.cycleStep + 1) % 10
+        currentTime = time.time()
 
-        flashOn = self.cycleStep in (0, 2)
-        playSound = self.cycleStep == 0
+        if currentTime - self.lastDataTime > self.connectionTimeout:
+            if self.isConnected:
+                self.isConnected = False
+                if self.window():
+                    self.window().updateArduinoStatus(False)
+            for instr in self.errorCapable:
+                instr.isInError = True
 
-        connectionError = not self.isConnected
-        anyError = connectionError or self.dataIntegrityError
-
-        for instr in self.errorCapable:
-            instr.isInError = anyError
+        anyError = any(instr.isInError for instr in self.errorCapable)
 
         if anyError:
-            if (
-                playSound
-                and self.alertPlayer.playbackState()
-                != QMediaPlayer.PlaybackState.PlayingState
-            ):
+            self.flashState = self.cycleStep == 0 or self.cycleStep == 2
+
+            if self.flashState:
                 self.alertPlayer.play()
 
             for instr in self.alertCapable:
-                instr.drawAlert(flashOn)
+                instr.drawAlert(self.flashState)
+
+            self.cycleStep = (self.cycleStep + 1) % 5
         else:
+            self.flashState = False
+            self.cycleStep = 0
             for instr in self.alertCapable:
                 instr.drawAlert(False)
 
