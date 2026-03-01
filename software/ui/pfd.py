@@ -22,7 +22,7 @@ class PrimaryFlightDisplay(QWidget):
         self.lastDataTime = time.time()
         self.connectionTimeout = 1.0
         self.isConnected = False
-        
+
         self.consecutivePacketLoss = 0
         self.maxAllowedLoss = 3
         self.dataIntegrityError = False
@@ -161,22 +161,24 @@ class PrimaryFlightDisplay(QWidget):
                 self.consecutivePacketLoss = 0
 
         self.expectedPacketId = packetId + 1
-        
-        self.dataIntegrityError = (
-            self.consecutivePacketLoss > self.maxAllowedLoss
-        )
+
+        self.dataIntegrityError = self.consecutivePacketLoss > self.maxAllowedLoss
 
         self.updatePositions(data)
-            
+
         print(data)
-        
-    def updatePositions(self, data): # data = [id, roll, pitch, alt, climb, speed, head, slip, btn]
-            self.instruments[0].updatePositions(data[1], data[2]) # Horizon (roll, pitch)
-            self.instruments[1].updatePositions(data[5])         # Vitesse (airspeed)
-            self.instruments[2].updatePositions(data[6])         # Cap (heading)
-            self.instruments[3].updatePositions(data[4])         # Variomètre (climbRate)
-            self.instruments[4].updatePositions(data[2], data[3], data[5])         # Altimètre (altitude)
-            self.instruments[5].updatePositions(data[7])         # Bille (slip)
+
+    def updatePositions(
+        self, data
+    ):  # data = [id, roll, pitch, alt, climb, speed, head, slip, btn]
+        self.instruments[0].updatePositions(data[1], data[2])  # Horizon (roll, pitch)
+        self.instruments[1].updatePositions(data[5])  # Vitesse (airspeed)
+        self.instruments[2].updatePositions(data[6])  # Cap (heading)
+        self.instruments[3].updatePositions(data[4])  # Variomètre (climbRate)
+        self.instruments[4].updatePositions(
+            data[2], data[3], data[5]
+        )  # Altimètre (altitude)
+        self.instruments[5].updatePositions(data[7])  # Bille (slip)
 
     def globalHeartbeat(self):
         self.cycleStep = (self.cycleStep + 1) % 10

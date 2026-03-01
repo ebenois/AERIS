@@ -70,11 +70,11 @@ class SpeedIndicator(QGraphicsItemGroup):
         baseSpeed = (speed // step) * step
         centerY = self.height * 0.5
 
-        tens = int(speed // 10) 
+        tens = int(speed // 10)
 
         for digit in self.digits:
             altVal = baseSpeed + digit["index"] * self.knotsPerGraduation
-            
+
             yOffset = (speed - altVal) * self.pxPerKnot
 
             units = abs(int(altVal)) % 10

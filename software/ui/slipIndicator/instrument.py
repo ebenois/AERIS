@@ -41,7 +41,7 @@ class SlipInstrument(QGraphicsItemGroup):
 
         self.hide()
 
-    def updatePositions(self,slip):
+    def updatePositions(self, slip):
         if isinstance(slip, numbers.Number):
             self.indicator.updatePositions(slip)
             self.show()

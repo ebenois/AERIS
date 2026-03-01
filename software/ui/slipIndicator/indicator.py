@@ -38,6 +38,6 @@ class SlipIndicator(QGraphicsItemGroup):
 
     def updatePositions(self, slip):
         maxRotation = 60
-        pixels = max(-maxRotation, min(maxRotation, slip*60))
+        pixels = max(-maxRotation, min(maxRotation, slip * 60))
 
         self.setRotation(pixels * math.tanh(self.width / (2 * self.radius)))

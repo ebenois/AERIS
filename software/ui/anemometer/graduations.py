@@ -24,7 +24,7 @@ class SpeedGraduations(QGraphicsItemGroup):
 
         pen = QPen(QColor("#FFFFFF"), 4)
         pen.setCapStyle(Qt.PenCapStyle.RoundCap)
-        
+
         self.font = QFont()
         self.font.setPixelSize(int(height / 22))
 

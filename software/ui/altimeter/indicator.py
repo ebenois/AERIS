@@ -92,7 +92,7 @@ class AltitudeIndicator(QGraphicsItemGroup):
 
             rect = var.boundingRect()
             var.setPos(
-                self.width - rect.width()/2 + 5,
+                self.width - rect.width() / 2 + 5,
                 centerY + yOffset - rect.height() * 0.5,
             )
             var.setVisible(True)
@@ -112,12 +112,18 @@ class AltitudeIndicator(QGraphicsItemGroup):
         bigRect = big.boundingRect()
         smallRect = small.boundingRect()
 
-        big.setPos(self.width - rect.width() - smallRect.width() - bigRect.width()/2 + 10, centerY - bigRect.height() / 2)
-        small.setPos(self.width - rect.width() - smallRect.width()/2 + 25, centerY - smallRect.height() / 2)
+        big.setPos(
+            self.width - rect.width() - smallRect.width() - bigRect.width() / 2 + 10,
+            centerY - bigRect.height() / 2,
+        )
+        small.setPos(
+            self.width - rect.width() - smallRect.width() / 2 + 25,
+            centerY - smallRect.height() / 2,
+        )
 
         big.setVisible(True)
         small.setVisible(True)
-        
+
     def boundingRect(self):
         return QRectF(
             0, self.height / 2 - self.height / 15, self.width * 2, self.height * 2 / 15

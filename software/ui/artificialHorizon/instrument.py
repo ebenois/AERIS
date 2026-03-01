@@ -148,7 +148,7 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
         else:
             self.rect.setPen(QPen(Qt.PenStyle.NoPen))
 
-    def updatePositions(self, roll,pitch):
+    def updatePositions(self, roll, pitch):
         if isinstance(roll, numbers.Number) and isinstance(pitch, numbers.Number):
             self.isInError = False
             self.background.updatePositions(pitch, roll)
