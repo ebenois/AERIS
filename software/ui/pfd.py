@@ -16,7 +16,7 @@ class PrimaryFlightDisplay(QWidget):
     def __init__(self, size=1200):
         super().__init__()
 
-        self.updateIntervalMs = 20
+        self.updateIntervalMs = 10
         self.heartbeatIntervalMs = 250
 
         self.lastDataTime = time.time()
@@ -28,9 +28,6 @@ class PrimaryFlightDisplay(QWidget):
         self.consecutivePacketLoss = 0
         self.maxAllowedLoss = 5
         self.dataIntegrityError = False
-
-        self.expectedPacketId = None
-        self.lostPackets = 0
 
         self.arduino = None
 
@@ -126,7 +123,7 @@ class PrimaryFlightDisplay(QWidget):
         data = self.arduino.read()
         currentTime = time.time()
 
-        if not data:
+        if data is None:
             if currentTime - self.lastDataTime > self.connectionTimeout:
                 if self.isConnected:
                     self.isConnected = False
@@ -150,19 +147,9 @@ class PrimaryFlightDisplay(QWidget):
         except (ValueError, IndexError, TypeError):
             return
 
-        if self.expectedPacketId is not None:
-            if packetId != self.expectedPacketId:
-                if packetId < self.expectedPacketId:
-                    self.expectedPacketId = packetId
-                else:
-                    missed = packetId - self.expectedPacketId
-                    self.lostPackets += missed
-                    self.consecutivePacketLoss += 1
-                    print(f"⚠ Paquets perdus: {missed}")
-            else:
-                self.consecutivePacketLoss = 0
-
-        self.expectedPacketId = packetId + 1
+        print(
+                f"lost={self.arduino.lostPackets} ignored/s={self.arduino.ignoredPerSecond}"
+            )
 
         self.dataIntegrityError = self.consecutivePacketLoss > self.maxAllowedLoss
 
@@ -200,7 +187,7 @@ class PrimaryFlightDisplay(QWidget):
         if anyError:
             self.flashState = self.cycleStep == 0 or self.cycleStep == 2
 
-            if self.flashState:
+            if self.cycleStep == 0:
                 self.alertPlayer.play()
 
             for instr in self.alertCapable:
