@@ -10,9 +10,11 @@ from ui.variometer.indicator import RiseIndicator
 class VariometerInstrument(QGraphicsItemGroup):
     def __init__(self, width, height):
         super().__init__()
+        self.limit=50000
         self.width = width
         self.height = height
         
+        self.isInError = True
         self.isCritical = False
 
         self.rect = QGraphicsRectItem(0, 0, self.width, self.height)
@@ -22,7 +24,8 @@ class VariometerInstrument(QGraphicsItemGroup):
         self.addToGroup(self.rect)
 
         self.alertFrame = QGraphicsRectItem(0, 0, self.width, self.height)
-        self.alertFrame.setPen(QPen(QColor("red"), 10))
+        self.isInErrorPen = QPen(QColor("red"), 10)
+        self.isCriticalPen = QPen(QColor("#ff7f00"), 10)
         self.alertFrame.setVisible(False)
         self.addToGroup(self.alertFrame)
 
@@ -34,16 +37,19 @@ class VariometerInstrument(QGraphicsItemGroup):
         self.addToGroup(self.indicator)
         self.indicator.setPos(width * 2 / 3, height / 2)
 
-        self.isInError = True
-
     def drawAlert(self, flashOn):
         if self.isInError:
+            self.alertFrame.setPen(self.isInErrorPen)
             self.alertFrame.setVisible(flashOn)
             self.graduations.hide()
-            self.indicator.updatePositions(0)
+            
+        elif self.isCritical:
+            self.alertFrame.setPen(self.isCriticalPen)
+            self.alertFrame.setVisible(flashOn)
+
         else:
-            self.alertFrame.setVisible(False)
             self.graduations.show()
+            self.alertFrame.setVisible(False)
             
     def drawLess(self, highMentalLoad):
         if highMentalLoad:
@@ -53,9 +59,13 @@ class VariometerInstrument(QGraphicsItemGroup):
 
     def updatePositions(self, climbRate):
         dataValid = isinstance(climbRate, numbers.Number)
-
         if dataValid:
             self.isInError = False
             self.indicator.updatePositions(climbRate)
+            
+            if abs(climbRate) >= self.limit:
+                    self.isCritical = True
+            else:
+                self.isCritical = False
         else:
             self.isInError = True

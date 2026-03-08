@@ -48,14 +48,16 @@ class AltimeterInstrument(QGraphicsItemGroup):
             self.trend.hide()
             self.limit.hide()
             self.indicator.updatePositions("ERR")
+            
+        elif self.isCritical:
+            self.alertFrame.setPen(self.isCriticalPen)
+            self.alertFrame.setVisible(flashOn)
 
         else:
             self.graduations.show()
             self.trend.show()
             self.limit.show()
-
-            if not self.isCritical:
-                self.alertFrame.setVisible(False)
+            self.alertFrame.setVisible(False)
                 
     def drawLess(self, highMentalLoad):
         if highMentalLoad:
@@ -79,12 +81,5 @@ class AltimeterInstrument(QGraphicsItemGroup):
                 self.isCritical = True
             else:
                 self.isCritical = False
-
-            if self.isCritical and not self.isInError:
-                self.alertFrame.setPen(self.isCriticalPen)
-                self.alertFrame.setVisible(True)
-            else:
-                if not self.isInError:
-                    self.alertFrame.setVisible(False)
         else:
             self.isInError = True

@@ -16,8 +16,10 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
         super().__init__()
         self.width = width
         self.height = height
+        self.limit=45
         
         self.isCritical = False
+        self.isInError = True
 
         settings = QSettings("ENSC", "AERIS")
 
@@ -35,11 +37,10 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
         self.background.setPos(width / 2, height / 2)
 
         self.alertFrame = QGraphicsRectItem(0, 0, self.width, self.height)
-        self.alertFrame.setPen(QPen(QColor("red"), 10))
+        self.isInErrorPen = QPen(QColor("red"), 10)
+        self.isCriticalPen = QPen(QColor("#ff7f00"), 10)
         self.alertFrame.setVisible(False)
         self.addToGroup(self.alertFrame)
-
-        self.isInError = True
 
         self.maquette = QGraphicsItemGroup()
 
@@ -146,10 +147,18 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
 
     def drawAlert(self, flashOn):
         if self.isInError:
+            self.alertFrame.setPen(self.isInErrorPen)
             self.alertFrame.setVisible(flashOn)
             self.background.updatePositions("ERR", "ERR")
+            
+        elif self.isCritical:
+            self.alertFrame.setPen(self.isCriticalPen)
+            self.alertFrame.setVisible(flashOn)
+
         else:
+            self.background.updatePositions("ERR", "ERR")
             self.alertFrame.setVisible(False)
+                
             
     def drawLess(self, highMentalLoad):
         if highMentalLoad:
@@ -165,5 +174,9 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
         if dataValid:
             self.isInError = False
             self.background.updatePositions(pitch, roll)
+            if abs(pitch) >= self.limit or abs(roll) >= self.limit:
+                self.isCritical = True
+            else:
+                self.isCritical = False
         else:
             self.isInError = True

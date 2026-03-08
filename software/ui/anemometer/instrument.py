@@ -48,40 +48,38 @@ class AnemometerInstrument(QGraphicsItemGroup):
             self.trend.hide()
             self.limit.hide()
             self.indicator.updatePositions("ERR")
+            
+        elif self.isCritical:
+            self.alertFrame.setPen(self.isCriticalPen)
+            self.alertFrame.setVisible(flashOn)
 
         else:
             self.graduations.show()
             self.trend.show()
             self.limit.show()
-
-            if not self.isCritical:
-                self.alertFrame.setVisible(False)
+            self.alertFrame.setVisible(False)
                 
     def drawLess(self, highMentalLoad):
         if highMentalLoad:
             self.setOpacity(0.5)
         else:
-            self.setOpacity(1)
-
+            self.setOpacity(1)            
+                
     def updatePositions(self, windSpeed):
         dataValid = isinstance(windSpeed, numbers.Number)
 
         if dataValid:
             self.isInError = False
+
             self.graduations.updatePositions(windSpeed)
             self.indicator.updatePositions(windSpeed)
             self.limit.updatePositions(windSpeed)
             self.trend.updatePositions(windSpeed)
+
             if windSpeed <= self.limitmin or windSpeed >= self.limitmax:
                 self.isCritical = True
             else:
                 self.isCritical = False
 
-            if self.isCritical and not self.isInError:
-                self.alertFrame.setPen(self.isCriticalPen)
-                self.alertFrame.setVisible(True)
-            else:
-                if not self.isInError:
-                    self.alertFrame.setVisible(False)
         else:
             self.isInError = True

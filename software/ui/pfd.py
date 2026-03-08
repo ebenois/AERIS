@@ -81,9 +81,9 @@ class PrimaryFlightDisplay(QWidget):
 
         positions = [
             (225, 240),  # artificial horizon
-            (15, 185),  # anemometer
+            (15, 185),   # anemometer
             (100, 990),  # compass
-            (1075, 335),  # variometer
+            (1075, 335), # variometer
             (915, 185),  # altimeter
             (225, 240),  # slip
         ]
@@ -92,9 +92,63 @@ class PrimaryFlightDisplay(QWidget):
             self.scene.addItem(instr)
             instr.setPos(*pos)
 
+        self.alertInstruments = [i for i in self.instruments if hasattr(i, "drawAlert")]
         self.errorCapable = [i for i in self.instruments if hasattr(i, "isInError")]
-        self.alertCapable = [i for i in self.instruments if hasattr(i, "drawAlert")]
-        self.alertCapable = [i for i in self.instruments if hasattr(i, "drawLess")]
+
+
+    def globalHeartbeat(self):
+        currentTime = time.time()
+
+        if currentTime - self.lastDataTime > self.connectionTimeout:
+            if self.isConnected:
+                self.isConnected = False
+                if self.window():
+                    self.window().updateArduinoStatus(False)
+            for instr in self.errorCapable:
+                instr.isInError = True
+
+        anyError = any(getattr(instr, "isInError", False) for instr in self.errorCapable)
+        anyCritical = any(getattr(instr, "isCritical", False) for instr in self.errorCapable)
+
+        self.flashState = self.cycleStep in (0, 2)
+
+        if self.cycleStep in (0, 2) and (anyError or anyCritical):
+            self.alertPlayer.play()
+
+        for instr in self.alertInstruments:
+            if getattr(instr, "isInError", False) or getattr(instr, "isCritical", False):
+                instr.drawAlert(self.flashState)
+            else:
+                instr.drawAlert(False)
+
+        highMentalLoad = any(getattr(instr, "isCritical", False) for instr in self.instruments)
+        
+        horizon = self.instruments[0]
+        anemometer = self.instruments[1]
+        compas = self.instruments[2]
+        variometer = self.instruments[3]
+        altimeter = self.instruments[4]
+        slip = self.instruments[5]
+
+        for instr in self.instruments:
+            instr.drawLess(False)
+
+        if highMentalLoad:
+            if anemometer.isCritical:
+                compas.drawLess(True)
+                variometer.drawLess(True)
+            
+            if horizon.isCritical:
+                compas.drawLess(True)
+                variometer.drawLess(True)
+                slip.drawLess(True)
+                altimeter.drawLess(True)
+            
+            if altimeter.isCritical or variometer.isCritical:
+                compas.drawLess(True)
+                slip.drawLess(True)
+                
+        self.cycleStep = (self.cycleStep + 1) % 5
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
@@ -171,44 +225,6 @@ class PrimaryFlightDisplay(QWidget):
             data[2], data[3], data[5]
         )  # Altimètre (altitude)
         self.instruments[5].updatePositions(data[7])  # Bille (slip)
-
-    def globalHeartbeat(self):
-        currentTime = time.time()
-
-        if currentTime - self.lastDataTime > self.connectionTimeout:
-            if self.isConnected:
-                self.isConnected = False
-                if self.window():
-                    self.window().updateArduinoStatus(False)
-            for instr in self.errorCapable:
-                instr.isInError = True
-
-        anyError = any(instr.isInError for instr in self.errorCapable)
-        anyCritical = any(instr.isCritical for instr in self.errorCapable)
-
-        if anyError:
-            self.flashState = self.cycleStep == 0 or self.cycleStep == 2
-
-            if self.cycleStep == 0:
-                self.alertPlayer.play()
-
-            for instr in self.alertCapable:
-                instr.drawAlert(self.flashState)
-
-            self.cycleStep = (self.cycleStep + 1) % 5
-        else:
-            self.flashState = False
-            self.cycleStep = 0
-            for instr in self.alertCapable:
-                instr.drawAlert(False)
-                
-        anemometer = self.instruments[1]
-        compass = self.instruments[2]
-
-        if getattr(anemometer, "isCritical", False):
-            compass.drawLess(True)
-        else:
-            compass.drawLess(False)
 
     def setArduino(self, arduino):
         self.arduino = arduino
