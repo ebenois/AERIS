@@ -135,18 +135,18 @@ class PrimaryFlightDisplay(QWidget):
 
         if highMentalLoad:
             if anemometer.isCritical:
-                compas.drawLess(True)
-                variometer.drawLess(True)
+                if not (compas.isCritical) : compas.drawLess(True)
+                if not (variometer.isCritical) : variometer.drawLess(True)
             
             if horizon.isCritical:
-                compas.drawLess(True)
-                variometer.drawLess(True)
-                slip.drawLess(True)
-                altimeter.drawLess(True)
+                if not (compas.isCritical) : compas.drawLess(True)
+                if not (variometer.isCritical) : variometer.drawLess(True)
+                if not (slip.isCritical) : slip.drawLess(True)
+                if not (altimeter.isCritical) : altimeter.drawLess(True)
             
             if altimeter.isCritical or variometer.isCritical:
-                compas.drawLess(True)
-                slip.drawLess(True)
+                if not (compas.isCritical) : compas.drawLess(True)
+                if not (slip.isCritical) : slip.drawLess(True)
                 
         self.cycleStep = (self.cycleStep + 1) % 5
 

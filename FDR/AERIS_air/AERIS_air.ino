@@ -46,7 +46,7 @@ void loop() {
   climbRate = sin(pitchRad) * airspeed * 101.27; // knots → ft/min approx
   altitude += climbRate * 0.000333; // conversion ft/min vers 20ms
 
-  if (altitude < 0) altitude = 0;
+  if (altitude < -100) altitude = 0;
 
   // Taux de virage réaliste simplifié
   float turnRate = tan(rollRad) * (airspeed / 100.0);
