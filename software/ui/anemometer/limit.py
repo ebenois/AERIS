@@ -4,12 +4,12 @@ from PyQt6.QtCore import Qt, QElapsedTimer
 
 
 class SpeedLimit(QGraphicsItemGroup):
-    def __init__(self, width, height):
+    def __init__(self, width, height, limit):
         super().__init__()
 
         self.width = width
         self.height = height
-        self.limit = 300
+        self.limit = limit
         self.span = 70
         self.pxPerKnot = self.height / (2 * self.span)
 

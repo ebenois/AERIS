@@ -14,6 +14,11 @@ class AnemometerInstrument(QGraphicsItemGroup):
         super().__init__()
         self.height = height
         self.width = width
+        self.limitmin = 180
+        self.limitmax = 300
+        
+        self.isInError = True
+        self.isCritical = False
 
         self.rect = QGraphicsRectItem(0, 0, width, height)
         self.rect.setBrush(QBrush(QColor("#808080")))
@@ -21,11 +26,12 @@ class AnemometerInstrument(QGraphicsItemGroup):
         self.addToGroup(self.rect)
 
         self.alertFrame = QGraphicsRectItem(0, 0, self.width, self.height)
-        self.alertFrame.setPen(QPen(QColor("red"), 10))
+        self.isInErrorPen = QPen(QColor("red"), 10)
+        self.isCriticalPen = QPen(QColor("orange"), 10)
         self.alertFrame.setVisible(False)
         self.addToGroup(self.alertFrame)
 
-        self.limit = SpeedLimit(width, height)
+        self.limit = SpeedLimit(width, height, self.limitmax)
         self.trend = SpeedTrend(width, height)
         self.graduations = SpeedGraduations(width, height)
         self.indicator = SpeedIndicator(width, height)
@@ -33,20 +39,23 @@ class AnemometerInstrument(QGraphicsItemGroup):
         for item in [self.limit, self.trend, self.graduations, self.indicator]:
             self.addToGroup(item)
 
-        self.isInError = True
-
     def drawAlert(self, flashOn):
         if self.isInError:
+            self.alertFrame.setPen(self.isInErrorPen)
             self.alertFrame.setVisible(flashOn)
+
             self.graduations.hide()
             self.trend.hide()
             self.limit.hide()
             self.indicator.updatePositions("ERR")
+
         else:
-            self.alertFrame.setVisible(False)
             self.graduations.show()
             self.trend.show()
             self.limit.show()
+
+            if not self.isCritical:
+                self.alertFrame.setVisible(False)
 
     def updatePositions(self, windSpeed):
         dataValid = isinstance(windSpeed, numbers.Number)
@@ -57,5 +66,16 @@ class AnemometerInstrument(QGraphicsItemGroup):
             self.indicator.updatePositions(windSpeed)
             self.limit.updatePositions(windSpeed)
             self.trend.updatePositions(windSpeed)
+            if windSpeed <= self.limitmin or windSpeed >= self.limitmax:
+                self.isCritical = True
+            else:
+                self.isCritical = False
+
+            if self.isCritical and not self.isInError:
+                self.alertFrame.setPen(self.isCriticalPen)
+                self.alertFrame.setVisible(True)
+            else:
+                if not self.isInError:
+                    self.alertFrame.setVisible(False)
         else:
             self.isInError = True
