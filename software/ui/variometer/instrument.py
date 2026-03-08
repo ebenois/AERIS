@@ -12,6 +12,8 @@ class VariometerInstrument(QGraphicsItemGroup):
         super().__init__()
         self.width = width
         self.height = height
+        
+        self.isCritical = False
 
         self.rect = QGraphicsRectItem(0, 0, self.width, self.height)
 
@@ -42,6 +44,12 @@ class VariometerInstrument(QGraphicsItemGroup):
         else:
             self.alertFrame.setVisible(False)
             self.graduations.show()
+            
+    def drawLess(self, highMentalLoad):
+        if highMentalLoad:
+            self.setOpacity(0.5)
+        else:
+            self.setOpacity(1)
 
     def updatePositions(self, climbRate):
         dataValid = isinstance(climbRate, numbers.Number)

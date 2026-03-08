@@ -10,6 +10,8 @@ from ui.slipIndicator.indicator import SlipIndicator
 class SlipInstrument(QGraphicsItemGroup):
     def __init__(self, width, height):
         super().__init__()
+        
+        self.isCritical = False
 
         polygonWidth = 25
         polygonHeight = 15
@@ -46,6 +48,12 @@ class SlipInstrument(QGraphicsItemGroup):
             self.hide()
         else:
             self.show()
+            
+    def drawLess(self, highMentalLoad):
+        if highMentalLoad:
+            self.setOpacity(0.5)
+        else:
+            self.setOpacity(1)
 
     def updatePositions(self, slip):
         dataValid = isinstance(slip, numbers.Number)

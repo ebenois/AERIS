@@ -16,6 +16,8 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
         super().__init__()
         self.width = width
         self.height = height
+        
+        self.isCritical = False
 
         settings = QSettings("ENSC", "AERIS")
 
@@ -148,6 +150,12 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
             self.background.updatePositions("ERR", "ERR")
         else:
             self.alertFrame.setVisible(False)
+            
+    def drawLess(self, highMentalLoad):
+        if highMentalLoad:
+            self.setOpacity(0.5)
+        else:
+            self.setOpacity(1)
 
     def updatePositions(self, roll, pitch):
         dataValid = isinstance(roll, numbers.Number) and isinstance(

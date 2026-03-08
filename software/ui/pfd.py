@@ -94,6 +94,7 @@ class PrimaryFlightDisplay(QWidget):
 
         self.errorCapable = [i for i in self.instruments if hasattr(i, "isInError")]
         self.alertCapable = [i for i in self.instruments if hasattr(i, "drawAlert")]
+        self.alertCapable = [i for i in self.instruments if hasattr(i, "drawLess")]
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
@@ -183,6 +184,7 @@ class PrimaryFlightDisplay(QWidget):
                 instr.isInError = True
 
         anyError = any(instr.isInError for instr in self.errorCapable)
+        anyCritical = any(instr.isCritical for instr in self.errorCapable)
 
         if anyError:
             self.flashState = self.cycleStep == 0 or self.cycleStep == 2
@@ -199,6 +201,14 @@ class PrimaryFlightDisplay(QWidget):
             self.cycleStep = 0
             for instr in self.alertCapable:
                 instr.drawAlert(False)
+                
+        anemometer = self.instruments[1]
+        compass = self.instruments[2]
+
+        if getattr(anemometer, "isCritical", False):
+            compass.drawLess(True)
+        else:
+            compass.drawLess(False)
 
     def setArduino(self, arduino):
         self.arduino = arduino

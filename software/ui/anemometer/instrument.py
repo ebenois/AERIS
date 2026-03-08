@@ -27,7 +27,7 @@ class AnemometerInstrument(QGraphicsItemGroup):
 
         self.alertFrame = QGraphicsRectItem(0, 0, self.width, self.height)
         self.isInErrorPen = QPen(QColor("red"), 10)
-        self.isCriticalPen = QPen(QColor("orange"), 10)
+        self.isCriticalPen = QPen(QColor("#ff7f00"), 10)
         self.alertFrame.setVisible(False)
         self.addToGroup(self.alertFrame)
 
@@ -56,6 +56,12 @@ class AnemometerInstrument(QGraphicsItemGroup):
 
             if not self.isCritical:
                 self.alertFrame.setVisible(False)
+                
+    def drawLess(self, highMentalLoad):
+        if highMentalLoad:
+            self.setOpacity(0.5)
+        else:
+            self.setOpacity(1)
 
     def updatePositions(self, windSpeed):
         dataValid = isinstance(windSpeed, numbers.Number)

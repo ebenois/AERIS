@@ -15,6 +15,8 @@ class CompassInstrument(QGraphicsItemGroup):
         super().__init__()
         self.width = width
         self.height = height
+        
+        self.isCritical = False
 
         centerX = width / 2
         centerY = height / 2
@@ -59,6 +61,12 @@ class CompassInstrument(QGraphicsItemGroup):
         else:
             self.dot.setPen(self.noPen)
             self.graduations.show()
+            
+    def drawLess(self, highMentalLoad):
+        if highMentalLoad:
+            self.setOpacity(0.5)
+        else:
+            self.setOpacity(1)
 
     def updatePositions(self, heading):
         dataValid = isinstance(heading, numbers.Number)
