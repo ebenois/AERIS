@@ -114,14 +114,6 @@ class PrimaryFlightDisplay(QWidget):
 
         if self.cycleStep in (0, 2) and (anyError or anyCritical):
             self.alertPlayer.play()
-
-        for instr in self.alertInstruments:
-            if getattr(instr, "isInError", False) or getattr(instr, "isCritical", False):
-                instr.drawAlert(self.flashState)
-            else:
-                instr.drawAlert(False)
-
-        highMentalLoad = any(getattr(instr, "isCritical", False) for instr in self.instruments)
         
         horizon = self.instruments[0]
         anemometer = self.instruments[1]
@@ -129,6 +121,14 @@ class PrimaryFlightDisplay(QWidget):
         variometer = self.instruments[3]
         altimeter = self.instruments[4]
         slip = self.instruments[5]
+        
+        for instr in self.instruments: 
+            if getattr(instr, "isInError", False) or getattr(instr, "isCritical", False):
+                instr.drawAlert(self.flashState)
+            else:
+                instr.drawAlert(False)
+            
+        highMentalLoad = any(getattr(instr, "isCritical", False) for instr in self.instruments)
 
         for instr in self.instruments:
             instr.drawLess(False)
@@ -138,11 +138,11 @@ class PrimaryFlightDisplay(QWidget):
                 if not (compas.isCritical) : compas.drawLess(True)
                 if not (variometer.isCritical) : variometer.drawLess(True)
                 
-            elif altimeter.isCritical or variometer.isCritical:
+            if altimeter.isCritical or variometer.isCritical:
                 if not (compas.isCritical) : compas.drawLess(True)
                 if not (slip.isCritical) : slip.drawLess(True)
             
-            elif horizon.isCritical:
+            if horizon.isCritical:
                 if not (compas.isCritical) : compas.drawLess(True)
                 if not (variometer.isCritical) : variometer.drawLess(True)
                 if not (slip.isCritical) : slip.drawLess(True)

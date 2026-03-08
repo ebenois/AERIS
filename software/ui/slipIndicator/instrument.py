@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsPolygonItem
-from PyQt6.QtGui import QBrush, QPen, QPolygonF
+from PyQt6.QtGui import QBrush, QPen, QPolygonF, QColor
 from PyQt6.QtCore import Qt, QPointF
 import numbers
 
@@ -10,11 +10,13 @@ from ui.slipIndicator.indicator import SlipIndicator
 class SlipInstrument(QGraphicsItemGroup):
     def __init__(self, width, height):
         super().__init__()
-        
-        self.isCritical = False
 
         polygonWidth = 25
         polygonHeight = 15
+        self.limit = 30
+        
+        self.isInError = True
+        self.isCritical = False
 
         self.graduations = SlipGraduations(width, height)
         self.addToGroup(self.graduations)
@@ -22,8 +24,8 @@ class SlipInstrument(QGraphicsItemGroup):
         self.indicator = SlipIndicator(width, height)
         self.addToGroup(self.indicator)
 
-        triangle = QGraphicsPolygonItem()
-        self.addToGroup(triangle)
+        self.triangle = QGraphicsPolygonItem()
+        self.addToGroup(self.triangle)
 
         polygon = QPolygonF(
             [
@@ -37,17 +39,22 @@ class SlipInstrument(QGraphicsItemGroup):
             ]
         )
 
-        triangle.setPolygon(polygon)
-        triangle.setBrush(QBrush(Qt.GlobalColor.white))
-        triangle.setPen(QPen(Qt.PenStyle.NoPen))
-
-        self.isInError = True
+        self.triangle.setPolygon(polygon)
+        self.triangle.setBrush(QBrush(Qt.GlobalColor.white))
+        self.isCriticalPen = QPen(QColor("#ff7f00"))
+        self.triangle.setPen(QPen(Qt.PenStyle.NoPen))
 
     def drawAlert(self, flashOn):
         if self.isInError:
-            self.hide()
+            self.hide()            
+        elif self.isCritical:
+            self.show()  
+            self.graduations.show()
+            self.triangle.setPen(QPen(self.isCriticalPen))
         else:
-            self.show()
+            self.show() 
+            self.graduations.show()
+            self.triangle.setPen(QPen(Qt.PenStyle.NoPen))
             
     def drawLess(self, highMentalLoad):
         if highMentalLoad:
@@ -57,9 +64,13 @@ class SlipInstrument(QGraphicsItemGroup):
 
     def updatePositions(self, slip):
         dataValid = isinstance(slip, numbers.Number)
-
         if dataValid:
             self.isInError = False
             self.indicator.updatePositions(slip)
+            
+            if abs(slip) >= self.limit:
+                    self.isCritical = True
+            else:
+                self.isCritical = False
         else:
             self.isInError = True
