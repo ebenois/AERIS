@@ -35,7 +35,7 @@ class AltimeterInstrument(QGraphicsItemGroup):
         self.graduations = AltitudeGraduations(width, height)
         self.indicator = AltitudeIndicator(width, height)
 
-        for item in [self.limit, self.trend, self.graduations, self.indicator, self.alertFrame]:
+        for item in [self.limit, self.trend, self.graduations, self.alertFrame, self.indicator]:
             self.addToGroup(item)
 
     def drawAlert(self, flashOpacity):

@@ -144,9 +144,6 @@ class PrimaryFlightDisplay(QWidget):
             elif pulseTime + pulseSleep <= self.pulseStep < pulseSleep + pulseTime*2:
                 inner_phase = ((self.pulseStep - (pulseTime + pulseSleep)) / pulseTime) * math.pi
                 self.flashOpacity = 0.35 + 0.65 * math.sin(inner_phase)
-                if self.pulseStep == pulseTime + pulseSleep:
-                    self.alertPlayer.stop()
-                    self.alertPlayer.play()
 
             else:
                 self.flashOpacity = 0
