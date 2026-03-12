@@ -13,6 +13,9 @@ class SpeedTrend(QGraphicsItemGroup):
         self.pixelPerUnit = (self.height / 2) / self.span
 
         self.previousSpeed = None
+        self.currentAcceleration = 0
+        self.filterFactor = 0.01 #0.01 = très stable, 0.5 = nerveux
+        
         self.timer = QElapsedTimer()
         self.timer.start()
 
@@ -29,15 +32,17 @@ class SpeedTrend(QGraphicsItemGroup):
             self.previousSpeed = speed
             return
 
-        acceleration = (speed - self.previousSpeed) / dt
+        rawAcceleration = (speed - self.previousSpeed) / dt
 
-        speedVariation = acceleration * 3
+        self.currentAcceleration = (self.currentAcceleration * (1 - self.filterFactor)) + (rawAcceleration * self.filterFactor)
+
+        speedVariation = self.currentAcceleration * 3
 
         heightPx = speedVariation * self.pixelPerUnit
-
         safe = max(-self.height / 2, min(self.height / 2, heightPx))
 
         self.rect.setRect(
             self.width * 15 / 17, self.height / 2, self.width * 2 / 17, -safe
         )
+        
         self.previousSpeed = speed
