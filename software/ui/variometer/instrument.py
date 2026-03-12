@@ -27,7 +27,6 @@ class VariometerInstrument(QGraphicsItemGroup):
         self.isInErrorPen = QPen(QColor("red"), 10)
         self.isCriticalPen = QPen(QColor("#ff7f00"), 10)
         self.alertFrame.setVisible(False)
-        self.addToGroup(self.alertFrame)
 
         self.graduations = RiseGraduations(width, height)
         self.addToGroup(self.graduations)
@@ -36,16 +35,20 @@ class VariometerInstrument(QGraphicsItemGroup):
         self.indicator = RiseIndicator(width, height)
         self.addToGroup(self.indicator)
         self.indicator.setPos(width * 2 / 3, height / 2)
+        
+        self.addToGroup(self.alertFrame)
 
-    def drawAlert(self, flashOn):
+    def drawAlert(self, flashOpacity):
         if self.isInError:
             self.alertFrame.setPen(self.isInErrorPen)
-            self.alertFrame.setVisible(flashOn)
+            self.alertFrame.setVisible(True)
+            self.alertFrame.setOpacity(flashOpacity)
             self.graduations.hide()
             
         elif self.isCritical:
             self.alertFrame.setPen(self.isCriticalPen)
-            self.alertFrame.setVisible(flashOn)
+            self.alertFrame.setVisible(True)
+            self.alertFrame.setOpacity(0.4 + 0.7 * flashOpacity)
 
         else:
             self.graduations.show()

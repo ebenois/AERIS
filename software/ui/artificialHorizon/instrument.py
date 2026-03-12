@@ -40,7 +40,6 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
         self.isInErrorPen = QPen(QColor("red"), 10)
         self.isCriticalPen = QPen(QColor("#ff7f00"), 10)
         self.alertFrame.setVisible(False)
-        self.addToGroup(self.alertFrame)
 
         self.maquette = QGraphicsItemGroup()
 
@@ -54,6 +53,8 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
         self.addToGroup(self.maquette)
         self.maquette.setPos(width / 2, height / 2)
         self.maquette.setZValue(10)
+        
+        self.addToGroup(self.alertFrame)
 
     def boundingRect(self):
         return QRectF(0, 0, self.width, self.height)
@@ -145,18 +146,19 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
         self.currentWingsHeight = value
         self.UpdateWingsGeometry()
 
-    def drawAlert(self, flashOn):
+    def drawAlert(self, flashOpacity):
         if self.isInError:
             self.alertFrame.setPen(self.isInErrorPen)
-            self.alertFrame.setVisible(flashOn)
+            self.alertFrame.setVisible(True)
+            self.alertFrame.setOpacity(flashOpacity)
             self.background.updatePositions("ERR", "ERR")
             
         elif self.isCritical:
             self.alertFrame.setPen(self.isCriticalPen)
-            self.alertFrame.setVisible(flashOn)
+            self.alertFrame.setVisible(True)
+            self.alertFrame.setOpacity(0.4 + 0.6 * flashOpacity)
 
         else:
-            self.background.updatePositions("ERR", "ERR")
             self.alertFrame.setVisible(False)
                 
             

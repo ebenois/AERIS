@@ -26,6 +26,9 @@ class SlipInstrument(QGraphicsItemGroup):
 
         self.triangle = QGraphicsPolygonItem()
         self.addToGroup(self.triangle)
+        
+        self.alertFrame = QGraphicsPolygonItem()
+        self.addToGroup(self.alertFrame)
 
         polygon = QPolygonF(
             [
@@ -41,20 +44,21 @@ class SlipInstrument(QGraphicsItemGroup):
 
         self.triangle.setPolygon(polygon)
         self.triangle.setBrush(QBrush(Qt.GlobalColor.white))
-        self.isCriticalPen = QPen(QColor("#ff7f00"))
-        self.triangle.setPen(QPen(Qt.PenStyle.NoPen))
-
-    def drawAlert(self, flashOn):
+        self.alertFrame.setPolygon(polygon)
+        self.triangle.setPen(QPen(QColor("#ff7f00")))
+        
+    def drawAlert(self, flashOpacity):
         if self.isInError:
             self.hide()            
         elif self.isCritical:
             self.show()  
             self.graduations.show()
-            self.triangle.setPen(QPen(self.isCriticalPen))
+            self.alertFrame.setVisible(True)
+            self.alertFrame.setOpacity(0.4 + 0.7 * flashOpacity)
         else:
             self.show() 
             self.graduations.show()
-            self.triangle.setPen(QPen(Qt.PenStyle.NoPen))
+            self.alertFrame.setVisible(False)
             
     def drawLess(self, highMentalLoad):
         if highMentalLoad:

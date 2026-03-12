@@ -23,27 +23,26 @@ class AnemometerInstrument(QGraphicsItemGroup):
         self.rect = QGraphicsRectItem(0, 0, width, height)
         self.rect.setBrush(QBrush(QColor("#808080")))
         self.rect.setPen(QPen(Qt.PenStyle.NoPen))
-        self.addToGroup(self.rect)
 
         self.alertFrame = QGraphicsRectItem(0, 0, self.width, self.height)
         self.isInErrorPen = QPen(QColor("red"), 10)
         self.isCriticalPen = QPen(QColor("#ff7f00"), 10)
         self.alertFrame.setVisible(False)
-        self.addToGroup(self.alertFrame)
 
         self.limit = SpeedLimit(width, height, self.limitmax)
         self.trend = SpeedTrend(width, height)
         self.graduations = SpeedGraduations(width, height)
         self.indicator = SpeedIndicator(width, height)
 
-        for item in [self.limit, self.trend, self.graduations, self.indicator]:
+        for item in [self.rect, self.limit, self.trend, self.graduations, self.indicator, self.alertFrame]:
             self.addToGroup(item)
 
-    def drawAlert(self, flashOn):
+    def drawAlert(self, flashOpacity):
         if self.isInError:
             self.alertFrame.setPen(self.isInErrorPen)
-            self.alertFrame.setVisible(flashOn)
-
+            self.alertFrame.setVisible(True)
+            self.alertFrame.setOpacity(flashOpacity)
+            
             self.graduations.hide()
             self.trend.hide()
             self.limit.hide()
@@ -51,7 +50,8 @@ class AnemometerInstrument(QGraphicsItemGroup):
             
         elif self.isCritical:
             self.alertFrame.setPen(self.isCriticalPen)
-            self.alertFrame.setVisible(flashOn)
+            self.alertFrame.setVisible(True)
+            self.alertFrame.setOpacity(0.4 + 0.6 * flashOpacity)
 
         else:
             self.graduations.show()

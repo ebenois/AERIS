@@ -10,6 +10,7 @@ from ui.compass.instrument import CompassInstrument
 from ui.variometer.instrument import VariometerInstrument
 from ui.slipIndicator.instrument import SlipInstrument
 import time
+import math
 
 
 class PrimaryFlightDisplay(QWidget):
@@ -17,17 +18,25 @@ class PrimaryFlightDisplay(QWidget):
         super().__init__()
 
         self.updateIntervalMs = 10
-        self.heartbeatIntervalMs = 250
+        self.heartbeatIntervalMs = 30
+        self.pulseStep = 0
 
         self.lastDataTime = time.time()
         self.isConnected = False
         self.connectionTimeout = 0.5
-        self.flashState = False
         self.cycleStep = 0
 
         self.consecutivePacketLoss = 0
         self.maxAllowedLoss = 5
         self.dataIntegrityError = False
+        
+        self.dataTimer = QTimer(self)
+        self.dataTimer.timeout.connect(self.updateFromArduino)
+        self.dataTimer.start(self.updateIntervalMs)
+
+        self.masterTimer = QTimer(self)
+        self.masterTimer.timeout.connect(self.globalHeartbeat)
+        self.masterTimer.start(self.heartbeatIntervalMs)
 
         self.arduino = None
 
@@ -98,22 +107,6 @@ class PrimaryFlightDisplay(QWidget):
 
     def globalHeartbeat(self):
         currentTime = time.time()
-
-        if currentTime - self.lastDataTime > self.connectionTimeout:
-            if self.isConnected:
-                self.isConnected = False
-                if self.window():
-                    self.window().updateArduinoStatus(False)
-            for instr in self.errorCapable:
-                instr.isInError = True
-
-        anyError = any(getattr(instr, "isInError", False) for instr in self.errorCapable)
-        anyCritical = any(getattr(instr, "isCritical", False) for instr in self.errorCapable)
-
-        self.flashState = self.cycleStep in (0, 2)
-
-        if self.cycleStep in (0, 2) and (anyError or anyCritical):
-            self.alertPlayer.play()
         
         horizon = self.instruments[0]
         anemometer = self.instruments[1]
@@ -122,33 +115,65 @@ class PrimaryFlightDisplay(QWidget):
         altimeter = self.instruments[4]
         slip = self.instruments[5]
         
-        for instr in self.instruments: 
-            if getattr(instr, "isInError", False) or getattr(instr, "isCritical", False):
-                instr.drawAlert(self.flashState)
-            else:
-                instr.drawAlert(False)
+        if currentTime - self.lastDataTime > self.connectionTimeout:
+            if self.isConnected:
+                self.isConnected = False
+                if self.window():
+                    self.window().updateArduinoStatus(False)
+            for instr in self.errorCapable:
+                instr.isInError = True
+
+        self.maxPulseSteps = 80 #100 étapes * 30ms = 3 secondes
+        
+        anyError = any(getattr(i, "isInError", False) for i in self.errorCapable)
+        anyCritical = any(getattr(i, "isCritical", False) for i in self.errorCapable)
+        anyAlert = anyError or anyCritical
+
+        if anyAlert:
+            self.pulseStep = (self.pulseStep + 1) % self.maxPulseSteps
+            pulseTime = 30 #(15 * 30 ms) = 450ms
+            pulseSleep = 0
             
-        highMentalLoad = any(getattr(instr, "isCritical", False) for instr in self.instruments)
+            if 0 <= self.pulseStep < pulseTime: 
+                inner_phase = (self.pulseStep / pulseTime) * math.pi
+                self.flashOpacity = 0.35 + 0.65 * math.sin(inner_phase)
+                if self.pulseStep == 0:
+                    self.alertPlayer.stop()
+                    self.alertPlayer.play()
+
+            elif pulseTime + pulseSleep <= self.pulseStep < pulseSleep + pulseTime*2:
+                inner_phase = ((self.pulseStep - (pulseTime + pulseSleep)) / pulseTime) * math.pi
+                self.flashOpacity = 0.35 + 0.65 * math.sin(inner_phase)
+                if self.pulseStep == pulseTime + pulseSleep:
+                    self.alertPlayer.stop()
+                    self.alertPlayer.play()
+
+            else:
+                self.flashOpacity = 0
+        else:
+            self.pulseStep = 0
+            self.flashOpacity = 0
+
+        for instr in self.alertInstruments:
+            instr.drawAlert(self.flashOpacity)
 
         for instr in self.instruments:
             instr.drawLess(False)
 
-        if highMentalLoad:
+        if anyCritical:
             if anemometer.isCritical:
-                if not (compas.isCritical) : compas.drawLess(True)
-                if not (variometer.isCritical) : variometer.drawLess(True)
+                if not compas.isCritical: compas.drawLess(True)
+                if not variometer.isCritical: variometer.drawLess(True)
                 
             if altimeter.isCritical or variometer.isCritical:
-                if not (compas.isCritical) : compas.drawLess(True)
-                if not (slip.isCritical) : slip.drawLess(True)
+                if not compas.isCritical: compas.drawLess(True)
+                if not slip.isCritical: slip.drawLess(True)
             
             if horizon.isCritical:
-                if not (compas.isCritical) : compas.drawLess(True)
-                if not (variometer.isCritical) : variometer.drawLess(True)
-                if not (slip.isCritical) : slip.drawLess(True)
-                if not (altimeter.isCritical) : altimeter.drawLess(True)
-                
-        self.cycleStep = (self.cycleStep + 1) % 5
+                if not compas.isCritical: compas.drawLess(True)
+                if not variometer.isCritical: variometer.drawLess(True)
+                if not slip.isCritical: slip.drawLess(True)
+                if not altimeter.isCritical: altimeter.drawLess(True)
 
     def resizeEvent(self, event):
         super().resizeEvent(event)

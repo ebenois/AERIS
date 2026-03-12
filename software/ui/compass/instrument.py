@@ -21,7 +21,6 @@ class CompassInstrument(QGraphicsItemGroup):
         centerX = width / 2
         centerY = height / 2
 
-        self.noPen = QPen(Qt.PenStyle.NoPen)
         self.alertPen = QPen(QColor("red"), 15)
         self.bgBrush = QBrush(QColor("#808080"))
         self.indicatorBrush = QBrush(Qt.GlobalColor.black)
@@ -29,7 +28,9 @@ class CompassInstrument(QGraphicsItemGroup):
 
         self.dot = QGraphicsEllipseItem(0, 0, width, height)
         self.dot.setBrush(self.bgBrush)
-        self.dot.setPen(self.noPen)
+        
+        self.alertFrame = QGraphicsEllipseItem(0, 0, width, height)
+        self.alertFrame.setPen(self.alertPen)
 
         self.graduations = DirectionGraduations(width)
         self.graduations.setPos(centerX, centerY)
@@ -49,17 +50,18 @@ class CompassInstrument(QGraphicsItemGroup):
         self.indicator.setBrush(self.indicatorBrush)
         self.indicator.setPen(self.indicatorPen)
 
-        for item in [self.dot, self.graduations, self.indicator]:
+        for item in [self.dot, self.graduations, self.indicator, self.alertFrame]:
             self.addToGroup(item)
 
         self.isInError = True
 
-    def drawAlert(self, flashOn):
+    def drawAlert(self, flashOpacity):
         if self.isInError:
-            self.dot.setPen(self.alertPen if flashOn else self.noPen)
+            self.alertFrame.setVisible(True)
+            self.alertFrame.setOpacity(flashOpacity)
             self.graduations.hide()
         else:
-            self.dot.setPen(self.noPen)
+            self.alertFrame.setVisible(False)
             self.graduations.show()
             
     def drawLess(self, highMentalLoad):
