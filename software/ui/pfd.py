@@ -150,8 +150,7 @@ class PrimaryFlightDisplay(QWidget):
         else:
             self.pulseStep = 0
 
-        for instr in self.alertInstruments:
-            instr.drawAlert(flashOpacity)
+        self.drawAlert(flashOpacity)
 
         for instr in self.instruments:
             instr.drawLess(False)
@@ -179,6 +178,43 @@ class PrimaryFlightDisplay(QWidget):
                     self.slip.drawLess(True)
                 if not self.altimeter.isCritical:
                     self.altimeter.drawLess(True)
+    
+    def drawAlert(self, flashOpacity):
+        secondaryFlashOpacity = 0.10
+        if (self.horizon.isCritical):
+            for instr in self.alertInstruments:
+                if (instr == self.horizon):
+                    instr.drawAlert(flashOpacity)
+                else:
+                    instr.drawAlert(secondaryFlashOpacity)
+        elif (self.anemometer.isCritical):
+            for instr in self.alertInstruments:
+                if (instr == self.anemometer):
+                    instr.drawAlert(flashOpacity)
+                else:
+                    instr.drawAlert(secondaryFlashOpacity)
+        elif (self.altimeter.isCritical):
+            for instr in self.alertInstruments:
+                if (instr == self.altimeter):
+                    instr.drawAlert(flashOpacity)
+                else:
+                    instr.drawAlert(secondaryFlashOpacity)
+        elif (self.variometer.isCritical):
+            for instr in self.alertInstruments:
+                if (instr == self.variometer):
+                    instr.drawAlert(flashOpacity)
+                else:
+                    instr.drawAlert(secondaryFlashOpacity)
+        elif (self.slip.isCritical):
+            for instr in self.alertInstruments:
+                if (instr == self.slip):
+                    instr.drawAlert(flashOpacity)
+                else:
+                    instr.drawAlert(secondaryFlashOpacity)
+        else:
+            for instr in self.alertInstruments:
+                instr.drawAlert(flashOpacity)
+        return
 
     def resizeEvent(self, event):
         super().resizeEvent(event)

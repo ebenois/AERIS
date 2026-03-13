@@ -30,8 +30,6 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
         self.currentWingsSpan = settings.value("WingsSpan", width // 4, int)
         self.currentWingsHeight = settings.value("WingsHeight", width // 15, int)
 
-        self.setFlag(QGraphicsItemGroup.GraphicsItemFlag.ItemClipsChildrenToShape, True)
-
         self.background = ArtificialHorizonBackground(width, height)
         self.addToGroup(self.background)
         self.background.setPos(width / 2, height / 2)
@@ -55,14 +53,6 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
         self.maquette.setZValue(10)
         
         self.addToGroup(self.alertFrame)
-
-    def boundingRect(self):
-        return QRectF(0, 0, self.width, self.height)
-
-    def shape(self):
-        path = QPainterPath()
-        path.addRect(self.boundingRect())
-        return path
 
     def CreatePen(self, color, isOutline):
         extra = self.currentOutlineWeight if isOutline else 0

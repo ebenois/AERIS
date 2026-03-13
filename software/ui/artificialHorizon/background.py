@@ -3,8 +3,8 @@ from PyQt6.QtWidgets import (
     QGraphicsRectItem,
     QGraphicsLineItem,
 )
-from PyQt6.QtGui import QPen, QBrush, QColor
-from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QPen, QBrush, QColor, QPainterPath
+from PyQt6.QtCore import Qt, QRectF
 import numbers
 
 from ui.artificialHorizon.graduations import PitchGraduations
@@ -20,6 +20,8 @@ class ArtificialHorizonBackground(QGraphicsItemGroup):
         self.pixelsPerDegree = height / 45.0
         self.cycleHeight = 360.0 * self.pixelsPerDegree
         self.blockHeight = 180.0 * self.pixelsPerDegree
+        
+        self.setFlag(QGraphicsItemGroup.GraphicsItemFlag.ItemClipsChildrenToShape, True)
 
         self.noPen = QPen(Qt.PenStyle.NoPen)
         self.skyBrush = QBrush(QColor("#0080FF"))
@@ -73,3 +75,11 @@ class ArtificialHorizonBackground(QGraphicsItemGroup):
 
         self.graduations.updatePositions(pitch)
         self.graduations.show()
+
+    def boundingRect(self):
+        return QRectF(-self.width/2, -self.height/2, self.width, self.height)
+
+    def shape(self):
+        path = QPainterPath()
+        path.addRect(self.boundingRect())
+        return path
