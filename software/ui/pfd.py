@@ -154,9 +154,9 @@ class PrimaryFlightDisplay(QWidget):
 
         if anyCritical or anyError:
             self.drawLess(True)
-        else :
+        else:
             self.drawLess(False)
-            
+
     def drawLess(self, isOn):
 
         for instr in self.instruments:
@@ -166,7 +166,9 @@ class PrimaryFlightDisplay(QWidget):
             return
 
         def isProblem(instr):
-            return getattr(instr, "isCritical", False) or getattr(instr, "isInError", False)
+            return getattr(instr, "isCritical", False) or getattr(
+                instr, "isInError", False
+            )
 
         if isProblem(self.anemometer):
             if not isProblem(self.compass):
@@ -189,36 +191,36 @@ class PrimaryFlightDisplay(QWidget):
                 self.slip.drawLess(True)
             if not isProblem(self.altimeter):
                 self.altimeter.drawLess(True)
-    
+
     def drawAlert(self, flashOpacity):
         secondaryFlashOpacity = 0.10
-        if (self.horizon.isCritical):
+        if self.horizon.isCritical:
             for instr in self.alertInstruments:
-                if (instr == self.horizon):
+                if instr == self.horizon:
                     instr.drawAlert(flashOpacity)
                 else:
                     instr.drawAlert(secondaryFlashOpacity)
-        elif (self.anemometer.isCritical):
+        elif self.anemometer.isCritical:
             for instr in self.alertInstruments:
-                if (instr == self.anemometer):
+                if instr == self.anemometer:
                     instr.drawAlert(flashOpacity)
                 else:
                     instr.drawAlert(secondaryFlashOpacity)
-        elif (self.altimeter.isCritical):
+        elif self.altimeter.isCritical:
             for instr in self.alertInstruments:
-                if (instr == self.altimeter):
+                if instr == self.altimeter:
                     instr.drawAlert(flashOpacity)
                 else:
                     instr.drawAlert(secondaryFlashOpacity)
-        elif (self.variometer.isCritical):
+        elif self.variometer.isCritical:
             for instr in self.alertInstruments:
-                if (instr == self.variometer):
+                if instr == self.variometer:
                     instr.drawAlert(flashOpacity)
                 else:
                     instr.drawAlert(secondaryFlashOpacity)
-        elif (self.slip.isCritical):
+        elif self.slip.isCritical:
             for instr in self.alertInstruments:
-                if (instr == self.slip):
+                if instr == self.slip:
                     instr.drawAlert(flashOpacity)
                 else:
                     instr.drawAlert(secondaryFlashOpacity)
@@ -277,9 +279,7 @@ class PrimaryFlightDisplay(QWidget):
         except (ValueError, IndexError, TypeError):
             return
 
-        self.dataIntegrityError = (
-            self.consecutivePacketLoss > self.maxAllowedLoss
-        )
+        self.dataIntegrityError = self.consecutivePacketLoss > self.maxAllowedLoss
 
         if self.dataIntegrityError:
             for instr in self.errorCapable:

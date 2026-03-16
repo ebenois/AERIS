@@ -10,10 +10,10 @@ from ui.variometer.indicator import RiseIndicator
 class VariometerInstrument(QGraphicsItemGroup):
     def __init__(self, width, height):
         super().__init__()
-        self.limit=50000
+        self.limit = 50000
         self.width = width
         self.height = height
-        
+
         self.isInError = True
         self.isCritical = False
 
@@ -35,7 +35,7 @@ class VariometerInstrument(QGraphicsItemGroup):
         self.indicator = RiseIndicator(width, height)
         self.addToGroup(self.indicator)
         self.indicator.setPos(width * 2 / 3, height / 2)
-        
+
         self.addToGroup(self.alertFrame)
 
     def drawAlert(self, flashOpacity):
@@ -44,7 +44,7 @@ class VariometerInstrument(QGraphicsItemGroup):
             self.alertFrame.setVisible(True)
             self.alertFrame.setOpacity(flashOpacity)
             self.graduations.hide()
-            
+
         elif self.isCritical:
             self.alertFrame.setPen(self.isCriticalPen)
             self.alertFrame.setVisible(True)
@@ -53,7 +53,7 @@ class VariometerInstrument(QGraphicsItemGroup):
         else:
             self.graduations.show()
             self.alertFrame.setVisible(False)
-            
+
     def drawLess(self, highMentalLoad):
         if highMentalLoad:
             self.setOpacity(0.5)
@@ -65,9 +65,9 @@ class VariometerInstrument(QGraphicsItemGroup):
         if dataValid:
             self.isInError = False
             self.indicator.updatePositions(climbRate)
-            
+
             if abs(climbRate) >= self.limit:
-                    self.isCritical = True
+                self.isCritical = True
             else:
                 self.isCritical = False
         else:

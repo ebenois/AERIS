@@ -16,7 +16,7 @@ class AnemometerInstrument(QGraphicsItemGroup):
         self.width = width
         self.limitmin = 180
         self.limitmax = 300
-        
+
         self.isInError = True
         self.isCritical = False
 
@@ -34,7 +34,14 @@ class AnemometerInstrument(QGraphicsItemGroup):
         self.graduations = SpeedGraduations(width, height)
         self.indicator = SpeedIndicator(width, height)
 
-        for item in [self.rect, self.limit, self.trend, self.graduations, self.indicator, self.alertFrame]:
+        for item in [
+            self.rect,
+            self.limit,
+            self.trend,
+            self.graduations,
+            self.indicator,
+            self.alertFrame,
+        ]:
             self.addToGroup(item)
 
     def drawAlert(self, flashOpacity):
@@ -42,12 +49,12 @@ class AnemometerInstrument(QGraphicsItemGroup):
             self.alertFrame.setPen(self.isInErrorPen)
             self.alertFrame.setVisible(True)
             self.alertFrame.setOpacity(flashOpacity)
-            
+
             self.graduations.hide()
             self.trend.hide()
             self.limit.hide()
             self.indicator.updatePositions("ERR")
-            
+
         elif self.isCritical:
             self.alertFrame.setPen(self.isCriticalPen)
             self.alertFrame.setVisible(True)
@@ -58,13 +65,13 @@ class AnemometerInstrument(QGraphicsItemGroup):
             self.trend.show()
             self.limit.show()
             self.alertFrame.setVisible(False)
-                
+
     def drawLess(self, highMentalLoad):
         if highMentalLoad:
             self.setOpacity(0.5)
         else:
-            self.setOpacity(1)            
-                
+            self.setOpacity(1)
+
     def updatePositions(self, windSpeed):
         dataValid = isinstance(windSpeed, numbers.Number)
 

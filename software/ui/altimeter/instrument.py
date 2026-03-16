@@ -16,7 +16,7 @@ class AltimeterInstrument(QGraphicsItemGroup):
         self.height = height
         self.limitmax = 3900
         self.limitmin = 1000
-        
+
         self.isInError = True
         self.isCritical = False
 
@@ -35,7 +35,13 @@ class AltimeterInstrument(QGraphicsItemGroup):
         self.graduations = AltitudeGraduations(width, height)
         self.indicator = AltitudeIndicator(width, height)
 
-        for item in [self.limit, self.trend, self.graduations, self.alertFrame, self.indicator]:
+        for item in [
+            self.limit,
+            self.trend,
+            self.graduations,
+            self.alertFrame,
+            self.indicator,
+        ]:
             self.addToGroup(item)
 
     def drawAlert(self, flashOpacity):
@@ -48,7 +54,7 @@ class AltimeterInstrument(QGraphicsItemGroup):
             self.trend.hide()
             self.limit.hide()
             self.indicator.updatePositions("ERR")
-            
+
         elif self.isCritical:
             self.alertFrame.setPen(self.isCriticalPen)
             self.alertFrame.setVisible(True)
@@ -59,7 +65,7 @@ class AltimeterInstrument(QGraphicsItemGroup):
             self.trend.show()
             self.limit.show()
             self.alertFrame.setVisible(False)
-                
+
     def drawLess(self, highMentalLoad):
         if highMentalLoad:
             self.setOpacity(0.5)

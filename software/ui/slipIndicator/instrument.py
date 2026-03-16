@@ -14,7 +14,7 @@ class SlipInstrument(QGraphicsItemGroup):
         polygonWidth = 25
         polygonHeight = 15
         self.limit = 30
-        
+
         self.isInError = True
         self.isCritical = False
 
@@ -26,7 +26,7 @@ class SlipInstrument(QGraphicsItemGroup):
 
         self.triangle = QGraphicsPolygonItem()
         self.addToGroup(self.triangle)
-        
+
         self.alertFrame = QGraphicsPolygonItem()
         self.addToGroup(self.alertFrame)
 
@@ -46,20 +46,20 @@ class SlipInstrument(QGraphicsItemGroup):
         self.triangle.setBrush(QBrush(Qt.GlobalColor.white))
         self.alertFrame.setPolygon(polygon)
         self.triangle.setPen(QPen(QColor("#ff7f00")))
-        
+
     def drawAlert(self, flashOpacity):
         if self.isInError:
-            self.hide()            
+            self.hide()
         elif self.isCritical:
-            self.show()  
+            self.show()
             self.graduations.show()
             self.alertFrame.setVisible(True)
             self.alertFrame.setOpacity(0.4 + 0.7 * flashOpacity)
         else:
-            self.show() 
+            self.show()
             self.graduations.show()
             self.alertFrame.setVisible(False)
-            
+
     def drawLess(self, highMentalLoad):
         if highMentalLoad:
             self.setOpacity(0.5)
@@ -71,9 +71,9 @@ class SlipInstrument(QGraphicsItemGroup):
         if dataValid:
             self.isInError = False
             self.indicator.updatePositions(slip)
-            
+
             if abs(slip) >= self.limit:
-                    self.isCritical = True
+                self.isCritical = True
             else:
                 self.isCritical = False
         else:

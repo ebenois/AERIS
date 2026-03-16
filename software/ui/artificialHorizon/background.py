@@ -20,7 +20,7 @@ class ArtificialHorizonBackground(QGraphicsItemGroup):
         self.pixelsPerDegree = height / 45.0
         self.cycleHeight = 360.0 * self.pixelsPerDegree
         self.blockHeight = 180.0 * self.pixelsPerDegree
-        
+
         self.setFlag(QGraphicsItemGroup.GraphicsItemFlag.ItemClipsChildrenToShape, True)
 
         self.noPen = QPen(Qt.PenStyle.NoPen)
@@ -77,7 +77,7 @@ class ArtificialHorizonBackground(QGraphicsItemGroup):
         self.graduations.show()
 
     def boundingRect(self):
-        return QRectF(-self.width/2, -self.height/2, self.width, self.height)
+        return QRectF(-self.width / 2, -self.height / 2, self.width, self.height)
 
     def shape(self):
         path = QPainterPath()

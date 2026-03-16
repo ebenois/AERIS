@@ -15,7 +15,7 @@ class CompassInstrument(QGraphicsItemGroup):
         super().__init__()
         self.width = width
         self.height = height
-        
+
         self.isCritical = False
 
         centerX = width / 2
@@ -28,7 +28,7 @@ class CompassInstrument(QGraphicsItemGroup):
 
         self.dot = QGraphicsEllipseItem(0, 0, width, height)
         self.dot.setBrush(self.bgBrush)
-        
+
         self.alertFrame = QGraphicsEllipseItem(0, 0, width, height)
         self.alertFrame.setPen(self.alertPen)
 
@@ -63,7 +63,7 @@ class CompassInstrument(QGraphicsItemGroup):
         else:
             self.alertFrame.setVisible(False)
             self.graduations.show()
-            
+
     def drawLess(self, highMentalLoad):
         if highMentalLoad:
             self.setOpacity(0.5)

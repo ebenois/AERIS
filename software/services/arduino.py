@@ -3,12 +3,13 @@ import serial.tools.list_ports
 import threading
 import time
 
+
 class ArduinoReader:
     def __init__(self):
         self.serial = None
         self.port = None
         self.baudrate = 115200
-        
+
         self.ignoredPackets = 0
         self.ignoredPerSecond = 0
 
@@ -48,7 +49,7 @@ class ArduinoReader:
             print("Erreur Arduino :", e)
             self.serial = None
             return False
-        
+
     def readLoop(self):
         while self.running:
 
@@ -89,7 +90,7 @@ class ArduinoReader:
 
             except Exception as e:
                 print("Erreur série:", e)
-            
+
     def disconnect(self):
         self.running = False
 

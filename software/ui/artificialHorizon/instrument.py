@@ -16,8 +16,8 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
         super().__init__()
         self.width = width
         self.height = height
-        self.limit=45
-        
+        self.limit = 45
+
         self.isCritical = False
         self.isInError = True
 
@@ -51,7 +51,7 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
         self.addToGroup(self.maquette)
         self.maquette.setPos(width / 2, height / 2)
         self.maquette.setZValue(10)
-        
+
         self.addToGroup(self.alertFrame)
 
     def CreatePen(self, color, isOutline):
@@ -142,7 +142,7 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
             self.alertFrame.setVisible(True)
             self.alertFrame.setOpacity(flashOpacity)
             self.background.updatePositions("ERR", "ERR")
-            
+
         elif self.isCritical:
             self.alertFrame.setPen(self.isCriticalPen)
             self.alertFrame.setVisible(True)
@@ -150,8 +150,7 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
 
         else:
             self.alertFrame.setVisible(False)
-                
-            
+
     def drawLess(self, highMentalLoad):
         if highMentalLoad:
             self.setOpacity(0.5)
