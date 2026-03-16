@@ -152,32 +152,43 @@ class PrimaryFlightDisplay(QWidget):
 
         self.drawAlert(flashOpacity)
 
+        if anyCritical or anyError:
+            self.drawLess(True)
+        else :
+            self.drawLess(False)
+            
+    def drawLess(self, isOn):
+
         for instr in self.instruments:
             instr.drawLess(False)
 
-        if anyCritical:
+        if not isOn:
+            return
 
-            if self.anemometer.isCritical:
-                if not self.compass.isCritical:
-                    self.compass.drawLess(True)
-                if not self.variometer.isCritical:
-                    self.variometer.drawLess(True)
+        def isProblem(instr):
+            return getattr(instr, "isCritical", False) or getattr(instr, "isInError", False)
 
-            if self.altimeter.isCritical or self.variometer.isCritical:
-                if not self.compass.isCritical:
-                    self.compass.drawLess(True)
-                if not self.slip.isCritical:
-                    self.slip.drawLess(True)
+        if isProblem(self.anemometer):
+            if not isProblem(self.compass):
+                self.compass.drawLess(True)
+            if not isProblem(self.variometer):
+                self.variometer.drawLess(True)
 
-            if self.horizon.isCritical:
-                if not self.compass.isCritical:
-                    self.compass.drawLess(True)
-                if not self.variometer.isCritical:
-                    self.variometer.drawLess(True)
-                if not self.slip.isCritical:
-                    self.slip.drawLess(True)
-                if not self.altimeter.isCritical:
-                    self.altimeter.drawLess(True)
+        if isProblem(self.altimeter) or isProblem(self.variometer):
+            if not isProblem(self.compass):
+                self.compass.drawLess(True)
+            if not isProblem(self.slip):
+                self.slip.drawLess(True)
+
+        if isProblem(self.horizon):
+            if not isProblem(self.compass):
+                self.compass.drawLess(True)
+            if not isProblem(self.variometer):
+                self.variometer.drawLess(True)
+            if not isProblem(self.slip):
+                self.slip.drawLess(True)
+            if not isProblem(self.altimeter):
+                self.altimeter.drawLess(True)
     
     def drawAlert(self, flashOpacity):
         secondaryFlashOpacity = 0.10
