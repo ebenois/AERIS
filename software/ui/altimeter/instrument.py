@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsRectItem
 from PyQt6.QtGui import QBrush, QColor, QPen
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QSettings
 import numbers
 
 from ui.altimeter.graduations import AltitudeGraduations
@@ -14,11 +14,14 @@ class AltimeterInstrument(QGraphicsItemGroup):
         super().__init__()
         self.width = width
         self.height = height
-        self.limitmax = 3900
-        self.limitmin = 1000
 
         self.isInError = True
         self.isCritical = False
+
+        self.settings = QSettings("ENSC", "AERIS")
+        self.qnh = int(self.settings.value("QNH", 1013))
+        self.limitmax = int(self.settings.value("limitMax", 1000))
+        self.limitmin = int(self.settings.value("limitMin", 10))
 
         self.rect = QGraphicsRectItem(0, 0, self.width, self.height)
         self.rect.setBrush(QBrush(QColor("#808080")))
@@ -43,6 +46,15 @@ class AltimeterInstrument(QGraphicsItemGroup):
             self.indicator,
         ]:
             self.addToGroup(item)
+
+    def setQNH(self, value):
+        self.qnh = value
+        
+    def setAltitudeMax(self, value):
+        self.limitmax = value
+        
+    def setAltitudeMin(self, value):
+        self.limitmin = value
 
     def drawAlert(self, flashOpacity):
         if self.isInError:
@@ -72,21 +84,29 @@ class AltimeterInstrument(QGraphicsItemGroup):
         else:
             self.setOpacity(1)
 
-    def updatePositions(self, pitch, altitude, windSpeed):
-        data_valid = isinstance(altitude, (int, float))
+    def updatePositions(self, pitch, pressure, windSpeed):
+        data_valid = isinstance(pressure, (int, float))
 
         if data_valid:
             self.isInError = False
+            altitude = pressure_to_altitude(pressure, self.qnh)
+            
             self.graduations.updatePositions(altitude)
             self.indicator.updatePositions(altitude)
             self.limit.updatePositions(altitude)
+            
             if isinstance(windSpeed, numbers.Number) and isinstance(
                 pitch, numbers.Number
             ):
                 self.trend.updatePositions(windSpeed, pitch)
+                
             if altitude <= self.limitmin or altitude >= self.limitmax:
                 self.isCritical = True
             else:
                 self.isCritical = False
         else:
             self.isInError = True
+
+def pressure_to_altitude(pression_hpa, qnh_hpa=1013.25):
+    if pression_hpa <= 0: return 0
+    return 44330.0 * (1.0 - (pression_hpa / qnh_hpa) ** 0.1903)

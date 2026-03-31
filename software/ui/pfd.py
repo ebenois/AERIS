@@ -9,6 +9,7 @@ from ui.anemometer.instrument import AnemometerInstrument
 from ui.compass.instrument import CompassInstrument
 from ui.variometer.instrument import VariometerInstrument
 from ui.slipIndicator.instrument import SlipInstrument
+from services.ESP32Client import ESP32Client 
 
 import time
 import math
@@ -33,7 +34,7 @@ class PrimaryFlightDisplay(QWidget):
         self.maxAllowedLoss = 5
         self.dataIntegrityError = False
 
-        self.arduino = None
+        self.device = None
 
         self.setMinimumSize(500, 500)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
@@ -62,7 +63,7 @@ class PrimaryFlightDisplay(QWidget):
 
     def setupTimers(self):
         self.dataTimer = QTimer(self)
-        self.dataTimer.timeout.connect(self.updateFromArduino)
+        self.dataTimer.timeout.connect(self.updateFromDevice)
         self.dataTimer.start(self.UPDATE_INTERVAL)
 
         self.masterTimer = QTimer(self)
@@ -119,7 +120,7 @@ class PrimaryFlightDisplay(QWidget):
             if self.isConnected:
                 self.isConnected = False
                 if self.window():
-                    self.window().updateArduinoStatus(False)
+                    self.window().updateDeviceStatus(False)
 
             for instr in self.errorCapable:
                 instr.isInError = True
@@ -249,53 +250,42 @@ class PrimaryFlightDisplay(QWidget):
         self.view.setGeometry(x, y, side, side)
         self.view.fitInView(self.scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
 
-    def updateFromArduino(self):
-
-        if not self.arduino:
+    def updateFromDevice(self):
+        if not self.device:
             return
 
-        data = self.arduino.read()
+        data = self.device.read()
         now = time.time()
 
         if data is None:
             if now - self.lastDataTime > self.CONNECTION_TIMEOUT and self.isConnected:
-
                 self.isConnected = False
-                self.window().updateArduinoStatus(False)
-
+                if self.window():
+                    self.window().updateDeviceStatus(False)
                 for instr in self.errorCapable:
                     instr.isInError = True
-
             return
 
         self.lastDataTime = now
-
         if not self.isConnected:
             self.isConnected = True
-            self.window().updateArduinoStatus(True)
+            if self.window():
+                self.window().updateDeviceStatus(True)
+            for instr in self.errorCapable:
+                instr.isInError = False
 
         try:
-            int(data[0])
-        except (ValueError, IndexError, TypeError):
-            return
-
-        self.dataIntegrityError = self.consecutivePacketLoss > self.maxAllowedLoss
-
-        if self.dataIntegrityError:
-            for instr in self.errorCapable:
-                instr.isInError = True
-            return
-
-        self.updatePositions(data)
+            self.updatePositions(data)
+        except Exception as e:
+            print(f"Erreur update positions: {e}")
 
     def updatePositions(self, data):
-
         self.horizon.updatePositions(data[1], data[2])
         self.anemometer.updatePositions(data[5])
         self.compass.updatePositions(data[6])
         self.variometer.updatePositions(data[4])
-        self.altimeter.updatePositions(data[2], data[3], data[5])
+        self.altimeter.updatePositions(data[1], data[3], data[5])
         self.slip.updatePositions(data[7])
 
-    def setArduino(self, arduino):
-        self.arduino = arduino
+    def setDevice(self, device_instance):
+        self.device = device_instance

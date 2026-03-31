@@ -15,8 +15,7 @@ from PyQt6.QtCore import Qt
 
 from ui.pfd import PrimaryFlightDisplay
 from ui.settings.altimeterSettingsPage import AltimeterSettingsPage
-from ui.settings.artificialHorizonSettingsPage import ArtificialHorizonSettingsPage
-from ui.settings.arduinoSettingsPage import ArduinoSettingsPage
+from ui.settings.deviceSettingsPage import DeviceSettingsPage
 from ui.ai import AIWidget
 
 try:
@@ -89,15 +88,6 @@ class MainWindow(QMainWindow):
         self.aiAction = QAction("Assistant IA", self, checkable=True)
         self.aiAction.triggered.connect(self.ToggleAi)
 
-        self.artificialHorizonAction = QAction("Horizon artificiel", self)
-        self.artificialHorizonAction.triggered.connect(
-            lambda: self.OpenSettingsDialog(
-                "Configuration de l'horizon artificiel",
-                ArtificialHorizonSettingsPage,
-                self.pfdPage.instruments[0],
-            )
-        )
-
         self.altimeterAction = QAction("Altimètre", self)
         self.altimeterAction.triggered.connect(
             lambda: self.OpenSettingsDialog(
@@ -107,32 +97,31 @@ class MainWindow(QMainWindow):
             )
         )
 
-        self.arduinoAction = QAction("Connexion", self)
-        self.arduinoAction.triggered.connect(
+        self.deviceAction = QAction("Connexion", self)
+        self.deviceAction.triggered.connect(
             lambda: self.OpenSettingsDialog(
-                "Connexion appareils", ArduinoSettingsPage, self
+                "Connexion appareils", DeviceSettingsPage, self
             )
         )
 
         toolbar.addActions(
             [
                 self.aiAction,
-                self.artificialHorizonAction,
                 self.altimeterAction,
-                self.arduinoAction,
+                self.deviceAction,
             ]
         )
 
         self.setStatusBar(QStatusBar(self))
-        self.arduinoStatus = QLabel("🔴 Déconnecté ")
-        self.statusBar().addPermanentWidget(self.arduinoStatus)
+        self.deviceStatus = QLabel("🔴 Déconnecté ")
+        self.statusBar().addPermanentWidget(self.deviceStatus)
 
         menu = self.menuBar()
         menu.addAction(self.aiAction)
-        menu.addAction(self.arduinoAction)
+        menu.addAction(self.deviceAction)
 
         settingsMenu = menu.addMenu("Paramètres")
-        settingsMenu.addActions([self.artificialHorizonAction, self.altimeterAction])
+        settingsMenu.addActions([self.altimeterAction])
 
     def ToggleAi(self, checked: bool):
         self.aiDock.setVisible(checked)
@@ -147,11 +136,11 @@ class MainWindow(QMainWindow):
 
         dialog.exec()
 
-    def updateArduinoStatus(self, connected: bool):
+    def updateDeviceStatus(self, connected: bool):
         if connected:
-            self.arduinoStatus.setText("🟢 Connecté ")
+            self.deviceStatus.setText("🟢 Connecté ")
         else:
-            self.arduinoStatus.setText("🔴 Déconnecté ")
+            self.deviceStatus.setText("🔴 Déconnecté ")
 
 
 def main():

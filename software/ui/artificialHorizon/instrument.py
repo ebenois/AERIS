@@ -4,8 +4,8 @@ from PyQt6.QtWidgets import (
     QGraphicsLineItem,
     QGraphicsRectItem,
 )
-from PyQt6.QtGui import QPen, QColor, QBrush, QPainterPath
-from PyQt6.QtCore import Qt, QSettings, QRectF
+from PyQt6.QtGui import QPen, QColor, QBrush
+from PyQt6.QtCore import Qt
 import numbers
 
 from ui.artificialHorizon.background import ArtificialHorizonBackground
@@ -20,15 +20,13 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
 
         self.isCritical = False
         self.isInError = True
-
-        settings = QSettings("ENSC", "AERIS")
-
-        self.currentLineWeight = settings.value("lineWeight", width // 30, int)
-        self.currentDotRadius = settings.value("dotSize", width // 30, int)
-        self.currentOutlineWeight = settings.value("outlineWeight", width // 75, int)
-        self.currentWingsDistance = settings.value("WingsDistance", width // 8, int)
-        self.currentWingsSpan = settings.value("WingsSpan", width // 4, int)
-        self.currentWingsHeight = settings.value("WingsHeight", width // 15, int)
+        
+        self.currentLineWeight = width // 30
+        self.currentDotRadius = width // 30
+        self.currentOutlineWeight = width // 75
+        self.currentWingsDistance = width // 8
+        self.currentWingsSpan = width // 4
+        self.currentWingsHeight = width // 15
 
         self.background = ArtificialHorizonBackground(width, height)
         self.addToGroup(self.background)
@@ -102,39 +100,6 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
                 sign * self.currentWingsDistance,
                 self.currentWingsHeight,
             )
-
-    def setLineWeight(self, width):
-        self.currentLineWeight = width
-        for item_list in (self.wings, self.montants):
-            for item, isOutline, _ in item_list:
-                pen = item.pen()
-                extra = self.currentOutlineWeight if isOutline else 0
-                pen.setWidth(self.currentLineWeight + extra)
-                item.setPen(pen)
-
-    def setDotSize(self, radius):
-        self.currentDotRadius = radius
-        for dot, isOutline in self.dots:
-            extra = self.currentOutlineWeight if isOutline else 0
-            r = self.currentDotRadius + extra
-            dot.setRect(-r / 2, -r / 2, r, r)
-
-    def setOutlineWeight(self, weight):
-        self.currentOutlineWeight = weight
-        self.setLineWeight(self.currentLineWeight)
-        self.setDotSize(self.currentDotRadius)
-
-    def setWingsDistance(self, value):
-        self.currentWingsDistance = value
-        self.UpdateWingsGeometry()
-
-    def setWingsSpan(self, value):
-        self.currentWingsSpan = value
-        self.UpdateWingsGeometry()
-
-    def setWingsHeight(self, value):
-        self.currentWingsHeight = value
-        self.UpdateWingsGeometry()
 
     def drawAlert(self, flashOpacity):
         if self.isInError:
