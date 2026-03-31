@@ -82,23 +82,22 @@ class AltitudeIndicator(QGraphicsItemGroup):
 
         self.digits[2]["bigText"].setDefaultTextColor(Qt.GlobalColor.white)
 
-        step = self.metersPerGraduation * 2
-        baseAlt = (altitude // step) * step
+        step = self.metersPerGraduation 
+        baseAlt = round(altitude / step) * step
         centerY = self.height * 0.5
 
         thousands = int(abs(altitude) // 1000)
         hundreds = int((abs(altitude) % 1000) // 100)
 
         for digit in self.digits:
-            altVal = baseAlt + digit["index"] * self.metersPerGraduation
+            altVal = baseAlt + (digit["index"] * self.metersPerGraduation)
             yOffset = (altitude - altVal) * self.pxPerMeter
 
-            tens = int((abs(altVal) % 100) // 10 * 10)
+            tens = int((abs(altVal) % 100)) 
             text = f"{tens:02d}"
 
             var = digit["variableText"]
-            if var.toPlainText() != text:
-                var.setPlainText(text)
+            var.setPlainText(text)
 
             v_rect = var.boundingRect()
             var.setPos(
@@ -107,9 +106,8 @@ class AltitudeIndicator(QGraphicsItemGroup):
             )
             var.setVisible(True)
 
-            if digit["index"] != 0:
-                digit["bigText"].setVisible(False)
-                digit["smallText"].setVisible(False)
+            digit["bigText"].setVisible(False)
+            digit["smallText"].setVisible(False)
 
         main = self.digits[2]
         big = main["bigText"]
@@ -118,10 +116,8 @@ class AltitudeIndicator(QGraphicsItemGroup):
         bigStr = f"-{thousands:02d}" if altitude < 0 else f"{thousands:02d}"
         smallStr = str(hundreds)
 
-        if big.toPlainText() != bigStr:
-            big.setPlainText(bigStr)
-        if small.toPlainText() != smallStr:
-            small.setPlainText(smallStr)
+        big.setPlainText(bigStr)
+        small.setPlainText(smallStr)
 
         bigRect = big.boundingRect()
         smallRect = small.boundingRect()

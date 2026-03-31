@@ -93,13 +93,10 @@ class AltimeterInstrument(QGraphicsItemGroup):
             
             self.graduations.updatePositions(altitude)
             self.indicator.updatePositions(altitude)
-            self.limit.updatePositions(altitude)
             
-            if isinstance(windSpeed, numbers.Number) and isinstance(
-                pitch, numbers.Number
-            ):
-                self.trend.updatePositions(windSpeed, pitch)
-                
+            self.limit.updatePositions(altitude, self.limitmin, self.limitmax)
+            self.trend.updatePositions(windSpeed, pitch, self.limitmin, self.limitmax)
+            
             if altitude <= self.limitmin or altitude >= self.limitmax:
                 self.isCritical = True
             else:
