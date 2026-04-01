@@ -9,7 +9,7 @@ from ui.anemometer.instrument import AnemometerInstrument
 from ui.compass.instrument import CompassInstrument
 from ui.variometer.instrument import VariometerInstrument
 from ui.slipIndicator.instrument import SlipInstrument
-from services.ESP32Client import ESP32Client 
+from services.ESP32Client import ESP32Client
 
 import time
 import math

@@ -82,7 +82,7 @@ class AltitudeIndicator(QGraphicsItemGroup):
 
         self.digits[2]["bigText"].setDefaultTextColor(Qt.GlobalColor.white)
 
-        step = self.metersPerGraduation 
+        step = self.metersPerGraduation
         baseAlt = round(altitude / step) * step
         centerY = self.height * 0.5
 
@@ -93,7 +93,7 @@ class AltitudeIndicator(QGraphicsItemGroup):
             altVal = baseAlt + (digit["index"] * self.metersPerGraduation)
             yOffset = (altitude - altVal) * self.pxPerMeter
 
-            tens = int((abs(altVal) % 100)) 
+            tens = int((abs(altVal) % 100))
             text = f"{tens:02d}"
 
             var = digit["variableText"]

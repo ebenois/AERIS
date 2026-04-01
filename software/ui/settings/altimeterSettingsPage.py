@@ -17,27 +17,27 @@ class AltimeterSettingsPage(QWidget):
         self.instrument = instrument
 
         mainLayout = QVBoxLayout(self)
-        
+
         calibrationGroup, calibrationLayout = self.createSection("Calibration")
-        
+
         qnhLayout = QHBoxLayout()
         qnhLabel = QLabel("QNH (hPa) :")
-        
+
         self.qnhSpin = QSpinBox()
         self.qnhSpin.setRange(900, 1100)
         self.qnhSpin.setSingleStep(1)
-            
+
         currentQNH = int(self.settings.value("QNH", 1013))
         self.qnhSpin.setValue(currentQNH)
-        
+
         self.qnhSpin.valueChanged.connect(
             lambda v: self.saveAndUpdate("QNH", v, self.instrument.setQNH)
         )
-        
+
         qnhLayout.addWidget(qnhLabel)
         qnhLayout.addWidget(self.qnhSpin)
         calibrationLayout.addLayout(qnhLayout)
-        mainLayout.addWidget(calibrationGroup)         
+        mainLayout.addWidget(calibrationGroup)
 
         altitudeGroup, altitudeLayout = self.createSection("Altitude de vol (m)")
 
@@ -75,8 +75,8 @@ class AltimeterSettingsPage(QWidget):
     def saveAndUpdate(self, key, value, callbackFunc):
         self.settings.setValue(key, value)
         self.settings.sync()
-        
-        if hasattr(callbackFunc, '__call__'):
+
+        if hasattr(callbackFunc, "__call__"):
             callbackFunc(value)
 
     def createSection(self, title):

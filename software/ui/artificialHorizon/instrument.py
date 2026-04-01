@@ -20,7 +20,7 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
 
         self.isCritical = False
         self.isInError = True
-        
+
         self.currentLineWeight = width // 30
         self.currentDotRadius = width // 30
         self.currentOutlineWeight = width // 75

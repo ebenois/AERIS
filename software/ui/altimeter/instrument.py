@@ -1,7 +1,6 @@
 from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsRectItem
 from PyQt6.QtGui import QBrush, QColor, QPen
 from PyQt6.QtCore import Qt, QSettings
-import numbers
 
 from ui.altimeter.graduations import AltitudeGraduations
 from ui.altimeter.indicator import AltitudeIndicator
@@ -49,10 +48,10 @@ class AltimeterInstrument(QGraphicsItemGroup):
 
     def setQNH(self, value):
         self.qnh = value
-        
+
     def setAltitudeMax(self, value):
         self.limitmax = value
-        
+
     def setAltitudeMin(self, value):
         self.limitmin = value
 
@@ -90,13 +89,13 @@ class AltimeterInstrument(QGraphicsItemGroup):
         if data_valid:
             self.isInError = False
             altitude = pressure_to_altitude(pressure, self.qnh)
-            
+
             self.graduations.updatePositions(altitude)
             self.indicator.updatePositions(altitude)
-            
+
             self.limit.updatePositions(altitude, self.limitmin, self.limitmax)
             self.trend.updatePositions(windSpeed, pitch, self.limitmin, self.limitmax)
-            
+
             if altitude <= self.limitmin or altitude >= self.limitmax:
                 self.isCritical = True
             else:
@@ -104,6 +103,8 @@ class AltimeterInstrument(QGraphicsItemGroup):
         else:
             self.isInError = True
 
+
 def pressure_to_altitude(pression_hpa, qnh_hpa=1013.25):
-    if pression_hpa <= 0: return 0
+    if pression_hpa <= 0:
+        return 0
     return 44330.0 * (1.0 - (pression_hpa / qnh_hpa) ** 0.1903)

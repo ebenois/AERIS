@@ -2,6 +2,7 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QLabel, QSpinBox
 from PyQt6.QtCore import QSettings
 from services.ESP32Client import ESP32Client
 
+
 class DeviceSettingsPage(QWidget):
     def __init__(self, mainWindow):
         super().__init__()
@@ -11,7 +12,7 @@ class DeviceSettingsPage(QWidget):
 
         layout = QVBoxLayout(self)
         layout.addWidget(QLabel("Port d'écoute UDP (ex: 1234) :"))
-        
+
         self.portSpin = QSpinBox()
         self.portSpin.setRange(1, 65535)
         self.portSpin.setValue(int(self.settings.value("UdpPort", 1234)))
@@ -28,7 +29,7 @@ class DeviceSettingsPage(QWidget):
     def applySettings(self):
         newPort = self.portSpin.value()
         self.settings.setValue("UdpPort", newPort)
-        
+
         # Fermeture propre de l'ancien socket
         if self.pfd.device:
             self.pfd.device.close()
