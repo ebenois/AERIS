@@ -16,7 +16,7 @@ from PyQt6.QtCore import Qt
 from ui.pfd import PrimaryFlightDisplay
 from ui.settings.altimeterSettingsPage import AltimeterSettingsPage
 from ui.settings.deviceSettingsPage import DeviceSettingsPage
-from ui.ai import AIWidget
+from ui.log import LogWidget
 
 try:
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("AERIS")
@@ -34,7 +34,7 @@ class MainWindow(QMainWindow):
         self.SetupWindow()
         self.SetupStyle()
         self.SetupCentralWidget()
-        self.SetupAiDock()
+        self.SetuplogDock()
         self.SetupMenu()
 
     def SetupWindow(self):
@@ -47,8 +47,8 @@ class MainWindow(QMainWindow):
             QToolBar {
                 background-color: #121212;
                 border-bottom: 1px solid #333333;
-                spacing: 10px;
-                padding: 5px;
+                spacing: 30px;
+                padding: 20px;
             }
             QToolBar QWidget { color: white; }
             QStatusBar {
@@ -67,26 +67,26 @@ class MainWindow(QMainWindow):
         self.pfdPage = PrimaryFlightDisplay()
         self.setCentralWidget(self.pfdPage)
 
-    def SetupAiDock(self):
-        self.aiDock = QDockWidget("Assistant IA", self)
-        self.aiDock.setAllowedAreas(Qt.DockWidgetArea.AllDockWidgetAreas)
+    def SetuplogDock(self):
+        self.logDock = QDockWidget("Journal Log", self)
+        self.logDock.setAllowedAreas(Qt.DockWidgetArea.AllDockWidgetAreas)
 
-        self.aiWidget = AIWidget()
-        self.aiWidget.setStyleSheet(
+        self.logWidget = LogWidget()
+        self.logWidget.setStyleSheet(
             "background-color: #1E1E1E; color: white; border-left: 1px solid #333333;"
         )
 
-        self.aiDock.setWidget(self.aiWidget)
-        self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.aiDock)
-        self.aiDock.hide()
+        self.logDock.setWidget(self.logWidget)
+        self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.logDock)
+        self.logDock.hide()
 
     def SetupMenu(self):
         toolbar = QToolBar("Main toolbar")
         self.addToolBar(toolbar)
         toolbar.hide()
 
-        self.aiAction = QAction("Assistant IA", self, checkable=True)
-        self.aiAction.triggered.connect(self.ToggleAi)
+        self.logAction = QAction("Journal Log", self, checkable=True)
+        self.logAction.triggered.connect(self.ToggleLog)
 
         self.altimeterAction = QAction("Altimètre", self)
         self.altimeterAction.triggered.connect(
@@ -106,7 +106,7 @@ class MainWindow(QMainWindow):
 
         toolbar.addActions(
             [
-                self.aiAction,
+                self.logAction,
                 self.altimeterAction,
                 self.deviceAction,
             ]
@@ -117,14 +117,14 @@ class MainWindow(QMainWindow):
         self.statusBar().addPermanentWidget(self.deviceStatus)
 
         menu = self.menuBar()
-        menu.addAction(self.aiAction)
+        menu.addAction(self.logAction)
         menu.addAction(self.deviceAction)
 
         settingsMenu = menu.addMenu("Paramètres")
         settingsMenu.addActions([self.altimeterAction])
 
-    def ToggleAi(self, checked: bool):
-        self.aiDock.setVisible(checked)
+    def ToggleLog(self, checked: bool):
+        self.logDock.setVisible(checked)
 
     def OpenSettingsDialog(self, title, pageClass, target):
         dialog = QDialog(self)

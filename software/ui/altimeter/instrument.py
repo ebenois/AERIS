@@ -6,6 +6,7 @@ from ui.altimeter.graduations import AltitudeGraduations
 from ui.altimeter.indicator import AltitudeIndicator
 from ui.altimeter.trend import AltitudeTrend
 from ui.altimeter.limit import AltitudeLimit
+from ui.altimeter.pin import AltitudePin
 
 
 class AltimeterInstrument(QGraphicsItemGroup):
@@ -21,6 +22,7 @@ class AltimeterInstrument(QGraphicsItemGroup):
         self.qnh = int(self.settings.value("QNH", 1013))
         self.limitmax = int(self.settings.value("limitMax", 1000))
         self.limitmin = int(self.settings.value("limitMin", 10))
+        self.wantedAltitude = int(self.settings.value("wantedAltitude", 500))
 
         self.rect = QGraphicsRectItem(0, 0, self.width, self.height)
         self.rect.setBrush(QBrush(QColor("#808080")))
@@ -32,15 +34,17 @@ class AltimeterInstrument(QGraphicsItemGroup):
         self.isCriticalPen = QPen(QColor("#ff7f00"), 10)
         self.alertFrame.setVisible(False)
 
-        self.limit = AltitudeLimit(width, height, self.limitmax)
+        self.limit = AltitudeLimit(width, height)
         self.trend = AltitudeTrend(width, height)
         self.graduations = AltitudeGraduations(width, height)
         self.indicator = AltitudeIndicator(width, height)
+        self.pin = AltitudePin(width, height)
 
         for item in [
             self.limit,
             self.trend,
             self.graduations,
+            self.pin,
             self.alertFrame,
             self.indicator,
         ]:
@@ -55,6 +59,9 @@ class AltimeterInstrument(QGraphicsItemGroup):
     def setAltitudeMin(self, value):
         self.limitmin = value
 
+    def setAltitudePin(self, value):
+        self.wantedAltitude = value
+
     def drawAlert(self, flashOpacity):
         if self.isInError:
             self.alertFrame.setPen(self.isInErrorPen)
@@ -62,6 +69,7 @@ class AltimeterInstrument(QGraphicsItemGroup):
             self.alertFrame.setOpacity(flashOpacity)
 
             self.graduations.hide()
+            self.pin.hide()
             self.trend.hide()
             self.limit.hide()
             self.indicator.updatePositions("ERR")
@@ -73,6 +81,7 @@ class AltimeterInstrument(QGraphicsItemGroup):
 
         else:
             self.graduations.show()
+            self.pin.show()
             self.trend.show()
             self.limit.show()
             self.alertFrame.setVisible(False)
@@ -93,8 +102,9 @@ class AltimeterInstrument(QGraphicsItemGroup):
             self.graduations.updatePositions(altitude)
             self.indicator.updatePositions(altitude)
 
-            self.limit.updatePositions(altitude, self.limitmin, self.limitmax)
-            self.trend.updatePositions(windSpeed, pitch, self.limitmin, self.limitmax)
+            self.limit.updatePositions(altitude, self.limitmax)
+            self.trend.updatePositions(windSpeed, pitch)
+            self.pin.updatePositions(altitude, self.wantedAltitude)
 
             if altitude <= self.limitmin or altitude >= self.limitmax:
                 self.isCritical = True

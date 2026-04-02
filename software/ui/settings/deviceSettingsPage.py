@@ -30,19 +30,18 @@ class DeviceSettingsPage(QWidget):
         newPort = self.portSpin.value()
         self.settings.setValue("UdpPort", newPort)
 
-        # Fermeture propre de l'ancien socket
         if self.pfd.device:
             self.pfd.device.close()
 
         try:
             newClient = ESP32Client(port=newPort)
             self.pfd.setDevice(newClient)
-            self.statusLabel.setText("✅ Port configuré avec succès")
+            self.statusLabel.setText("✅ Port configuré")
         except Exception as e:
             self.statusLabel.setText(f"❌ Erreur: {e}")
 
     def updateUI(self):
         if self.pfd.isConnected:
-            self.statusLabel.setText("🟢 Réception de données en cours")
+            self.statusLabel.setText("🟢 Connécté")
         else:
-            self.statusLabel.setText("🔴 Déconnecté (en attente de paquets)")
+            self.statusLabel.setText("🔴 Déconnecté")

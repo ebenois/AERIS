@@ -4,10 +4,9 @@ from PyQt6.QtCore import Qt, QElapsedTimer
 
 
 class AltitudeLimit(QGraphicsItemGroup):
-    def __init__(self, width, height, limit):
+    def __init__(self, width, height):
         super().__init__()
 
-        self.limit = limit
         self.span = 500
         self.height = height
         self.pixelPerUnit = (self.height / 2) / self.span
@@ -21,8 +20,8 @@ class AltitudeLimit(QGraphicsItemGroup):
         self.rect.setPen(QPen(Qt.PenStyle.NoPen))
         self.addToGroup(self.rect)
 
-    def updatePositions(self, altitude):
-        heightPx = (self.limit - altitude) * self.pixelPerUnit
+    def updatePositions(self, altitude, limit):
+        heightPx = (limit - altitude) * self.pixelPerUnit
         safe = max(-self.height / 2, min(self.height / 2, heightPx))
         self.rect.setRect(
             -self.width * 2 / 17, 0, self.width * 2 / 17, self.height / 2 - safe

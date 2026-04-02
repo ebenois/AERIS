@@ -68,8 +68,31 @@ class AltimeterSettingsPage(QWidget):
         maxLayout.addWidget(maxLabel)
         maxLayout.addWidget(self.maxSpin)
         altitudeLayout.addLayout(maxLayout)
-
         mainLayout.addWidget(altitudeGroup)
+
+        indicatorGroup, indicatorLayout = self.createSection("Indicateur")
+
+        limitLayout = QHBoxLayout()
+        limitLabel = QLabel("Altitude désirée (m) :")
+
+        self.limitSpin = QSpinBox()
+        self.limitSpin.setRange(0, 2000)
+        self.limitSpin.setSingleStep(1)
+
+        currentLimit = int(self.settings.value("wantedAltitude", 100))
+        self.limitSpin.setValue(currentLimit)
+
+        self.limitSpin.valueChanged.connect(
+            lambda v: self.saveAndUpdate(
+                "wantedAltitude", v, self.instrument.setAltitudePin
+            )
+        )
+
+        limitLayout.addWidget(limitLabel)
+        limitLayout.addWidget(self.limitSpin)
+        indicatorLayout.addLayout(limitLayout)
+        mainLayout.addWidget(indicatorGroup)
+
         mainLayout.addStretch()
 
     def saveAndUpdate(self, key, value, callbackFunc):
