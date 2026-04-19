@@ -1,96 +1,113 @@
 from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsLineItem, QGraphicsTextItem
 from PyQt6.QtGui import QColor, QPen, QFont
 from PyQt6.QtCore import Qt
-import math
+
 
 class PitchGraduations(QGraphicsItemGroup):
-    def __init__(self, parent=None, width=24):
+    def __init__(self, parent, width, height):
         super().__init__(parent)
 
         self.width = width
-        self.step = 2.5
-        self.span = 30
+        self.height = height
+        self.pixelsPerDegree = height / 45.0
 
-        self.nbGraduations = (self.span * 2) // int(self.step) + 1
+        self.step = 2.5
+        self.span = 20
+
+        self.nbGraduations = int((self.span * 2) / self.step)
         self.graduationsPool = []
+
+        self.lenMajor = width / 6
+        self.lenMedium = width / 10
+        self.lenMinor = width / 16
 
         pen = QPen(QColor("#FFFFFF"), 3)
         pen.setCapStyle(Qt.PenCapStyle.RoundCap)
-        self.font = QFont("Arial", 18)
+
+        self.font = QFont()
+        self.font.setPixelSize(int(height / 22))
 
         for _ in range(self.nbGraduations):
-            line = QGraphicsLineItem(-width/2, 0, width/2, 0, self)
+            line = QGraphicsLineItem(self)
             line.setPen(pen)
 
-            leftText = QGraphicsTextItem("", line)
+            leftText = QGraphicsTextItem(line)
             leftText.setDefaultTextColor(Qt.GlobalColor.white)
             leftText.setFont(self.font)
-            rigthText = QGraphicsTextItem("", line)
-            rigthText.setDefaultTextColor(Qt.GlobalColor.white)
-            rigthText.setFont(self.font)
 
-            self.graduationsPool.append({
-                "line": line,
-                "leftText": leftText,
-                "rigthText": rigthText
-            })
+            rightText = QGraphicsTextItem(line)
+            rightText.setDefaultTextColor(Qt.GlobalColor.white)
+            rightText.setFont(self.font)
+
+            self.graduationsPool.append((line, leftText, rightText))
 
     def updatePositions(self, pitchDeg):
         pitchDeg = ((pitchDeg + 180) % 360) - 180
-        
-        isInverted = abs(pitchDeg) > 90
 
-        basePitch = round(pitchDeg / self.step) * self.step
-        startOffset = -(self.nbGraduations // 2)
+        if pitchDeg > 90:
+            displayPitch = 180 - pitchDeg
+            self.setRotation(180)
+        elif pitchDeg < -90:
+            displayPitch = -180 - pitchDeg
+            self.setRotation(180)
+        else:
+            displayPitch = pitchDeg
+            self.setRotation(0)
 
-        for i in range(self.nbGraduations):
-            gradPitch = basePitch + (startOffset + i) * self.step
-            
-            relPitch = gradPitch - pitchDeg
-            
-            item = self.graduationsPool[i]
-            line = item["line"]
-            leftText = item["leftText"]
-            rigthText = item["rigthText"]
+        basePitch = round(displayPitch / self.step)
+        centerIndex = self.nbGraduations // 2
 
-            if abs(relPitch) > self.span:
+        pixelsPerDegree = self.pixelsPerDegree
+        halfHeight = self.height / 2
+        step = self.step
+
+        for i, (line, leftText, rightText) in enumerate(self.graduationsPool):
+            stepIndex = basePitch + (i - centerIndex)
+            gradPitch = stepIndex * step
+
+            if not -90 <= gradPitch <= 90:
                 line.setVisible(False)
                 continue
 
-            displayPitch = gradPitch
-            if displayPitch > 90: displayPitch = 180 - displayPitch
-            if displayPitch < -90: displayPitch = -180 - displayPitch
+            relPitch = gradPitch - displayPitch
+            yPos = -(relPitch * pixelsPerDegree)
 
-            if isInverted:
-                line.setRotation(180)
+            if abs(yPos) > halfHeight:
+                line.setVisible(False)
+                continue
+
+            line.setVisible(True)
+            line.setPos(0, yPos)
+
+            absStepIndex = abs(stepIndex)
+
+            if absStepIndex % 4 == 0:  # 10°
+                halfLen = self.lenMajor
+                isMajor = True
+            elif absStepIndex % 2 == 0:  # 5°
+                halfLen = self.lenMedium
+                isMajor = False
             else:
-                line.setRotation(0)
+                halfLen = self.lenMinor
+                isMajor = False
 
-            if displayPitch % 10 == 0:
-                line.setLine(-self.width*4/2, 0, self.width*4/2, 0)
-            elif displayPitch % 5 == 0:
-                line.setLine(-self.width*2/2, 0, self.width*2/2, 0)
-            else:
-                line.setLine(-self.width/2, 0, self.width/2, 0)
+            line.setLine(-halfLen, 0, halfLen, 0)
 
-            y = relPitch * 6.5
-            line.setPos(0, -y)
-
-            val = int(abs(displayPitch))
-            if displayPitch % 10 == 0 and val != 0:
-                textStr = f"{val:02d}"
+            if isMajor and stepIndex != 0:
+                textStr = f"{int(abs(gradPitch)):02d}"
                 leftText.setPlainText(textStr)
-                rigthText.setPlainText(textStr)
-                leftText.setVisible(True)
-                rigthText.setVisible(True)
+                rightText.setPlainText(textStr)
 
-                hDistX = 60
-                if isInverted:
-                    leftText.setPos(hDistX, -20) 
-                    rigthText.setPos(-hDistX - rigthText.boundingRect().width(), -20)
-                else:
-                    leftText.setPos(-hDistX - leftText.boundingRect().width(), -20)
-                    rigthText.setPos(hDistX, -20)
+                leftText.setVisible(True)
+                rightText.setVisible(True)
+
+                rect = leftText.boundingRect()
+                textW = rect.width()
+                textH = rect.height()
+
+                yText = -textH / 2
+                leftText.setPos(-halfLen - textW - 4, yText)
+                rightText.setPos(halfLen + 4, yText)
             else:
                 leftText.setVisible(False)
-                rigthText.setVisible(False)
+                rightText.setVisible(False)

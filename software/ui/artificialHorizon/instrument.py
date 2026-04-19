@@ -2,162 +2,127 @@ from PyQt6.QtWidgets import (
     QGraphicsItemGroup,
     QGraphicsEllipseItem,
     QGraphicsLineItem,
-    QGraphicsItem
+    QGraphicsRectItem,
 )
-from PyQt6.QtGui import QPen, QColor, QBrush, QPainterPath
-from PyQt6.QtCore import Qt, QSettings, QRectF
+from PyQt6.QtGui import QPen, QColor, QBrush
+from PyQt6.QtCore import Qt
+import numbers
 
 from ui.artificialHorizon.background import ArtificialHorizonBackground
 
-class ArtificialHorizonInstrument(QGraphicsItemGroup):  
-    def __init__(self):
+
+class ArtificialHorizonInstrument(QGraphicsItemGroup):
+    def __init__(self, width, height):
         super().__init__()
+        self.width = width
+        self.height = height
+        self.limit = 45
 
-        settings = QSettings("ENSC", "AERIS")
-        self.size = 310
-        self.currentLineWeight = settings.value("lineWeight", 10, int)
-        self.currentDotRadius = settings.value("dotSize", 10, int)
-        self.currentOutlineWeight = settings.value("outlineWeight", 5, int)
-        self.currentWingsDistance = settings.value("WingsDistance", 45, int)
-        self.currentWingsSpan = settings.value("WingsSpan", 75, int)
-        self.currentWingsHeight = settings.value("WingsHeight", 12, int)
+        self.isCritical = False
+        self.isInError = True
 
-        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
+        self.currentLineWeight = width // 30
+        self.currentDotRadius = width // 30
+        self.currentOutlineWeight = width // 75
+        self.currentWingsDistance = width // 8
+        self.currentWingsSpan = width // 4
+        self.currentWingsHeight = width // 15
 
-        self.artificialHorizon = ArtificialHorizonBackground()
-        self.addToGroup(self.artificialHorizon)
+        # Initialisation du fond (Le masque est géré à l'intérieur)
+        self.background = ArtificialHorizonBackground(width, height)
+        self.addToGroup(self.background)
+        self.background.setPos(0, 0) 
+
+        self.alertFrame = QGraphicsRectItem(-width/2, -height/2, width, height)
+        self.isInErrorPen = QPen(QColor("red"), 10)
+        self.isCriticalPen = QPen(QColor("#ff7f00"), 10)
+        self.alertFrame.setVisible(False)
 
         self.maquette = QGraphicsItemGroup()
+        self.wings = []
+        self.montants = []
+        self.dots = []
+
+        self.DrawIndicator("white", isOutline=True)
+        self.DrawIndicator("black", isOutline=False)
+
         self.addToGroup(self.maquette)
+        self.maquette.setPos(0, 0)
         self.maquette.setZValue(10)
 
-        self.lines = []
-        self.dots = []
-        self.drawIndicatorGeneric(color="white", isOutline=True)
-        self.drawIndicatorGeneric(color="black", isOutline=False)
+        self.addToGroup(self.alertFrame)
 
-        center = self.boundingRect().center()
-        self.setTransformOriginPoint(center)
-        self.setPos(-center)
-
-    def boundingRect(self):
-        return QRectF(-self.size / 2, -self.size / 2, self.size, self.size)
-
-    def shape(self):
-        path = QPainterPath()
-        path.addRect(self.boundingRect())
-        return path
-
-    def drawIndicatorGeneric(self, color, isOutline=False):
-        if isOutline:
-            extra = self.currentOutlineWeight
-        else:
-            extra = 0
+    def CreatePen(self, color, isOutline):
+        extra = self.currentOutlineWeight if isOutline else 0
         pen = QPen(QColor(color), self.currentLineWeight + extra)
         pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+        return pen
+
+    def DrawIndicator(self, color, isOutline=False):
+        pen = self.CreatePen(color, isOutline)
 
         for sign in (-1, 1):
-            # Ailes et Montants
-            wing = QGraphicsLineItem(sign*(self.currentWingsSpan+self.currentWingsDistance), 0, sign*self.currentWingsDistance, 0)
+            wing = QGraphicsLineItem()
             wing.setPen(pen)
             self.maquette.addToGroup(wing)
-            self.lines.append((wing, isOutline))
+            self.wings.append((wing, isOutline, sign))
 
-            montant = QGraphicsLineItem(sign*self.currentWingsDistance, 0, sign*self.currentWingsDistance, self.currentWingsHeight)
+            montant = QGraphicsLineItem()
             montant.setPen(pen)
             self.maquette.addToGroup(montant)
-            self.lines.append((montant, isOutline))
+            self.montants.append((montant, isOutline, sign))
 
-        # Point central
-        r = self.currentDotRadius + extra
-        dot = QGraphicsEllipseItem(-r/2, -r/2, r, r)
+        r = self.currentDotRadius + (self.currentOutlineWeight if isOutline else 0)
+        dot = QGraphicsEllipseItem(-r / 2, -r / 2, r, r)
         dot.setBrush(QBrush(QColor(color)))
         dot.setPen(QPen(Qt.PenStyle.NoPen))
         self.maquette.addToGroup(dot)
         self.dots.append((dot, isOutline))
 
-    def setLineWeight(self, width):
-        self.currentLineWeight = width
-        for item, isOutline in self.lines:
-            pen = item.pen()
-            if isOutline:
-                extra = self.currentOutlineWeight
-            else:
-                extra = 0
-            pen.setWidth(self.currentLineWeight + extra)
-            item.setPen(pen)
+        self.UpdateWingsGeometry()
 
-    def setDotSize(self, radius):
-        self.currentDotRadius = radius
-        for item, isOutline in self.dots:
-            if isOutline:
-                extra = self.currentOutlineWeight
-            else:
-                extra = 0
-            r = self.currentDotRadius + extra
-            item.setRect(-r/2, -r/2, r, r)
+    def UpdateWingsGeometry(self):
+        for wing, _, sign in self.wings:
+            wing.setLine(
+                sign * (self.currentWingsSpan + self.currentWingsDistance),
+                0,
+                sign * self.currentWingsDistance,
+                0,
+            )
 
-    def setOutlineWeight(self, weight):
-        self.currentOutlineWeight = weight
-        self.setLineWeight(self.currentLineWeight)
-        self.setDotSize(self.currentDotRadius)
-    
-    def setWingsDistance(self, width):
-        self.currentWingsDistance = width
-        for item, isOutline in self.lines:
-            currentLine = item.line()
-            if currentLine.x1() < 0:
-                sign = -1 
-            else:
-                sign = 1
-            if currentLine.y1() == currentLine.y2():
-                item.setLine(
-                    sign * (self.currentWingsSpan + self.currentWingsDistance), 0, 
-                    sign * self.currentWingsDistance, 0
-                )
-            else:
-                item.setLine(
-                    sign * self.currentWingsDistance, 0, 
-                    sign * self.currentWingsDistance, self.currentWingsHeight
-                )
+        for montant, _, sign in self.montants:
+            montant.setLine(
+                sign * self.currentWingsDistance,
+                0,
+                sign * self.currentWingsDistance,
+                self.currentWingsHeight,
+            )
 
-    def setWingsSpan(self, span):
-        self.currentWingsSpan = span
-        for item, isOutline in self.lines:
-            currentLine = item.line()
-            if currentLine.x1() < 0:
-                sign = -1 
-            else:
-                sign = 1
-            if currentLine.y1() == currentLine.y2():
-                item.setLine(
-                    sign * (self.currentWingsSpan + self.currentWingsDistance), 0, 
-                    sign * self.currentWingsDistance, 0
-                )
-            else:
-                item.setLine(
-                    sign * self.currentWingsDistance, 0, 
-                    sign * self.currentWingsDistance, self.currentWingsHeight
-                )
-    
-    def setWingsHeight(self, height):
-        self.currentWingsHeight = height
-        for item, isOutline in self.lines:
-            currentLine = item.line()
-            if currentLine.x1() < 0:
-                sign = -1 
-            else:
-                sign = 1
-            if currentLine.y1() == currentLine.y2():
-                item.setLine(
-                    sign * (self.currentWingsSpan + self.currentWingsDistance), 0, 
-                    sign * self.currentWingsDistance, 0
-                )
-            else:
-                item.setLine(
-                    sign * self.currentWingsDistance, 0, 
-                    sign * self.currentWingsDistance, self.currentWingsHeight
-                )
-    
+    def drawAlert(self, flashOpacity):
+        if self.isInError:
+            self.alertFrame.setPen(self.isInErrorPen)
+            self.alertFrame.setVisible(True)
+            self.alertFrame.setOpacity(flashOpacity)
+            self.background.updatePositions("ERR", "ERR")
+        elif self.isCritical:
+            self.alertFrame.setPen(self.isCriticalPen)
+            self.alertFrame.setVisible(True)
+            self.alertFrame.setOpacity(0.4 + 0.6 * flashOpacity)
+        else:
+            self.alertFrame.setVisible(False)
+
+    def drawLess(self, highMentalLoad):
+        self.setOpacity(0.5 if highMentalLoad else 1.0)
+
     def updatePositions(self, pitch, roll):
-        self.artificialHorizon.updatePositions(pitch, roll)
+        dataValid = isinstance(roll, numbers.Number) and isinstance(pitch, numbers.Number)
+
+        if dataValid:
+            self.isInError = False
+            self.background.updatePositions(pitch, roll)
+            if abs(pitch) >= self.limit or abs(roll) >= self.limit:
+                self.isCritical = True
+            else:
+                self.isCritical = False
+        else:
+            self.isInError = True

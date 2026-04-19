@@ -1,123 +1,291 @@
 from PyQt6.QtWidgets import QWidget, QGraphicsView, QGraphicsScene, QSizePolicy
-from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtGui import QPixmap, QBrush, QPainter
+from PyQt6.QtCore import Qt, QTimer, QUrl
+from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
+from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 
 from ui.artificialHorizon.instrument import ArtificialHorizonInstrument
 from ui.altimeter.instrument import AltimeterInstrument
 from ui.anemometer.instrument import AnemometerInstrument
 from ui.compass.instrument import CompassInstrument
 from ui.variometer.instrument import VariometerInstrument
+from ui.slipIndicator.instrument import SlipInstrument
+from services.ESP32Client import ESP32Client
+
+import time
+import math
+
 
 class PrimaryFlightDisplay(QWidget):
-    def __init__(self, size=600):
-        super().__init__()
-        
-        self.setMinimumSize(100, 100)
-        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 
-        self.view = QGraphicsView(self)
-        self.scene = QGraphicsScene(0, 0, size, size)
-        self.view.setScene(self.scene)
-        
+    UPDATE_INTERVAL = 10
+    HEARTBEAT_INTERVAL = 30
+    CONNECTION_TIMEOUT = 0.5
+    MAX_PULSE_STEPS = 50
+    PULSE_TIME = 15
+
+    def __init__(self, size=1200):
+        super().__init__()
+
+        self.lastDataTime = time.time()
+        self.isConnected = False
+        self.pulseStep = 0
+
+        self.consecutivePacketLoss = 0
+        self.maxAllowedLoss = 5
+        self.dataIntegrityError = False
+
+        self.device = None
+
+        self.setMinimumSize(500, 500)
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.setStyleSheet("background-color: #000000;")
+
+        self.scene = QGraphicsScene(0, 0, size, size, self)
+
+        self.view = QGraphicsView(self.scene, self)
+        self.view.setViewport(QOpenGLWidget())
         self.view.setFrameShape(QGraphicsView.Shape.NoFrame)
         self.view.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.view.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        
-        self.view.setRenderHints(
-            QPainter.RenderHint.Antialiasing | 
-            QPainter.RenderHint.SmoothPixmapTransform | 
-            QPainter.RenderHint.TextAntialiasing
-        )
-        self.view.setViewportUpdateMode(QGraphicsView.ViewportUpdateMode.SmartViewportUpdate)
-        self.view.setCacheMode(QGraphicsView.CacheModeFlag.CacheBackground)
-        self.view.setOptimizationFlag(QGraphicsView.OptimizationFlag.DontSavePainterState)
 
-        #self.setupMockPFD(size) #Provisoire
+        self.view.setViewportUpdateMode(
+            QGraphicsView.ViewportUpdateMode.MinimalViewportUpdate
+        )
+        self.view.setOptimizationFlag(
+            QGraphicsView.OptimizationFlag.DontSavePainterState
+        )
+        self.view.setCacheMode(QGraphicsView.CacheModeFlag.CacheBackground)
+
         self.setupInstruments()
 
-        test=True
-        if test == False:
-            self.updateFromData()
-        else:
-            self.updateTest()
+        self.setupAudio()
+        self.setupTimers()
 
-    def updateTest(self):
-        self.artificialHorizon.updatePositions(10, 10)
-        self.altimeter.updatePositions(38000)
-        self.anemometer.updatePositions(250)
-        self.compass.updatePositions(230)
-        self.variometer.updatePositions(1.5)
+    def setupTimers(self):
+        self.dataTimer = QTimer(self)
+        self.dataTimer.timeout.connect(self.updateFromDevice)
+        self.dataTimer.start(self.UPDATE_INTERVAL)
+
+        self.masterTimer = QTimer(self)
+        self.masterTimer.timeout.connect(self.globalHeartbeat)
+        self.masterTimer.start(self.HEARTBEAT_INTERVAL)
+
+    def setupAudio(self):
+        self.audioOutput = QAudioOutput(self)
+        self.audioOutput.setVolume(1.0)
+
+        self.alertPlayer = QMediaPlayer(self)
+        self.alertPlayer.setAudioOutput(self.audioOutput)
+        self.alertPlayer.setSource(QUrl.fromLocalFile("software/assets/warning.wav"))
 
     def setupInstruments(self):
-        self.artificialHorizon = ArtificialHorizonInstrument()
-        self.altimeter = AltimeterInstrument()
-        self.anemometer = AnemometerInstrument()
-        self.compass = CompassInstrument()
-        self.variometer = VariometerInstrument()
 
-        self.scene.addItem(self.variometer)
-        self.scene.addItem(self.artificialHorizon)
-        self.scene.addItem(self.altimeter)
-        self.scene.addItem(self.anemometer)
-        self.scene.addItem(self.compass)
-        
-        self.variometer.setPos(577, 300)
-        self.artificialHorizon.setPos(271, 277)
-        self.altimeter.setPos(510, 300)
-        self.anemometer.setPos(45, 300)
-        self.compass.setPos(271, 715)
+        self.horizon = ArtificialHorizonInstrument(625, 625)
+        self.anemometer = AnemometerInstrument(145, 830)
+        self.compass = CompassInstrument(875, 875)
+        self.variometer = VariometerInstrument(110, 530)
+        self.altimeter = AltimeterInstrument(145, 830)
+        self.slip = SlipInstrument(625, 625)
 
-    def showEvent(self, event):
-        super().showEvent(event)
-        self.updateViewGeometry()
+        self.instruments = [
+            self.horizon,
+            self.anemometer,
+            self.compass,
+            self.variometer,
+            self.altimeter,
+            self.slip,
+        ]
+
+        positions = [
+            (225*2.4, 240*2.3),
+            (15, 185),
+            (100, 990),
+            (1075, 335),
+            (915, 185),
+            (225, 240),
+        ]
+
+        for instr, pos in zip(self.instruments, positions):
+            self.scene.addItem(instr)
+            instr.setPos(*pos)
+
+        self.alertInstruments = [i for i in self.instruments if hasattr(i, "drawAlert")]
+        self.errorCapable = [i for i in self.instruments if hasattr(i, "isInError")]
+
+    def globalHeartbeat(self):
+
+        now = time.time()
+
+        if now - self.lastDataTime > self.CONNECTION_TIMEOUT:
+            if self.isConnected:
+                self.isConnected = False
+                if self.window() and hasattr(self.window(), 'updateDeviceStatus'):
+                    self.window().updateDeviceStatus(False)
+
+            for instr in self.errorCapable:
+                instr.isInError = True
+
+        anyError = any(i.isInError for i in self.errorCapable)
+        anyCritical = any(getattr(i, "isCritical", False) for i in self.errorCapable)
+
+        flashOpacity = 0
+
+        if anyError or anyCritical:
+
+            self.pulseStep = (self.pulseStep + 1) % self.MAX_PULSE_STEPS
+
+            if self.pulseStep < self.PULSE_TIME:
+
+                phase = (self.pulseStep / self.PULSE_TIME) * math.pi
+                flashOpacity = 0.35 + 0.65 * math.sin(phase)
+
+                if self.pulseStep == 0:
+                    self.alertPlayer.stop()
+                    self.alertPlayer.play()
+
+            elif self.pulseStep < self.PULSE_TIME * 2:
+
+                phase = ((self.pulseStep - self.PULSE_TIME) / self.PULSE_TIME) * math.pi
+                flashOpacity = 0.35 + 0.65 * math.sin(phase)
+
+        else:
+            self.pulseStep = 0
+
+        self.drawAlert(flashOpacity)
+
+        if anyCritical or anyError:
+            self.drawLess(True)
+        else:
+            self.drawLess(False)
+
+    def drawLess(self, isOn):
+
+        for instr in self.instruments:
+            instr.drawLess(False)
+
+        if not isOn:
+            return
+
+        def isProblem(instr):
+            return getattr(instr, "isCritical", False) or getattr(
+                instr, "isInError", False
+            )
+
+        if isProblem(self.anemometer):
+            if not isProblem(self.compass):
+                self.compass.drawLess(True)
+            if not isProblem(self.variometer):
+                self.variometer.drawLess(True)
+
+        if isProblem(self.altimeter) or isProblem(self.variometer):
+            if not isProblem(self.compass):
+                self.compass.drawLess(True)
+            if not isProblem(self.slip):
+                self.slip.drawLess(True)
+
+        if isProblem(self.horizon):
+            if not isProblem(self.compass):
+                self.compass.drawLess(True)
+            if not isProblem(self.variometer):
+                self.variometer.drawLess(True)
+            if not isProblem(self.slip):
+                self.slip.drawLess(True)
+            if not isProblem(self.altimeter):
+                self.altimeter.drawLess(True)
+
+    def drawAlert(self, flashOpacity):
+        secondaryFlashOpacity = 0.10
+        if self.horizon.isCritical:
+            for instr in self.alertInstruments:
+                if instr == self.horizon:
+                    instr.drawAlert(flashOpacity)
+                else:
+                    instr.drawAlert(secondaryFlashOpacity)
+        elif self.anemometer.isCritical:
+            for instr in self.alertInstruments:
+                if instr == self.anemometer:
+                    instr.drawAlert(flashOpacity)
+                else:
+                    instr.drawAlert(secondaryFlashOpacity)
+        elif self.altimeter.isCritical:
+            for instr in self.alertInstruments:
+                if instr == self.altimeter:
+                    instr.drawAlert(flashOpacity)
+                else:
+                    instr.drawAlert(secondaryFlashOpacity)
+        elif self.variometer.isCritical:
+            for instr in self.alertInstruments:
+                if instr == self.variometer:
+                    instr.drawAlert(flashOpacity)
+                else:
+                    instr.drawAlert(secondaryFlashOpacity)
+        elif self.slip.isCritical:
+            for instr in self.alertInstruments:
+                if instr == self.slip:
+                    instr.drawAlert(flashOpacity)
+                else:
+                    instr.drawAlert(secondaryFlashOpacity)
+        else:
+            for instr in self.alertInstruments:
+                instr.drawAlert(flashOpacity)
+        return
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
         self.updateViewGeometry()
 
+    def showEvent(self, event):
+        super().showEvent(event)
+        self.updateViewGeometry()
+
     def updateViewGeometry(self):
-        target_w = self.width()
-        target_h = self.height()
-        side = min(target_w, target_h)
-        
-        if side > 0:
-            x = (target_w - side) // 2
-            y = (target_h - side) // 2
 
-            self.view.setGeometry(x, y, side, side)
-            self.view.fitInView(self.scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
-
-    def updateFromData(self):
-        from services.arduino import ArduinoReader
-        self.arduino = ArduinoReader(port="COM3", baudrate=115200)
-
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.updateFromArduino)
-        self.timer.start(20)
-
-    def updateFromArduino(self):
-        data = self.arduino.read()
-
-        if data is None:
+        side = min(self.width(), self.height())
+        if side <= 0:
             return
 
-        roll, pitch = data
+        x = (self.width() - side) // 2
+        y = (self.height() - side) // 2
 
-        self.last_roll = roll
-        self.last_pitch = pitch
+        self.view.setGeometry(x, y, side, side)
+        self.view.fitInView(self.scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
 
-        self.artificialHorizon.updatePositions(pitch, roll)
-        self.altimeter.updatePositions(pitch)
-        self.anemometer.updatePositions(roll)
-        self.compass.updatePositions(roll)
-        self.variometer.updatePositions(pitch/60)
+    def updateFromDevice(self):
+        if not self.device:
+            return
 
-    def setupMockPFD(self, size): #Provisoire
-        pixmap = QPixmap("assets/maquette.png")
-        if not pixmap.isNull():
-            scaled_pixmap = pixmap.scaled(
-                size, size,
-                Qt.AspectRatioMode.KeepAspectRatio,
-                Qt.TransformationMode.SmoothTransformation
-            )
-            self.scene.setBackgroundBrush(QBrush(scaled_pixmap))
+        data = self.device.read()
+        now = time.time()
+
+        if data is None:
+            if now - self.lastDataTime > self.CONNECTION_TIMEOUT and self.isConnected:
+                self.isConnected = False
+                if self.window():
+                    self.window().updateDeviceStatus(False)
+                for instr in self.errorCapable:
+                    instr.isInError = True
+            return
+
+        self.lastDataTime = now
+        if not self.isConnected:
+            self.isConnected = True
+            if self.window() and hasattr(self.window(), 'updateDeviceStatus'):
+                self.window().updateDeviceStatus(True)
+            for instr in self.errorCapable:
+                instr.isInError = False
+
+        try:
+            self.updatePositions(data)
+        except Exception as e:
+            print(f"Erreur update positions: {e}")
+
+    def updatePositions(self, data):
+        self.horizon.updatePositions(data[1], data[2])
+        self.anemometer.updatePositions(data[5])
+        self.compass.updatePositions(data[6])
+        self.variometer.updatePositions(data[4])
+        self.altimeter.updatePositions(data[1], data[3], data[5])
+        self.slip.updatePositions(data[7])
+
+    def setDevice(self, device_instance):
+        self.device = device_instance

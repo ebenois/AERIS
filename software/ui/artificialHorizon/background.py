@@ -1,52 +1,92 @@
-from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsRectItem, QGraphicsLineItem, QGraphicsEllipseItem
-from PyQt6.QtGui import QPen, QBrush, QColor
-from PyQt6.QtCore import Qt
-import math
+from PyQt6.QtWidgets import (
+    QGraphicsItemGroup,
+    QGraphicsRectItem,
+    QGraphicsLineItem,
+)
+from PyQt6.QtGui import QPen, QBrush, QColor, QPainterPath
+from PyQt6.QtCore import Qt, QRectF
+import numbers
 
 from ui.artificialHorizon.graduations import PitchGraduations
-from ui.artificialHorizon.ai import DirectionAi
+
 
 class ArtificialHorizonBackground(QGraphicsItemGroup):
-    def __init__(self):
+    def __init__(self, width, height):
         super().__init__()
-        self.size = 310
-        self.pixelsPerDegree = 6.5
-        
-        self.movingItems = QGraphicsItemGroup(self)
-        
-        self.cycleHeight = 360 * self.pixelsPerDegree 
-        
-        width = self.size * 5 
 
-        blockH = 180 * self.pixelsPerDegree 
+        self.width = width
+        self.height = height
 
-        self.bg1 = QGraphicsItemGroup(self.movingItems)
-        self.bg2 = QGraphicsItemGroup(self.movingItems)
+        self.pixelsPerDegree = height / 45.0
+        self.cycleHeight = 360.0 * self.pixelsPerDegree
+        self.blockHeight = 180.0 * self.pixelsPerDegree
 
-        for group in [self.bg1, self.bg2]:
-            sky = QGraphicsRectItem(-width/2, -blockH, width, blockH, group)
-            sky.setBrush(QBrush(QColor("#0080FF")))
-            sky.setPen(QPen(Qt.PenStyle.NoPen))
-            
-            ground = QGraphicsRectItem(-width/2, 0, width, blockH, group)
-            ground.setBrush(QBrush(QColor("#804000")))
-            ground.setPen(QPen(Qt.PenStyle.NoPen))
+        # Ce groupe (self) est le MASQUE. Il ne doit JAMAIS tourner.
+        self.setFlag(QGraphicsItemGroup.GraphicsItemFlag.ItemClipsChildrenToShape, True)
 
-            for i in [-1,0,1]:
-                line = QGraphicsLineItem(-width/2, i*blockH , width/2, i*blockH, group)
-                line.setPen(QPen(QColor("white"), 3))
+        self.movingContent = QGraphicsItemGroup(self)
 
-        self.graduations = PitchGraduations(parent=self.movingItems)
-        
-        self.ai = DirectionAi(parent=self.movingItems)
+        self.noPen = QPen(Qt.PenStyle.NoPen)
+        self.skyBrush = QBrush(QColor("#0080FF"))
+        self.groundBrush = QBrush(QColor("#804000"))
+        self.horizonPen = QPen(QColor("white"), 5)
+
+        # On ajoute les blocs au groupe mobile
+        self.bg1 = self.CreateBlock()
+        self.bg2 = self.CreateBlock()
+        self.movingContent.addToGroup(self.bg1)
+        self.movingContent.addToGroup(self.bg2)
+
+        self.graduations = PitchGraduations(self.movingContent, width, height)
+
+    def CreateBlock(self):
+        group = QGraphicsItemGroup()
+
+        width = self.width
+        height = self.blockHeight
+
+        sky = QGraphicsRectItem(-width, -height, width * 2, height, group)
+        sky.setBrush(self.skyBrush)
+        sky.setPen(self.noPen)
+
+        ground = QGraphicsRectItem(-width, 0, width * 2, height, group)
+        ground.setBrush(self.groundBrush)
+        ground.setPen(self.noPen)
+
+        for i in (-1, 0, 1):
+            line = QGraphicsLineItem(-width, i * height, width * 2, i * height, group)
+            line.setPen(self.horizonPen)
+
+        return group
 
     def updatePositions(self, pitch, roll):
-        self.movingItems.setRotation(-roll)
+        if not isinstance(roll, numbers.Number) or not isinstance(pitch, numbers.Number):
+            self.movingContent.setRotation(0)
+            self.bg1.setPos(0, 0)
+            self.bg2.setPos(0, 0)
+            self.graduations.hide()
+            return
 
-        y_offset = (pitch * self.pixelsPerDegree) % self.cycleHeight
-        
-        self.bg1.setPos(0, y_offset)
-        self.bg2.setPos(0, y_offset - self.cycleHeight)
+        self.movingContent.setRotation(-roll)
+
+        pixelsPerDegree = self.pixelsPerDegree
+        cycleHeight = self.cycleHeight
+
+        # Le décalage vertical (Pitch)
+        yOffset = (pitch * pixelsPerDegree) % cycleHeight
+
+        self.bg1.setPos(0, yOffset)
+        self.bg2.setPos(0, yOffset - cycleHeight)
 
         self.graduations.updatePositions(pitch)
-        self.ai.updatePositions(pitch, roll, 50, 50)
+        self.graduations.show()
+
+    def boundingRect(self):
+        # C'est cette zone qui définit le "carré" de ton instrument
+        return QRectF(-self.width / 2, -self.height / 2, self.width, self.height)
+
+    def shape(self):
+        # Le masque de découpe suit exactement le boundingRect
+        path = QPainterPath()
+        path.addRect(self.boundingRect())
+        return path

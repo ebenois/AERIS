@@ -1,13 +1,20 @@
-from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsLineItem, QGraphicsTextItem
-from PyQt6.QtGui import QColor, QPen, QFont
-from PyQt6.QtCore import Qt
-import math
+from PyQt6.QtWidgets import (
+    QGraphicsItemGroup,
+    QGraphicsLineItem,
+    QGraphicsTextItem,
+    QGraphicsItem,
+)
+from PyQt6.QtGui import QColor, QPen, QFont, QPainterPath
+from PyQt6.QtCore import Qt, QRectF
 
 
 class AltitudeGraduations(QGraphicsItemGroup):
-    def __init__(self, parent=None, width=600):
-        super().__init__(parent)
+    def __init__(self, width, height):
+        super().__init__()
 
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemClipsChildrenToShape, True)
+
+        self.height = height
         self.width = width
         self.step = 100
         self.span = 500
@@ -18,11 +25,14 @@ class AltitudeGraduations(QGraphicsItemGroup):
         pen = QPen(QColor("#FFFFFF"), 4)
         pen.setCapStyle(Qt.PenCapStyle.RoundCap)
 
-        self.bigFont = QFont("Arial", 18)
-        self.smallFont = QFont("Arial", 13)
+        self.bigFont = QFont()
+        self.bigFont.setPixelSize(int(height / 22))
+
+        self.smallFont = QFont()
+        self.smallFont.setPixelSize(int(height / 28))
 
         for _ in range(self.nbGraduations):
-            line = QGraphicsLineItem(-width / 2, 0, -width / 2 + 12, 0, self)
+            line = QGraphicsLineItem(0, 0, width / 8, 0, self)
             line.setPen(pen)
 
             bigText = QGraphicsTextItem("", self)
@@ -33,65 +43,69 @@ class AltitudeGraduations(QGraphicsItemGroup):
             smallText.setDefaultTextColor(Qt.GlobalColor.white)
             smallText.setFont(self.smallFont)
 
-            self.graduationsPool.append({
-                "line": line,
-                "bigText": bigText,
-                "smallText": smallText
-            })
+            self.graduationsPool.append(
+                {"line": line, "bigText": bigText, "smallText": smallText}
+            )
 
     def updatePositions(self, altitude):
-        baseAltitude = round(altitude / self.step) * self.step
-        startOffset = -(self.nbGraduations // 2)
+        halfHeight = self.height * 0.5
+        scale = halfHeight / self.span
+        baseAlt = round(altitude / self.step) * self.step
+        start = -(self.nbGraduations // 2)
 
-        for i in range(self.nbGraduations):
-            gradAltitude = baseAltitude + (startOffset + i) * self.step
-            relAltitude = gradAltitude - altitude
-            
-            item = self.graduationsPool[i]
-            line = item["line"]
-            bigText = item["bigText"]
-            smallText = item["smallText"]
+        for i, item in enumerate(self.graduationsPool):
+            gradAlt = baseAlt + (start + i) * self.step
+            relAlt = gradAlt - altitude
 
-            if abs(relAltitude) > self.span:
-                line.setVisible(False)
-                bigText.setVisible(False)
-                smallText.setVisible(False)
+            if abs(relAlt) > self.span:
+                item["line"].setVisible(False)
+                item["bigText"].setVisible(False)
+                item["smallText"].setVisible(False)
                 continue
-            
-            line.setVisible(True)
 
-            y = relAltitude * -0.48
+            y = halfHeight - relAlt * scale
+            item["line"].setVisible(True)
+            item["line"].setPos(0, y)
 
-            line.setPos(0, y)
+            if gradAlt % 200 == 0:
+                absAlt = abs(gradAlt)
+                thousands = absAlt // 1000
+                remainder = absAlt % 1000
 
-            if gradAltitude % 200 == 0:
-                if gradAltitude >= 1000:
-                    thousands = gradAltitude // 1000
-                    remainder = gradAltitude % 1000
+                prefix = "-" if gradAlt < 0 else ""
+                bigStr = f"{prefix}{thousands:02d}"
+                smallStr = f"{remainder:03d}"
 
-                    bigText.setPlainText(str(thousands))
-                    bigText.setPos(
-                        -self.width / 3,
-                        y - bigText.boundingRect().height() / 2
-                    )
-                    bigText.setVisible(True)
+                big = item["bigText"]
+                small = item["smallText"]
 
-                    smallText.setPlainText(f"{remainder:03d}")
-                    smallText.setPos(
-                        -self.width / 3 + bigText.boundingRect().width() - 8,
-                        y - smallText.boundingRect().height() / 2 + 2
-                    )
-                    smallText.setVisible(True)
-                else:
-                    bigText.setVisible(False)
+                if big.toPlainText() != bigStr:
+                    big.setPlainText(bigStr)
+                if small.toPlainText() != smallStr:
+                    small.setPlainText(smallStr)
 
-                    smallText.setPlainText(str(gradAltitude))
-                    smallText.setPos(
-                        -self.width / 3,
-                        y - smallText.boundingRect().height() / 2
-                    )
-                    smallText.setVisible(True)
+                smallRect = small.boundingRect()
+                bigRect = big.boundingRect()
+
+                small.setPos(
+                    self.width - smallRect.width(), y - smallRect.height() * 0.5
+                )
+
+                big.setPos(
+                    self.width - smallRect.width() - bigRect.width() * 0.875,
+                    y - bigRect.height() * 0.5,
+                )
+
+                big.setVisible(True)
+                small.setVisible(True)
             else:
-                bigText.setVisible(False)
-                smallText.setVisible(False)
+                item["bigText"].setVisible(False)
+                item["smallText"].setVisible(False)
 
+    def boundingRect(self):
+        return QRectF(0, 0, self.width, self.height)
+
+    def shape(self):
+        path = QPainterPath()
+        path.addRect(self.boundingRect())
+        return path

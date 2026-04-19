@@ -1,43 +1,80 @@
-from PyQt6.QtWidgets import QGraphicsItemGroup, QGraphicsEllipseItem, QGraphicsPolygonItem
+from PyQt6.QtWidgets import (
+    QGraphicsItemGroup,
+    QGraphicsEllipseItem,
+    QGraphicsPolygonItem,
+)
 from PyQt6.QtGui import QBrush, QColor, QPen, QPolygonF
 from PyQt6.QtCore import Qt, QPointF
+import numbers
 
 from ui.compass.graduations import DirectionGraduations
-from ui.compass.ai import DirectionAi
+
 
 class CompassInstrument(QGraphicsItemGroup):
-    def __init__(self):
+    def __init__(self, width, height):
         super().__init__()
+        self.width = width
+        self.height = height
 
-        radius = 222
-        dot = QGraphicsEllipseItem(-radius, -radius, radius*2, radius*2)
-        dot.setBrush(QBrush(QColor("#808080")))
-        dot.setPen(QPen(Qt.PenStyle.NoPen))
-        self.addToGroup(dot)
+        self.isCritical = False
 
-        self.graduations = DirectionGraduations()
-        self.addToGroup(self.graduations)
+        centerX = width / 2
+        centerY = height / 2
 
-        self.ai = DirectionAi(parent=self)
-        self.addToGroup(self.ai)
+        self.alertPen = QPen(QColor("red"), 15)
+        self.bgBrush = QBrush(QColor("#808080"))
+        self.indicatorBrush = QBrush(Qt.GlobalColor.black)
+        self.indicatorPen = QPen(Qt.GlobalColor.white, 3)
 
-        indicator = QGraphicsPolygonItem()
-        self.addToGroup(indicator)
+        self.dot = QGraphicsEllipseItem(0, 0, width, height)
+        self.dot.setBrush(self.bgBrush)
 
-        width = 40
-        radius = 223
-        length = 10
+        self.alertFrame = QGraphicsEllipseItem(0, 0, width, height)
+        self.alertFrame.setPen(self.alertPen)
 
-        polygon = QPolygonF([
-            QPointF(0, -radius),
-            QPointF(length, -(radius+width/2)),
-            QPointF(-length, -(radius+width/2)),
-        ])
+        self.graduations = DirectionGraduations(width)
+        self.graduations.setPos(centerX, centerY)
 
-        indicator.setPolygon(polygon)
-        indicator.setBrush(QBrush(Qt.GlobalColor.black))
-        indicator.setPen(QPen(Qt.GlobalColor.white, 3))
+        polygonWidth = 55
+        polygonHeight = 45
 
-    def updatePositions(self, direction):
-        self.graduations.updatePositions(direction)
-        self.ai.updatePositions(direction,250)
+        polygon = QPolygonF(
+            [
+                QPointF(centerX, 0),
+                QPointF(centerX + polygonWidth / 2, -polygonHeight),
+                QPointF(centerX - polygonWidth / 2, -polygonHeight),
+            ]
+        )
+
+        self.indicator = QGraphicsPolygonItem(polygon)
+        self.indicator.setBrush(self.indicatorBrush)
+        self.indicator.setPen(self.indicatorPen)
+
+        for item in [self.dot, self.graduations, self.indicator, self.alertFrame]:
+            self.addToGroup(item)
+
+        self.isInError = True
+
+    def drawAlert(self, flashOpacity):
+        if self.isInError:
+            self.alertFrame.setVisible(True)
+            self.alertFrame.setOpacity(flashOpacity)
+            self.graduations.hide()
+        else:
+            self.alertFrame.setVisible(False)
+            self.graduations.show()
+
+    def drawLess(self, highMentalLoad):
+        if highMentalLoad:
+            self.setOpacity(0.5)
+        else:
+            self.setOpacity(1)
+
+    def updatePositions(self, heading):
+        dataValid = isinstance(heading, numbers.Number)
+
+        if dataValid:
+            self.isInError = False
+            self.graduations.updatePositions(heading)
+        else:
+            self.isInError = True
