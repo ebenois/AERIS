@@ -97,7 +97,7 @@ class PrimaryFlightDisplay(QWidget):
         ]
 
         positions = [
-            (225, 240),
+            (225*2.4, 240*2.3),
             (15, 185),
             (100, 990),
             (1075, 335),
@@ -119,7 +119,7 @@ class PrimaryFlightDisplay(QWidget):
         if now - self.lastDataTime > self.CONNECTION_TIMEOUT:
             if self.isConnected:
                 self.isConnected = False
-                if self.window():
+                if self.window() and hasattr(self.window(), 'updateDeviceStatus'):
                     self.window().updateDeviceStatus(False)
 
             for instr in self.errorCapable:

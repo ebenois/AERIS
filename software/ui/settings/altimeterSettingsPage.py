@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QSpinBox,
     QGroupBox,
+    QComboBox,
 )
 from PyQt6.QtCore import Qt, QSettings
 
@@ -72,7 +73,21 @@ class AltimeterSettingsPage(QWidget):
 
         indicatorGroup, indicatorLayout = self.createSection("Indicateur")
 
-        limitLayout = QHBoxLayout()
+        unitLayout = QHBoxLayout()
+        unitLabel = QLabel("Unité :")
+        self.unitCombo = QComboBox()
+        self.unitCombo.addItems(["m", "dam", "hm", "km"])
+        currentUnit = self.settings.value("altitudeUnit", "m")
+        self.unitCombo.setCurrentText(currentUnit)
+        self.unitCombo.currentTextChanged.connect(
+            lambda v: self.saveAndUpdate("altitudeUnit", v, self.instrument.setAltitudeUnit)
+        )
+
+        unitLayout.addWidget(unitLabel)
+        unitLayout.addWidget(self.unitCombo)
+
+        indicatorLayout.addLayout(unitLayout)
+        
         limitLabel = QLabel("Altitude désirée (m) :")
 
         self.limitSpin = QSpinBox()
@@ -88,9 +103,10 @@ class AltimeterSettingsPage(QWidget):
             )
         )
 
+        limitLayout = QHBoxLayout()
         limitLayout.addWidget(limitLabel)
         limitLayout.addWidget(self.limitSpin)
-        indicatorLayout.addLayout(limitLayout)
+        altitudeLayout.addLayout(limitLayout)
         mainLayout.addWidget(indicatorGroup)
 
         mainLayout.addStretch()
@@ -99,7 +115,7 @@ class AltimeterSettingsPage(QWidget):
         self.settings.setValue(key, value)
         self.settings.sync()
 
-        if hasattr(callbackFunc, "__call__"):
+        if callable(callbackFunc):
             callbackFunc(value)
 
     def createSection(self, title):

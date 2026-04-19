@@ -22,7 +22,8 @@ class AltimeterInstrument(QGraphicsItemGroup):
         self.qnh = int(self.settings.value("QNH", 1013))
         self.limitmax = int(self.settings.value("limitMax", 1000))
         self.limitmin = int(self.settings.value("limitMin", 10))
-        self.wantedAltitude = int(self.settings.value("wantedAltitude", 500))
+        self.wantedAltitude = int(self.settings.value("wantedAltitude", 100))
+        self.altitudeUnit = self.settings.value("altitudeUnit", "km")
 
         self.rect = QGraphicsRectItem(0, 0, self.width, self.height)
         self.rect.setBrush(QBrush(QColor("#808080")))
@@ -61,6 +62,9 @@ class AltimeterInstrument(QGraphicsItemGroup):
 
     def setAltitudePin(self, value):
         self.wantedAltitude = value
+        
+    def setAltitudeUnit(self, value):
+        self.altitudeUnit = value
 
     def drawAlert(self, flashOpacity):
         if self.isInError:
@@ -97,10 +101,11 @@ class AltimeterInstrument(QGraphicsItemGroup):
 
         if data_valid:
             self.isInError = False
-            altitude = pressure_to_altitude(pressure, self.qnh)
+            altitude = self.pressure_to_altitude(pressure, self.qnh)
+            altitudeChanged = self.changeUnit(altitude, self.altitudeUnit)
 
             self.graduations.updatePositions(altitude)
-            self.indicator.updatePositions(altitude)
+            self.indicator.updatePositions(altitudeChanged)
 
             self.limit.updatePositions(altitude, self.limitmax)
             self.trend.updatePositions(windSpeed, pitch)
@@ -114,7 +119,17 @@ class AltimeterInstrument(QGraphicsItemGroup):
             self.isInError = True
 
 
-def pressure_to_altitude(pression_hpa, qnh_hpa=1013.25):
-    if pression_hpa <= 0:
-        return 0
-    return 44330.0 * (1.0 - (pression_hpa / qnh_hpa) ** 0.1903)
+    def pressure_to_altitude(self, pression_hpa, qnh_hpa=1013.25):
+        if pression_hpa <= 0:
+            return 0
+        return 44330.0 * (1.0 - (pression_hpa / qnh_hpa) ** 0.1903)
+
+    def changeUnit(self, altitude, altitudeUnit):
+        if (altitudeUnit == "km"):
+            return altitude
+        elif (altitudeUnit == "hm"):
+            return altitude*10
+        elif (altitudeUnit == "dam"):
+            return altitude*100
+        else:
+            return altitude*1000

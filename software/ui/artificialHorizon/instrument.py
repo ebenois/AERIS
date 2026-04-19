@@ -28,17 +28,17 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
         self.currentWingsSpan = width // 4
         self.currentWingsHeight = width // 15
 
+        # Initialisation du fond (Le masque est géré à l'intérieur)
         self.background = ArtificialHorizonBackground(width, height)
         self.addToGroup(self.background)
-        self.background.setPos(width / 2, height / 2)
+        self.background.setPos(0, 0) 
 
-        self.alertFrame = QGraphicsRectItem(0, 0, self.width, self.height)
+        self.alertFrame = QGraphicsRectItem(-width/2, -height/2, width, height)
         self.isInErrorPen = QPen(QColor("red"), 10)
         self.isCriticalPen = QPen(QColor("#ff7f00"), 10)
         self.alertFrame.setVisible(False)
 
         self.maquette = QGraphicsItemGroup()
-
         self.wings = []
         self.montants = []
         self.dots = []
@@ -47,7 +47,7 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
         self.DrawIndicator("black", isOutline=False)
 
         self.addToGroup(self.maquette)
-        self.maquette.setPos(width / 2, height / 2)
+        self.maquette.setPos(0, 0)
         self.maquette.setZValue(10)
 
         self.addToGroup(self.alertFrame)
@@ -62,19 +62,16 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
         pen = self.CreatePen(color, isOutline)
 
         for sign in (-1, 1):
-            # Horizontal wing
             wing = QGraphicsLineItem()
             wing.setPen(pen)
             self.maquette.addToGroup(wing)
             self.wings.append((wing, isOutline, sign))
 
-            # Vertical montant
             montant = QGraphicsLineItem()
             montant.setPen(pen)
             self.maquette.addToGroup(montant)
             self.montants.append((montant, isOutline, sign))
 
-        # Center dot
         r = self.currentDotRadius + (self.currentOutlineWeight if isOutline else 0)
         dot = QGraphicsEllipseItem(-r / 2, -r / 2, r, r)
         dot.setBrush(QBrush(QColor(color)))
@@ -107,25 +104,18 @@ class ArtificialHorizonInstrument(QGraphicsItemGroup):
             self.alertFrame.setVisible(True)
             self.alertFrame.setOpacity(flashOpacity)
             self.background.updatePositions("ERR", "ERR")
-
         elif self.isCritical:
             self.alertFrame.setPen(self.isCriticalPen)
             self.alertFrame.setVisible(True)
             self.alertFrame.setOpacity(0.4 + 0.6 * flashOpacity)
-
         else:
             self.alertFrame.setVisible(False)
 
     def drawLess(self, highMentalLoad):
-        if highMentalLoad:
-            self.setOpacity(0.5)
-        else:
-            self.setOpacity(1)
+        self.setOpacity(0.5 if highMentalLoad else 1.0)
 
-    def updatePositions(self, roll, pitch):
-        dataValid = isinstance(roll, numbers.Number) and isinstance(
-            pitch, numbers.Number
-        )
+    def updatePositions(self, pitch, roll):
+        dataValid = isinstance(roll, numbers.Number) and isinstance(pitch, numbers.Number)
 
         if dataValid:
             self.isInError = False
