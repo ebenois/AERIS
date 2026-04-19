@@ -269,7 +269,7 @@ class PrimaryFlightDisplay(QWidget):
         self.lastDataTime = now
         if not self.isConnected:
             self.isConnected = True
-            if self.window():
+            if self.window() and hasattr(self.window(), 'updateDeviceStatus'):
                 self.window().updateDeviceStatus(True)
             for instr in self.errorCapable:
                 instr.isInError = False
